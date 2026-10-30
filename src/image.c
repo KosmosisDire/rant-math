@@ -15,16 +15,16 @@ static uint16_t i_u16(double v){ return !(v > 0.0) ? 0 : (v >= 65535.0 ? 65535 :
  * longer ones when the width is odd. */
 static uint64_t i_line(RantImageFormat f, uint32_t w){
     switch (f){
-    case RANT_IMAGE_MONO8: return w;
-    case RANT_IMAGE_MONO16: return 2ull * w;
-    case RANT_IMAGE_RGB8: case RANT_IMAGE_BGR8: return 3ull * w;
-    case RANT_IMAGE_RGBA8: case RANT_IMAGE_MONOF32: return 4ull * w;
-    case RANT_IMAGE_YUYV: return 4ull * ((w + 1ull) / 2);
-    case RANT_IMAGE_NV12: return 2ull * ((w + 1ull) / 2);
+    case RANT_IMAGE_FORMAT_MONO8: return w;
+    case RANT_IMAGE_FORMAT_MONO16: return 2ull * w;
+    case RANT_IMAGE_FORMAT_RGB8: case RANT_IMAGE_FORMAT_BGR8: return 3ull * w;
+    case RANT_IMAGE_FORMAT_RGBA8: case RANT_IMAGE_FORMAT_MONOF32: return 4ull * w;
+    case RANT_IMAGE_FORMAT_YUYV: return 4ull * ((w + 1ull) / 2);
+    case RANT_IMAGE_FORMAT_NV12: return 2ull * ((w + 1ull) / 2);
     default: return 0;
     }
 }
-static uint64_t i_rows(RantImageFormat f, uint32_t h){ return f == RANT_IMAGE_NV12 ? h + (h + 1ull) / 2 : h; }
+static uint64_t i_rows(RantImageFormat f, uint32_t h){ return f == RANT_IMAGE_FORMAT_NV12 ? h + (h + 1ull) / 2 : h; }
 
 size_t rant_image_bytes(RantImageFormat format, uint32_t width, uint32_t height){
     uint64_t line = i_line(format, width), rows = i_rows(format, height);
@@ -57,18 +57,18 @@ static int i_apart(const RantImageView *a, const RantImageView *b){
 }
 
 static int i_colour(RantImageFormat f){
-    return f == RANT_IMAGE_MONO8 || f == RANT_IMAGE_RGB8 || f == RANT_IMAGE_RGBA8 || f == RANT_IMAGE_BGR8
-        || f == RANT_IMAGE_YUYV || f == RANT_IMAGE_NV12;
+    return f == RANT_IMAGE_FORMAT_MONO8 || f == RANT_IMAGE_FORMAT_RGB8 || f == RANT_IMAGE_FORMAT_RGBA8 || f == RANT_IMAGE_FORMAT_BGR8
+        || f == RANT_IMAGE_FORMAT_YUYV || f == RANT_IMAGE_FORMAT_NV12;
 }
 
 /* A plain format's channels and the bytes of each. */
 static int i_plain(RantImageFormat f, int *channels, int *bytes){
     switch (f){
-    case RANT_IMAGE_MONO8: *channels = 1; *bytes = 1; return 1;
-    case RANT_IMAGE_MONO16: *channels = 1; *bytes = 2; return 1;
-    case RANT_IMAGE_MONOF32: *channels = 1; *bytes = 4; return 1;
-    case RANT_IMAGE_RGB8: case RANT_IMAGE_BGR8: *channels = 3; *bytes = 1; return 1;
-    case RANT_IMAGE_RGBA8: *channels = 4; *bytes = 1; return 1;
+    case RANT_IMAGE_FORMAT_MONO8: *channels = 1; *bytes = 1; return 1;
+    case RANT_IMAGE_FORMAT_MONO16: *channels = 1; *bytes = 2; return 1;
+    case RANT_IMAGE_FORMAT_MONOF32: *channels = 1; *bytes = 4; return 1;
+    case RANT_IMAGE_FORMAT_RGB8: case RANT_IMAGE_FORMAT_BGR8: *channels = 3; *bytes = 1; return 1;
+    case RANT_IMAGE_FORMAT_RGBA8: *channels = 4; *bytes = 1; return 1;
     default: return 0;
     }
 }
@@ -108,31 +108,31 @@ static void i_read(const RantImageView *v, size_t stride, uint32_t y, uint32_t x
     double rv = 0.0, gu = 0.0, gv = 0.0, bu = 0.0, l;
     uint32_t i, x;
     switch (v->format){
-    case RANT_IMAGE_MONO8:
+    case RANT_IMAGE_FORMAT_MONO8:
         for (i = 0; i < n; i++) out[i] = rant_color(row[x0 + i], row[x0 + i], row[x0 + i], 255);
         break;
-    case RANT_IMAGE_RGB8:
+    case RANT_IMAGE_FORMAT_RGB8:
         for (i = 0, p = row + 3 * (size_t)x0; i < n; i++, p += 3) out[i] = rant_color(p[0], p[1], p[2], 255);
         break;
-    case RANT_IMAGE_BGR8:
+    case RANT_IMAGE_FORMAT_BGR8:
         for (i = 0, p = row + 3 * (size_t)x0; i < n; i++, p += 3) out[i] = rant_color(p[2], p[1], p[0], 255);
         break;
-    case RANT_IMAGE_RGBA8:
+    case RANT_IMAGE_FORMAT_RGBA8:
         for (i = 0, p = row + 4 * (size_t)x0; i < n; i++, p += 4) out[i] = rant_color(p[0], p[1], p[2], p[3]);
         break;
-    case RANT_IMAGE_YUYV: case RANT_IMAGE_NV12:
+    case RANT_IMAGE_FORMAT_YUYV: case RANT_IMAGE_FORMAT_NV12:
         for (i = 0; i < n; i++){
             x = x0 + i;
             /* each pair of pixels shares its chroma, so its terms are made once */
             if (i == 0 || !(x & 1)){
-                const uint8_t *c = v->format == RANT_IMAGE_YUYV ? row + 4 * (size_t)(x / 2) + 1 : chroma + 2 * (size_t)(x / 2);
-                double pb = (c[0] - 128) * (255.0 / 224.0), pr = (c[v->format == RANT_IMAGE_YUYV ? 2 : 1] - 128) * (255.0 / 224.0);
+                const uint8_t *c = v->format == RANT_IMAGE_FORMAT_YUYV ? row + 4 * (size_t)(x / 2) + 1 : chroma + 2 * (size_t)(x / 2);
+                double pb = (c[0] - 128) * (255.0 / 224.0), pr = (c[v->format == RANT_IMAGE_FORMAT_YUYV ? 2 : 1] - 128) * (255.0 / 224.0);
                 rv = 2.0 * (1.0 - I_KR) * pr;
                 gu = 2.0 * I_KB * (1.0 - I_KB) / I_KG * pb;
                 gv = 2.0 * I_KR * (1.0 - I_KR) / I_KG * pr;
                 bu = 2.0 * (1.0 - I_KB) * pb;
             }
-            l = ((v->format == RANT_IMAGE_YUYV ? row[4 * (size_t)(x / 2) + 2 * (x & 1)] : row[x]) - 16) * (255.0 / 219.0);
+            l = ((v->format == RANT_IMAGE_FORMAT_YUYV ? row[4 * (size_t)(x / 2) + 2 * (x & 1)] : row[x]) - 16) * (255.0 / 219.0);
             out[i] = rant_color(i_u8(l + rv), i_u8(l - gu - gv), i_u8(l + bu), 255);
         }
         break;
@@ -148,18 +148,18 @@ static void i_write(RantImageView *v, size_t stride, uint32_t y, uint32_t x0, ui
     double yy[4], uu[4], vv[4];
     uint32_t i, x;
     int b, a, k;
-    if (v->format == RANT_IMAGE_YUYV || v->format == RANT_IMAGE_NV12){
+    if (v->format == RANT_IMAGE_FORMAT_YUYV || v->format == RANT_IMAGE_FORMAT_NV12){
         for (i = 0; i < n; i += 2){
             double su = 0.0, sv = 0.0;
             k = 0;
-            for (b = 0; b < (v->format == RANT_IMAGE_NV12 && bottom ? 2 : 1); b++)
+            for (b = 0; b < (v->format == RANT_IMAGE_FORMAT_NV12 && bottom ? 2 : 1); b++)
                 for (a = 0; a < 2 && i + a < n; a++, k++){
                     i_to_yuv((b ? bottom : top)[i + a], &yy[k], &uu[k], &vv[k]);
                     su += uu[k];
                     sv += vv[k];
                 }
             x = x0 + i;
-            if (v->format == RANT_IMAGE_YUYV){
+            if (v->format == RANT_IMAGE_FORMAT_YUYV){
                 p = row + 2 * (size_t)x;
                 p[0] = i_u8(yy[0]);
                 p[1] = i_u8(su / k);
@@ -180,10 +180,10 @@ static void i_write(RantImageView *v, size_t stride, uint32_t y, uint32_t x0, ui
         RantColor c = top[i];
         x = x0 + i;
         switch (v->format){
-        case RANT_IMAGE_MONO8: row[x] = i_luma(c); break;
-        case RANT_IMAGE_RGB8: p = row + 3 * (size_t)x; p[0] = c.r; p[1] = c.g; p[2] = c.b; break;
-        case RANT_IMAGE_BGR8: p = row + 3 * (size_t)x; p[0] = c.b; p[1] = c.g; p[2] = c.r; break;
-        case RANT_IMAGE_RGBA8: p = row + 4 * (size_t)x; p[0] = c.r; p[1] = c.g; p[2] = c.b; p[3] = c.a; break;
+        case RANT_IMAGE_FORMAT_MONO8: row[x] = i_luma(c); break;
+        case RANT_IMAGE_FORMAT_RGB8: p = row + 3 * (size_t)x; p[0] = c.r; p[1] = c.g; p[2] = c.b; break;
+        case RANT_IMAGE_FORMAT_BGR8: p = row + 3 * (size_t)x; p[0] = c.b; p[1] = c.g; p[2] = c.r; break;
+        case RANT_IMAGE_FORMAT_RGBA8: p = row + 4 * (size_t)x; p[0] = c.r; p[1] = c.g; p[2] = c.b; p[3] = c.a; break;
         default: break;
         }
     }
@@ -194,7 +194,7 @@ typedef void (*i_Source)(const void *from, uint32_t y, uint32_t x0, uint32_t n, 
 
 static void i_paint(RantImageView *dst, size_t stride, i_Source read, const void *from){
     RantColor top[I_RUN], bottom[I_RUN];
-    uint64_t y, x0, step = dst->format == RANT_IMAGE_NV12 ? 2 : 1;
+    uint64_t y, x0, step = dst->format == RANT_IMAGE_FORMAT_NV12 ? 2 : 1;
     for (y = 0; y < dst->height; y += step)
         for (x0 = 0; x0 < dst->width; x0 += I_RUN){
             uint32_t n = (uint32_t)(dst->width - x0 < I_RUN ? dst->width - x0 : I_RUN);
@@ -261,7 +261,7 @@ RantMathResult rant_image_convert(const RantImageView *src, RantImageView *dst){
         /* only the pixels, so dst's padding stays as it was */
         for (y = 0; y < rows; y++)
             memcpy(dst->data + (size_t)y * ds, src->data + (size_t)y * ss,
-                   (size_t)(src->format == RANT_IMAGE_NV12 && y < src->height ? src->width : i_line(src->format, src->width)));
+                   (size_t)(src->format == RANT_IMAGE_FORMAT_NV12 && y < src->height ? src->width : i_line(src->format, src->width)));
         return RANT_MATH_OK;
     }
     if (!i_colour(src->format) || !i_colour(dst->format)) return RANT_MATH_ERR_FORMAT;
@@ -296,9 +296,9 @@ RantMathResult rant_image_crop(const RantImageView *image, uint32_t x, uint32_t 
     size_t s, at;
     if (!out) return RANT_MATH_ERR_ARGUMENT;
     if ((r = i_view(image, &s)) != RANT_MATH_OK) return r;
-    if (image->format == RANT_IMAGE_NV12) return RANT_MATH_ERR_FORMAT;
+    if (image->format == RANT_IMAGE_FORMAT_NV12) return RANT_MATH_ERR_FORMAT;
     if (!width || !height || (uint64_t)x + width > image->width || (uint64_t)y + height > image->height
-        || (image->format == RANT_IMAGE_YUYV && ((x & 1) || ((width & 1) && x + width != image->width))))
+        || (image->format == RANT_IMAGE_FORMAT_YUYV && ((x & 1) || ((width & 1) && x + width != image->width))))
         return RANT_MATH_ERR_ARGUMENT;
     if (s > UINT32_MAX) return RANT_MATH_ERR_FORMAT;
     at = (size_t)y * s + (size_t)i_line(image->format, x);
@@ -441,7 +441,7 @@ RantMathResult rant_image_undistort(const RantImageView *src, const RantCameraIn
     if ((r = i_math_lens(camera, 1, &from)) != RANT_MATH_OK) return r;
     if (!ideal){
         pinhole = *camera;
-        pinhole.model = RANT_DISTORTION_NONE;
+        pinhole.model = RANT_DISTORTION_MODEL_NONE;
         memset(pinhole.coeffs, 0, sizeof pinhole.coeffs);
         ideal = &pinhole;
     }
@@ -494,8 +494,8 @@ RantMathResult rant_image_draw(RantImageView *image, const RantShape2D *shape, R
     double half, x0, x1, y0, y1, x, y;
     int fill;
     if ((r = i_view(image, &s)) != RANT_MATH_OK) return r;
-    if (image->format != RANT_IMAGE_MONO8 && image->format != RANT_IMAGE_RGB8 && image->format != RANT_IMAGE_RGBA8
-        && image->format != RANT_IMAGE_BGR8) return RANT_MATH_ERR_FORMAT;
+    if (image->format != RANT_IMAGE_FORMAT_MONO8 && image->format != RANT_IMAGE_FORMAT_RGB8 && image->format != RANT_IMAGE_FORMAT_RGBA8
+        && image->format != RANT_IMAGE_FORMAT_BGR8) return RANT_MATH_ERR_FORMAT;
     if (!shape || !(width >= 0.0) || !i_math_finite(width)) return RANT_MATH_ERR_ARGUMENT;
     if (width == 0.0 && (shape->kind == RANT_SHAPE2D_SEGMENT || shape->kind == RANT_SHAPE2D_POLYLINE)) width = 1.0;
     fill = width == 0.0;
@@ -513,9 +513,9 @@ RantMathResult rant_image_draw(RantImageView *image, const RantShape2D *shape, R
             uint8_t *p = image->data + (size_t)y * s + (size_t)x * (size_t)i_line(image->format, 1);
             if (!(a > 0.0)) continue;
             switch (image->format){
-            case RANT_IMAGE_MONO8: p[0] = i_over(i_luma(color), p[0], a); break;
-            case RANT_IMAGE_RGB8: p[0] = i_over(color.r, p[0], a); p[1] = i_over(color.g, p[1], a); p[2] = i_over(color.b, p[2], a); break;
-            case RANT_IMAGE_BGR8: p[0] = i_over(color.b, p[0], a); p[1] = i_over(color.g, p[1], a); p[2] = i_over(color.r, p[2], a); break;
+            case RANT_IMAGE_FORMAT_MONO8: p[0] = i_over(i_luma(color), p[0], a); break;
+            case RANT_IMAGE_FORMAT_RGB8: p[0] = i_over(color.r, p[0], a); p[1] = i_over(color.g, p[1], a); p[2] = i_over(color.b, p[2], a); break;
+            case RANT_IMAGE_FORMAT_BGR8: p[0] = i_over(color.b, p[0], a); p[1] = i_over(color.g, p[1], a); p[2] = i_over(color.r, p[2], a); break;
             default: {
                 double under = p[3] / 255.0 * (1.0 - a), total = a + under;
                 p[0] = i_u8((color.r * a + p[0] * under) / total);

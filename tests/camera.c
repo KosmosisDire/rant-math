@@ -20,7 +20,7 @@ static RantCameraIntrinsics lens(RantDistortionModel model, double k1, double k2
     c.fx = 400.0; c.fy = 400.0; c.cx = 399.5; c.cy = 299.5;
     c.model = model;
     c.coeffs[0] = k1; c.coeffs[1] = k2;
-    if (model == RANT_DISTORTION_FISHEYE){ c.coeffs[2] = k3; c.coeffs[3] = k4; } else c.coeffs[4] = k3;
+    if (model == RANT_DISTORTION_MODEL_FISHEYE){ c.coeffs[2] = k3; c.coeffs[3] = k4; } else c.coeffs[4] = k3;
     (void)k4;
     return c;
 }
@@ -88,7 +88,7 @@ static void round_trip(void){
                 if (rant_camera_project(&c, rant_double3_scale(ray.direction, 3.0), &back) != RANT_MATH_OK
                     || !near2(back, px, 1e-8)) bad++;
                 if (ray.direction.x <= 0.0){
-                    if (c.model != RANT_DISTORTION_FISHEYE) far++;
+                    if (c.model != RANT_DISTORTION_MODEL_FISHEYE) far++;
                     continue;
                 }
                 if (rant_camera_unproject(&c, px, 2.5, &p) != RANT_MATH_OK || p.x != 2.5
@@ -140,7 +140,7 @@ static void edge(const RantCameraIntrinsics *c){
 }
 
 static void folds(void){
-    RantCameraIntrinsics c = lens(RANT_DISTORTION_BROWN_CONRADY, -0.5, 0.0, 0.0, 0.0);
+    RantCameraIntrinsics c = lens(RANT_DISTORTION_MODEL_BROWN_CONRADY, -0.5, 0.0, 0.0, 0.0);
     double fold = sqrt(2.0 / 3.0), reach = fold * (1.0 - 0.5 * fold * fold);
     RantDouble2 px;
     RantRay ray;
@@ -159,13 +159,13 @@ static void folds(void){
     edge(&c);
     for (i = 0; i < REF_CAM_COUNT; i++){
         RantCameraIntrinsics r = cam_of(i);
-        no_ghosts(&r, r.model == RANT_DISTORTION_FISHEYE, &taken, &refused);
+        no_ghosts(&r, r.model == RANT_DISTORTION_MODEL_FISHEYE, &taken, &refused);
         CHECK(taken > 100, "camera %d sees %d of the points", i, taken);
-        if (r.model != RANT_DISTORTION_FISHEYE) edge(&r);
+        if (r.model != RANT_DISTORTION_MODEL_FISHEYE) edge(&r);
     }
 
     /* r / (1 - r^2) runs to infinity at r = 1, so every pixel has a ray and nothing past 1 lands */
-    c = lens(RANT_DISTORTION_RATIONAL, 0.0, 0.0, 0.0, 0.0);
+    c = lens(RANT_DISTORTION_MODEL_RATIONAL, 0.0, 0.0, 0.0, 0.0);
     c.coeffs[5] = -1.0;
     CHECK(rant_camera_project(&c, body(0.99, 0.0, 1.0), &px) == RANT_MATH_OK && px.x > c.cx + 49.0 * c.fx, "near the pole lands far out");
     CHECK(rant_camera_project(&c, body(1.01, 0.0, 1.0), &px) == RANT_MATH_ERR_OUTSIDE, "past the pole");
@@ -173,7 +173,7 @@ static void folds(void){
     no_ghosts(&c, 0, &taken, &refused);
 
     /* an equidistant fisheye sees past its side, though no depth lies ahead there */
-    c = lens(RANT_DISTORTION_FISHEYE, 0.0, 0.0, 0.0, 0.0);
+    c = lens(RANT_DISTORTION_MODEL_FISHEYE, 0.0, 0.0, 0.0, 0.0);
     p = rant_double3(cos(100.0 * PI / 180.0), sin(100.0 * PI / 180.0), 0.0);
     CHECK(rant_camera_project(&c, p, &px) == RANT_MATH_OK && near(px.x, c.cx - c.fx * 100.0 * PI / 180.0, 1e-9), "100 degrees off its axis");
     CHECK(rant_camera_ray(&c, px, &ray) == RANT_MATH_OK && angle_between(ray.direction, p) < 1e-12, "and its ray goes back there");
@@ -184,12 +184,12 @@ static void folds(void){
     no_ghosts(&c, 1, &taken, &refused);
     CHECK(taken > 3900, "it sees nearly everything: %d", taken);
     /* 1 - 0.6 theta^2 reaches 0 at 74 degrees */
-    c = lens(RANT_DISTORTION_FISHEYE, -0.2, 0.0, 0.0, 0.0);
+    c = lens(RANT_DISTORTION_MODEL_FISHEYE, -0.2, 0.0, 0.0, 0.0);
     CHECK(rant_camera_project(&c, rant_double3(cos(1.25), sin(1.25), 0.0), &px) == RANT_MATH_OK, "inside a fisheye's fold");
     CHECK(rant_camera_project(&c, rant_double3(cos(1.33), sin(1.33), 0.0), &px) == RANT_MATH_ERR_OUTSIDE, "past a fisheye's fold");
     no_ghosts(&c, 1, &taken, &refused);
     CHECK(refused > 1000, "the fold refuses the rest: %d", refused);
-    c = lens(RANT_DISTORTION_NONE, 0.0, 0.0, 0.0, 0.0);
+    c = lens(RANT_DISTORTION_MODEL_NONE, 0.0, 0.0, 0.0, 0.0);
     CHECK(rant_camera_project(&c, rant_double3(0.0, 1.0, 0.0), &px) == RANT_MATH_ERR_OUTSIDE, "a pinhole sees nothing at its side");
     CHECK(rant_camera_project(&c, rant_double3(-1.0, 0.0, 0.0), &px) == RANT_MATH_ERR_OUTSIDE, "or behind");
 }
@@ -239,12 +239,12 @@ static void fov(void){
     RantDouble2 f;
     CHECK(rant_camera_from_fov(640, 480, rant_double2(PI / 2.0, 0.0), &c) == RANT_MATH_OK, "from a fov");
     CHECK(near(c.fx, 320.0, 1e-12) && near(c.fy, 320.0, 1e-12) && c.cx == 319.5 && c.cy == 239.5
-          && c.model == RANT_DISTORTION_NONE && c.width == 640 && c.coeffs[0] == 0.0, "square pixels, centered");
+          && c.model == RANT_DISTORTION_MODEL_NONE && c.width == 640 && c.coeffs[0] == 0.0, "square pixels, centered");
     CHECK(rant_camera_fov(&c, &f) == RANT_MATH_OK && near(f.x, PI / 2.0, 1e-14) && near(f.y, 2.0 * atan(240.0 / 320.0), 1e-14), "its fov back");
     CHECK(rant_camera_from_fov(1280, 720, rant_double2(1.2, 0.8), &back) == RANT_MATH_OK
           && rant_camera_fov(&back, &f) == RANT_MATH_OK && near(f.x, 1.2, 1e-14) && near(f.y, 0.8, 1e-14), "both angles");
     /* an equidistant fisheye whose edges reach 100 degrees to each side */
-    c = lens(RANT_DISTORTION_FISHEYE, 0.0, 0.0, 0.0, 0.0);
+    c = lens(RANT_DISTORTION_MODEL_FISHEYE, 0.0, 0.0, 0.0, 0.0);
     c.fx = c.fy = 400.0 / (100.0 * PI / 180.0);
     CHECK(rant_camera_fov(&c, &f) == RANT_MATH_OK && near(f.x, 200.0 * PI / 180.0, 1e-12), "a fisheye spans more than half a turn");
     c = cam_of(1);

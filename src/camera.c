@@ -41,10 +41,10 @@ RantMathResult i_math_lens(const RantCameraIntrinsics *c, int many, i_MathLens *
     if (!c || !(c->fx > 0.0 && c->fy > 0.0) || !i_math_finite(c->fx) || !i_math_finite(c->fy)
         || !i_math_finite(c->cx) || !i_math_finite(c->cy)) return RANT_MATH_ERR_ARGUMENT;
     switch (c->model){
-    case RANT_DISTORTION_NONE: count = 0; break;
-    case RANT_DISTORTION_BROWN_CONRADY: count = 5; break;
-    case RANT_DISTORTION_FISHEYE: count = 4; break;
-    case RANT_DISTORTION_RATIONAL: count = 8; break;
+    case RANT_DISTORTION_MODEL_NONE: count = 0; break;
+    case RANT_DISTORTION_MODEL_BROWN_CONRADY: count = 5; break;
+    case RANT_DISTORTION_MODEL_FISHEYE: count = 4; break;
+    case RANT_DISTORTION_MODEL_RATIONAL: count = 8; break;
     default: return RANT_MATH_ERR_ARGUMENT;
     }
     memset(L, 0, sizeof *L);
@@ -53,7 +53,7 @@ RantMathResult i_math_lens(const RantCameraIntrinsics *c, int many, i_MathLens *
         if (!i_math_finite(c->coeffs[i])) return RANT_MATH_ERR_ARGUMENT;
         L->k[i] = c->coeffs[i];
     }
-    L->fisheye = c->model == RANT_DISTORTION_FISHEYE;
+    L->fisheye = c->model == RANT_DISTORTION_MODEL_FISHEYE;
     if (L->fisheye){
         /* theta g(theta^2) grows as 1 + 3 k1 theta^2 + 5 k2 theta^4 + 7 k3 theta^6 + 9 k4 theta^8 */
         L->bounds = 1;
@@ -196,7 +196,7 @@ RantMathResult i_math_lens_ray(i_MathLens *L, RantDouble2 pixel, RantDouble3 *o)
     double xd = (pixel.x - c->cx) / c->fx, yd = (pixel.y - c->cy) / c->fy, rd, r = 0.0, a, b;
     int i, tangential = !L->fisheye && (L->k[2] != 0.0 || L->k[3] != 0.0);
     if (!i_math_finite(xd) || !i_math_finite(yd)) return RANT_MATH_ERR_ARGUMENT;
-    if (c->model == RANT_DISTORTION_NONE){
+    if (c->model == RANT_DISTORTION_MODEL_NONE){
         *o = rant_double3(xd, yd, 1.0);
         return RANT_MATH_OK;
     }
@@ -360,7 +360,7 @@ RantMathResult rant_camera_from_fov(uint32_t width, uint32_t height, RantDouble2
     o.fy = fov.y > 0.0 ? 0.5 * height / tan(0.5 * fov.y) : o.fx;
     o.cx = 0.5 * (width - 1.0);
     o.cy = 0.5 * (height - 1.0);
-    o.model = RANT_DISTORTION_NONE;
+    o.model = RANT_DISTORTION_MODEL_NONE;
     *out = o;
     return RANT_MATH_OK;
 }

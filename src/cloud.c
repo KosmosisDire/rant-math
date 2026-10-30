@@ -1,17 +1,17 @@
 #include "internal.h"
 
 static const RantPointFieldView I_XYZ[] = {
-    { "x", 1, 0, RANT_SCALAR_F32, 1 }, { "y", 1, 4, RANT_SCALAR_F32, 1 }, { "z", 1, 8, RANT_SCALAR_F32, 1 },
-    { "intensity", 9, 12, RANT_SCALAR_F32, 1 }
+    { "x", 1, 0, RANT_SCALAR_KIND_F32, 1 }, { "y", 1, 4, RANT_SCALAR_KIND_F32, 1 }, { "z", 1, 8, RANT_SCALAR_KIND_F32, 1 },
+    { "intensity", 9, 12, RANT_SCALAR_KIND_F32, 1 }
 };
 static const RantPointFieldView I_RGB[] = {
-    { "x", 1, 0, RANT_SCALAR_F32, 1 }, { "y", 1, 4, RANT_SCALAR_F32, 1 }, { "z", 1, 8, RANT_SCALAR_F32, 1 },
-    { "rgb", 3, 12, RANT_SCALAR_F32, 1 }
+    { "x", 1, 0, RANT_SCALAR_KIND_F32, 1 }, { "y", 1, 4, RANT_SCALAR_KIND_F32, 1 }, { "z", 1, 8, RANT_SCALAR_KIND_F32, 1 },
+    { "rgb", 3, 12, RANT_SCALAR_KIND_F32, 1 }
 };
 static const RantPointFieldView I_NORMAL[] = {
-    { "x", 1, 0, RANT_SCALAR_F32, 1 }, { "y", 1, 4, RANT_SCALAR_F32, 1 }, { "z", 1, 8, RANT_SCALAR_F32, 1 },
-    { "normal_x", 8, 12, RANT_SCALAR_F32, 1 }, { "normal_y", 8, 16, RANT_SCALAR_F32, 1 },
-    { "normal_z", 8, 20, RANT_SCALAR_F32, 1 }
+    { "x", 1, 0, RANT_SCALAR_KIND_F32, 1 }, { "y", 1, 4, RANT_SCALAR_KIND_F32, 1 }, { "z", 1, 8, RANT_SCALAR_KIND_F32, 1 },
+    { "normal_x", 8, 12, RANT_SCALAR_KIND_F32, 1 }, { "normal_y", 8, 16, RANT_SCALAR_KIND_F32, 1 },
+    { "normal_z", 8, 20, RANT_SCALAR_KIND_F32, 1 }
 };
 
 RantPointCloudView rant_point_cloud_layout(RantPointCloudLayout layout){
@@ -30,10 +30,10 @@ RantPointCloudView rant_point_cloud_layout(RantPointCloudLayout layout){
 
 int i_math_scalar_bytes(RantScalarKind k){
     switch (k){
-    case RANT_SCALAR_I8: case RANT_SCALAR_U8: return 1;
-    case RANT_SCALAR_I16: case RANT_SCALAR_U16: return 2;
-    case RANT_SCALAR_I32: case RANT_SCALAR_U32: case RANT_SCALAR_F32: return 4;
-    case RANT_SCALAR_F64: case RANT_SCALAR_I64: case RANT_SCALAR_U64: return 8;
+    case RANT_SCALAR_KIND_I8: case RANT_SCALAR_KIND_U8: return 1;
+    case RANT_SCALAR_KIND_I16: case RANT_SCALAR_KIND_U16: return 2;
+    case RANT_SCALAR_KIND_I32: case RANT_SCALAR_KIND_U32: case RANT_SCALAR_KIND_F32: return 4;
+    case RANT_SCALAR_KIND_F64: case RANT_SCALAR_KIND_I64: case RANT_SCALAR_KIND_U64: return 8;
     default: return 0;
     }
 }
@@ -55,16 +55,16 @@ double i_math_scalar_get(RantScalarKind k, const uint8_t *p){
     float f;
     double d;
     switch (k){
-    case RANT_SCALAR_I8: return (int8_t)(uint8_t)u;
-    case RANT_SCALAR_U8: return (double)u;
-    case RANT_SCALAR_I16: return (int16_t)(uint16_t)u;
-    case RANT_SCALAR_U16: return (double)u;
-    case RANT_SCALAR_I32: return (int32_t)(uint32_t)u;
-    case RANT_SCALAR_U32: return (double)u;
-    case RANT_SCALAR_F32: { uint32_t w = (uint32_t)u; memcpy(&f, &w, sizeof f); return f; }
-    case RANT_SCALAR_F64: memcpy(&d, &u, sizeof d); return d;
-    case RANT_SCALAR_I64: return (double)(int64_t)u;
-    case RANT_SCALAR_U64: return (double)u;
+    case RANT_SCALAR_KIND_I8: return (int8_t)(uint8_t)u;
+    case RANT_SCALAR_KIND_U8: return (double)u;
+    case RANT_SCALAR_KIND_I16: return (int16_t)(uint16_t)u;
+    case RANT_SCALAR_KIND_U16: return (double)u;
+    case RANT_SCALAR_KIND_I32: return (int32_t)(uint32_t)u;
+    case RANT_SCALAR_KIND_U32: return (double)u;
+    case RANT_SCALAR_KIND_F32: { uint32_t w = (uint32_t)u; memcpy(&f, &w, sizeof f); return f; }
+    case RANT_SCALAR_KIND_F64: memcpy(&d, &u, sizeof d); return d;
+    case RANT_SCALAR_KIND_I64: return (double)(int64_t)u;
+    case RANT_SCALAR_KIND_U64: return (double)u;
     default: return 0.0;
     }
 }
@@ -81,20 +81,20 @@ void i_math_scalar_put(RantScalarKind k, uint8_t *p, double v){
     uint32_t w;
     uint64_t u;
     switch (k){
-    case RANT_SCALAR_I8: p[0] = (uint8_t)(int8_t)i_whole(v, -128.0, 127.0); return;
-    case RANT_SCALAR_U8: p[0] = (uint8_t)i_whole(v, 0.0, 255.0); return;
-    case RANT_SCALAR_I16: i_store(p, 2, (uint16_t)(int16_t)i_whole(v, -32768.0, 32767.0)); return;
-    case RANT_SCALAR_U16: i_store(p, 2, (uint16_t)i_whole(v, 0.0, 65535.0)); return;
-    case RANT_SCALAR_I32: i_store(p, 4, (uint32_t)(int32_t)i_whole(v, -2147483648.0, 2147483647.0)); return;
-    case RANT_SCALAR_U32: i_store(p, 4, (uint32_t)i_whole(v, 0.0, 4294967295.0)); return;
-    case RANT_SCALAR_F32: f = (float)v; memcpy(&w, &f, sizeof w); i_store(p, 4, w); return;
-    case RANT_SCALAR_F64: memcpy(&u, &v, sizeof u); i_store(p, 8, u); return;
+    case RANT_SCALAR_KIND_I8: p[0] = (uint8_t)(int8_t)i_whole(v, -128.0, 127.0); return;
+    case RANT_SCALAR_KIND_U8: p[0] = (uint8_t)i_whole(v, 0.0, 255.0); return;
+    case RANT_SCALAR_KIND_I16: i_store(p, 2, (uint16_t)(int16_t)i_whole(v, -32768.0, 32767.0)); return;
+    case RANT_SCALAR_KIND_U16: i_store(p, 2, (uint16_t)i_whole(v, 0.0, 65535.0)); return;
+    case RANT_SCALAR_KIND_I32: i_store(p, 4, (uint32_t)(int32_t)i_whole(v, -2147483648.0, 2147483647.0)); return;
+    case RANT_SCALAR_KIND_U32: i_store(p, 4, (uint32_t)i_whole(v, 0.0, 4294967295.0)); return;
+    case RANT_SCALAR_KIND_F32: f = (float)v; memcpy(&w, &f, sizeof w); i_store(p, 4, w); return;
+    case RANT_SCALAR_KIND_F64: memcpy(&u, &v, sizeof u); i_store(p, 8, u); return;
     /* 2^63 and 2^64 are past the top, so they stand for it */
-    case RANT_SCALAR_I64:
+    case RANT_SCALAR_KIND_I64:
         v = i_whole(v, -9223372036854775808.0, 9223372036854775808.0);
         i_store(p, 8, v >= 9223372036854775808.0 ? (uint64_t)INT64_MAX : (uint64_t)(int64_t)v);
         return;
-    case RANT_SCALAR_U64:
+    case RANT_SCALAR_KIND_U64:
         v = i_whole(v, 0.0, 18446744073709551616.0);
         i_store(p, 8, v >= 18446744073709551616.0 ? UINT64_MAX : (uint64_t)v);
         return;
@@ -316,18 +316,18 @@ RantMathResult rant_image_depth_points(const RantImageView *depth, const RantCam
     int wide;
     if (!count || !camera) return RANT_MATH_ERR_ARGUMENT;
     if ((r = rant_image_check(depth)) != RANT_MATH_OK) return r;
-    if (depth->format != RANT_IMAGE_MONO16 && depth->format != RANT_IMAGE_MONOF32) return RANT_MATH_ERR_FORMAT;
+    if (depth->format != RANT_IMAGE_FORMAT_MONO16 && depth->format != RANT_IMAGE_FORMAT_MONOF32) return RANT_MATH_ERR_FORMAT;
     if (depth->width != camera->width || depth->height != camera->height) return RANT_MATH_ERR_ARGUMENT;
     if ((r = i_math_lens(camera, 1, &L)) != RANT_MATH_OK) return r;
     if ((uint64_t)depth->width * depth->height > UINT32_MAX) return RANT_MATH_ERR_ARGUMENT;
     if ((r = i_math_room(count, depth->width * depth->height, out)) != RANT_MATH_OK) return r;
-    wide = depth->format == RANT_IMAGE_MONOF32;
+    wide = depth->format == RANT_IMAGE_FORMAT_MONOF32;
     stride = depth->stride ? depth->stride : (size_t)depth->width * (wide ? 4 : 2);
     for (y = 0; y < depth->height; y++){
         const uint8_t *row = depth->data + y * stride;
         for (x = 0; x < depth->width; x++){
-            double d = wide ? i_math_scalar_get(RANT_SCALAR_F32, row + 4 * x)
-                            : 0.001 * i_math_scalar_get(RANT_SCALAR_U16, row + 2 * x);
+            double d = wide ? i_math_scalar_get(RANT_SCALAR_KIND_F32, row + 4 * x)
+                            : 0.001 * i_math_scalar_get(RANT_SCALAR_KIND_U16, row + 2 * x);
             RantDouble3 o;
             if (d > 0.0 && i_math_finite(d) && i_math_lens_ray(&L, rant_double2(x, y), &o) == RANT_MATH_OK && o.z > 0.0)
                 *out++ = rant_double3(d, -o.x * (d / o.z), -o.y * (d / o.z));

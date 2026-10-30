@@ -34,7 +34,7 @@ static void layouts(void){
         RantPointCloudView v = rant_point_cloud_layout((RantPointCloudLayout)l);
         int ok = v.field_count == fields[l] && v.point_step == 4 * fields[l] && !v.data && !v.size;
         for (k = 0; ok && k < v.field_count; k++)
-            ok = v.fields[k].offset == 4 * k && v.fields[k].kind == RANT_SCALAR_F32 && v.fields[k].count == 1
+            ok = v.fields[k].offset == 4 * k && v.fields[k].kind == RANT_SCALAR_KIND_F32 && v.fields[k].count == 1
                 && v.fields[k].name_len == strlen(names[l][k]) && !memcmp(v.fields[k].name, names[l][k], v.fields[k].name_len);
         CHECK(ok, "layout %d: its fields, packed as f32", l);
         v.data = data;
@@ -48,8 +48,8 @@ static void layouts(void){
 /* Each kind written and read back: rounded to nearest with halves away from 0, held to its range. */
 static void kinds(void){
     static const struct { RantScalarKind kind; double lo, hi; } k[] = {
-        { RANT_SCALAR_I8, -128, 127 }, { RANT_SCALAR_U8, 0, 255 }, { RANT_SCALAR_I16, -32768, 32767 },
-        { RANT_SCALAR_U16, 0, 65535 }, { RANT_SCALAR_I32, -2147483648.0, 2147483647.0 }, { RANT_SCALAR_U32, 0, 4294967295.0 } };
+        { RANT_SCALAR_KIND_I8, -128, 127 }, { RANT_SCALAR_KIND_U8, 0, 255 }, { RANT_SCALAR_KIND_I16, -32768, 32767 },
+        { RANT_SCALAR_KIND_U16, 0, 65535 }, { RANT_SCALAR_KIND_I32, -2147483648.0, 2147483647.0 }, { RANT_SCALAR_KIND_U32, 0, 4294967295.0 } };
     static const double in[] = { 2.5, -2.5, 2.4999, -0.5, 0.49, 1e30, -1e30, NAN, 7.0 };
     uint8_t data[8 * 9];
     double back[9];
@@ -74,8 +74,8 @@ static void kinds(void){
         uint8_t raw[16 * 6];
         int64_t s;
         uint64_t u;
-        f[0] = field("s", 0, RANT_SCALAR_I64, 1);
-        f[1] = field("u", 8, RANT_SCALAR_U64, 1);
+        f[0] = field("s", 0, RANT_SCALAR_KIND_I64, 1);
+        f[1] = field("u", 8, RANT_SCALAR_KIND_U64, 1);
         v = view(f, 2, 16, raw, 6);
         CHECK(rant_point_cloud_write_values(&v, "s", big, 6) == RANT_MATH_OK && rant_point_cloud_write_values(&v, "u", big, 6) == RANT_MATH_OK, "64 bit kinds write");
         memcpy(&s, raw + 16 * 1, 8); CHECK(s == INT64_MIN, "i64 low end");
@@ -92,9 +92,9 @@ static void kinds(void){
         RantPointCloudView v;
         double a, b, c;
         uint32_t n = 1;
-        f[0] = field("a", 0, RANT_SCALAR_U16, 1);
-        f[1] = field("b", 2, RANT_SCALAR_I16, 1);
-        f[2] = field("c", 4, RANT_SCALAR_F32, 1);
+        f[0] = field("a", 0, RANT_SCALAR_KIND_U16, 1);
+        f[1] = field("b", 2, RANT_SCALAR_KIND_I16, 1);
+        f[2] = field("c", 4, RANT_SCALAR_KIND_F32, 1);
         v = view(f, 3, 8, raw, 1);
         rant_point_cloud_read_values(&v, "a", &a, &n);
         rant_point_cloud_read_values(&v, "b", &b, &n);
@@ -112,10 +112,10 @@ static void points(void){
     double ring[14];
     uint32_t n, i;
     int same = 1, kept = 1;
-    f[0] = field("ring", 0, RANT_SCALAR_U8, 2);
-    f[1] = field("x", 2, RANT_SCALAR_F64, 1);
-    f[2] = field("z", 11, RANT_SCALAR_F32, 1);
-    f[3] = field("y", 17, RANT_SCALAR_I16, 1);
+    f[0] = field("ring", 0, RANT_SCALAR_KIND_U8, 2);
+    f[1] = field("x", 2, RANT_SCALAR_KIND_F64, 1);
+    f[2] = field("z", 11, RANT_SCALAR_KIND_F32, 1);
+    f[3] = field("y", 17, RANT_SCALAR_KIND_I16, 1);
     v = view(f, 4, 23, data, 7);
     for (i = 0; i < sizeof data; i++) data[i] = (uint8_t)(i * 37 + 11);
     for (i = 0; i < 7; i++) in[i] = rant_double3(random_range(-50, 50), random_range(-300, 300), random_range(-2, 2));
@@ -152,9 +152,9 @@ static void layout_errors(void){
     uint8_t data[64];
     RantDouble3 p[4];
     uint32_t n = 4;
-    f[0] = field("x", 0, RANT_SCALAR_F32, 1);
-    f[1] = field("y", 4, RANT_SCALAR_F32, 1);
-    f[2] = field("z", 8, RANT_SCALAR_F32, 1);
+    f[0] = field("x", 0, RANT_SCALAR_KIND_F32, 1);
+    f[1] = field("y", 4, RANT_SCALAR_KIND_F32, 1);
+    f[2] = field("z", 8, RANT_SCALAR_KIND_F32, 1);
     v = view(f, 3, 12, data, 4);
     CHECK(rant_point_cloud_check(&v) == RANT_MATH_OK, "a plain cloud");
     v.size = 47;
@@ -167,7 +167,7 @@ static void layout_errors(void){
     v.point_step = 12; v.size = 48;
     f[2].kind = (RantScalarKind)11;
     CHECK(rant_point_cloud_check(&v) == RANT_MATH_ERR_FORMAT, "no such kind");
-    f[2].kind = RANT_SCALAR_F32; f[2].count = 0;
+    f[2].kind = RANT_SCALAR_KIND_F32; f[2].count = 0;
     CHECK(rant_point_cloud_check(&v) == RANT_MATH_ERR_FORMAT, "a field of no numbers");
     f[2].count = 1;
     v.data = NULL;
@@ -184,7 +184,7 @@ static void layout_errors(void){
     CHECK(rant_point_cloud_read_values(&v, NULL, NULL, &n) == RANT_MATH_ERR_ARGUMENT, "no field name");
     v.field_count = 3;
     /* a name is its bytes, not up to a NUL */
-    bad = field("xyz", 0, RANT_SCALAR_F32, 1);
+    bad = field("xyz", 0, RANT_SCALAR_KIND_F32, 1);
     bad.name_len = 1;
     v.fields = &bad; v.field_count = 1;
     CHECK(rant_point_cloud_field(&v, "x") == &bad && !rant_point_cloud_field(&v, "xyz"), "x is the first byte of xyz");
@@ -212,13 +212,13 @@ static void colors(void){
     CHECK(rant_point_cloud_read_colors(&v, out, &n) == RANT_MATH_OK && n == 3, "and gives them back");
     CHECK(out[0].r == 255 && out[0].g == 0 && out[0].a == 255 && out[1].b == 3 && out[2].g == 128, "with alpha 255 from rgb");
     memcpy(f, v.fields, sizeof f);
-    f[3] = field("rgba", 12, RANT_SCALAR_U32, 1);
+    f[3] = field("rgba", 12, RANT_SCALAR_KIND_U32, 1);
     v.fields = f;
     CHECK(rant_point_cloud_write_colors(&v, in, 3) == RANT_MATH_OK && rant_point_cloud_read_colors(&v, out, &n) == RANT_MATH_OK
           && out[0].a == 10 && out[1].a == 4 && data[16 + 12] == 3 && data[16 + 15] == 4, "rgba keeps alpha, blue first");
-    f[3] = field("rgb", 12, RANT_SCALAR_U16, 1);
+    f[3] = field("rgb", 12, RANT_SCALAR_KIND_U16, 1);
     CHECK(rant_point_cloud_read_colors(&v, out, &n) == RANT_MATH_ERR_FORMAT, "an rgb of 2 bytes");
-    f[3] = field("color", 12, RANT_SCALAR_F32, 1);
+    f[3] = field("color", 12, RANT_SCALAR_KIND_F32, 1);
     CHECK(rant_point_cloud_read_colors(&v, out, &n) == RANT_MATH_ERR_FORMAT, "no colour field");
 }
 
@@ -235,7 +235,7 @@ static void transform(void){
     /* f64 fields, so the move can be compared exactly */
     for (i = 0; i < 6; i++){
         f[i] = v.fields[i];
-        f[i].kind = RANT_SCALAR_F64;
+        f[i].kind = RANT_SCALAR_KIND_F64;
         f[i].offset = 8 * i;
     }
     {   RantPointCloudView w = view(f, 6, 48, (uint8_t *)raw, 50);
@@ -328,7 +328,7 @@ static void depth(void){
     c.width = 6; c.height = 5; c.fx = 5.0; c.fy = 5.5; c.cx = 2.4; c.cy = 2.1;
     for (k = 0; k < 36; k++) mm[k] = (uint16_t)(400 + 97 * k);
     mm[7] = 0;
-    im.width = 6; im.height = 5; im.stride = 12; im.format = RANT_IMAGE_MONO16; im.data = (uint8_t *)mm; im.size = sizeof mm;
+    im.width = 6; im.height = 5; im.stride = 12; im.format = RANT_IMAGE_FORMAT_MONO16; im.data = (uint8_t *)mm; im.size = sizeof mm;
     n = 30;
     CHECK(rant_image_depth_points(&im, &c, p, &n) == RANT_MATH_OK && n == 30, "Mono16 depth");
     for (y = 0; y < 5; y++)
@@ -341,12 +341,12 @@ static void depth(void){
         }
     CHECK(ok, "millimeters along +x as unproject places them, NaN for 0");
     /* a distorted lens, every point seen back at its pixel */
-    c.model = RANT_DISTORTION_BROWN_CONRADY;
+    c.model = RANT_DISTORTION_MODEL_BROWN_CONRADY;
     c.coeffs[0] = -0.2; c.coeffs[1] = 0.05; c.coeffs[2] = 0.001; c.coeffs[3] = -0.002;
     c.width = 8;
     for (k = 0; k < 40; k++) m[k] = (float)random_range(0.3, 9.0);
     m[3] = (float)NAN; m[9] = 0.0f; m[10] = -1.0f; m[11] = (float)HUGE_VAL;
-    im.width = 8; im.stride = 0; im.format = RANT_IMAGE_MONOF32; im.data = (uint8_t *)m; im.size = sizeof m;
+    im.width = 8; im.stride = 0; im.format = RANT_IMAGE_FORMAT_MONOF32; im.data = (uint8_t *)m; im.size = sizeof m;
     n = 40;
     CHECK(rant_image_depth_points(&im, &c, p, &n) == RANT_MATH_OK, "Monof32 depth through a lens");
     for (k = 0, ok = 1; k < 40; k++){
@@ -359,9 +359,9 @@ static void depth(void){
     c.width = 7;
     CHECK(rant_image_depth_points(&im, &c, p, &n) == RANT_MATH_ERR_ARGUMENT, "the sizes must match");
     c.width = 8;
-    im.format = RANT_IMAGE_MONO8;
+    im.format = RANT_IMAGE_FORMAT_MONO8;
     CHECK(rant_image_depth_points(&im, &c, p, &n) == RANT_MATH_ERR_FORMAT, "not a depth format");
-    im.format = RANT_IMAGE_MONOF32;
+    im.format = RANT_IMAGE_FORMAT_MONOF32;
     n = 39;
     CHECK(rant_image_depth_points(&im, &c, p, &n) == RANT_MATH_ERR_SPACE && n == 40, "room for every pixel");
 }

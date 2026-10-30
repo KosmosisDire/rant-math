@@ -74,9 +74,9 @@ static void values(void){
     double v;
     int16_t s;
     float h;
-    f[0] = field("occupancy", RANT_SCALAR_U8, occupancy, sizeof occupancy);
-    f[1] = field("height", RANT_SCALAR_F32, height, sizeof height);
-    f[2] = field("cost", RANT_SCALAR_I16, cost, sizeof cost);
+    f[0] = field("occupancy", RANT_SCALAR_KIND_U8, occupancy, sizeof occupancy);
+    f[1] = field("height", RANT_SCALAR_KIND_F32, height, sizeof height);
+    f[2] = field("cost", RANT_SCALAR_KIND_I16, cost, sizeof cost);
     g.fields = f;
     g.field_count = 3;
     CHECK(rant_grid_write_value(&g, "occupancy", rant_int3(2, 3, 1), 99.6) == RANT_MATH_OK && occupancy[37] == 100,
@@ -101,7 +101,7 @@ static void values(void){
     f[1].size = 240;
     f[2].kind = (RantScalarKind)0;
     CHECK(rant_grid_read_value(&g, "cost", rant_int3(0, 0, 0), &v) == RANT_MATH_ERR_FORMAT, "a field of no kind");
-    f[2].kind = RANT_SCALAR_I16;
+    f[2].kind = RANT_SCALAR_KIND_I16;
     f[0].name_len = 3;
     CHECK(rant_grid_read_value(&g, "occ", rant_int3(2, 3, 1), &v) == RANT_MATH_OK && v == 100.0, "a name is its bytes, no NUL needed");
     g.cells_x = 0xFFFFFFFFu; g.cells_y = 0xFFFFFFFFu; g.cells_z = 0xFFFFFFFFu;
