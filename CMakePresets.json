@@ -1,0 +1,64 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21 },
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Windows (Visual Studio)",
+      "binaryDir": "${sourceDir}/build",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "windows-local",
+      "inherits": "windows",
+      "displayName": "Windows (Visual Studio), local Rant",
+      "description": "Rant from the ../rant working tree",
+      "cacheVariables": { "CPM_rant_SOURCE": "${sourceDir}/../rant" }
+    },
+    {
+      "name": "linux",
+      "displayName": "Linux (Ninja)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "linux-local",
+      "inherits": "linux",
+      "displayName": "Linux (Ninja), local Rant",
+      "description": "Rant from the ../rant working tree",
+      "cacheVariables": { "CPM_rant_SOURCE": "${sourceDir}/../rant" }
+    },
+    {
+      "name": "gcc",
+      "displayName": "GCC (Ninja), local Rant",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-gcc",
+      "cacheVariables": { "CMAKE_C_COMPILER": "gcc", "CMAKE_BUILD_TYPE": "Debug", "CPM_rant_SOURCE": "${sourceDir}/../rant" }
+    },
+    {
+      "name": "clang",
+      "displayName": "Clang (Ninja), local Rant",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-clang",
+      "cacheVariables": { "CMAKE_C_COMPILER": "clang", "CMAKE_BUILD_TYPE": "Debug", "CPM_rant_SOURCE": "${sourceDir}/../rant" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "windows", "configurePreset": "windows", "configuration": "Release" },
+    { "name": "windows-local", "configurePreset": "windows-local", "configuration": "Release" },
+    { "name": "linux", "configurePreset": "linux" },
+    { "name": "linux-local", "configurePreset": "linux-local" },
+    { "name": "gcc", "configurePreset": "gcc" },
+    { "name": "clang", "configurePreset": "clang" }
+  ],
+  "testPresets": [
+    { "name": "windows", "configurePreset": "windows", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "windows-local", "configurePreset": "windows-local", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "linux", "configurePreset": "linux", "output": { "outputOnFailure": true } },
+    { "name": "linux-local", "configurePreset": "linux-local", "output": { "outputOnFailure": true } },
+    { "name": "gcc", "configurePreset": "gcc", "output": { "outputOnFailure": true } },
+    { "name": "clang", "configurePreset": "clang", "output": { "outputOnFailure": true } }
+  ]
+}
