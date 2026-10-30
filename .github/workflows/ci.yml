@@ -1,0 +1,129 @@
+# Builds and tests Rant Math on every platform. Run by hand on main, when VERSION has no tag yet, it
+# also releases that version, with the single header and turbo's licence attached.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # Whether this run releases: by hand on main, when no tag v<VERSION> exists yet
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      release: ${{ steps.plan.outputs.release }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: plan
+        run: |
+          v="$(tr -d '\r\n' < VERSION)"
+          found=0
+          git ls-remote --exit-code --tags origin "refs/tags/v$v" > /dev/null || found=$?
+          # 2 is no such tag, anything else a lookup that went wrong
+          test "$found" = 0 || test "$found" = 2
+          release=false
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$GITHUB_REF" = refs/heads/main ] && [ "$found" = 2 ]; then release=true; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: test ${{ matrix.preset }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  preset: linux }
+          - { os: windows-latest, preset: windows }
+          - { os: macos-15,       preset: macos }
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Ninja
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Ninja
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      - name: Build
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build --preset ${{ matrix.preset }}
+
+      - name: Test
+        timeout-minutes: 10
+        run: ctest --preset ${{ matrix.preset }}
+
+      # The release takes the header from one platform, since it packs the same on all.
+      - uses: actions/upload-artifact@v7
+        if: matrix.preset == 'linux'
+        with:
+          name: single-header
+          path: |
+            build/dist/rant_math.h
+            build/dist/rant_math.c
+
+  # Clang with the address and undefined behaviour sanitizers, which fail on the first report.
+  sanitizers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Build
+        run: |
+          cmake --preset linux -B build-sanitizers -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-sanitize-recover=undefined"
+          cmake --build build-sanitizers
+
+      - name: Test
+        timeout-minutes: 20
+        run: ctest --test-dir build-sanitizers --output-on-failure
+
+  # The release makes the tag v<VERSION> on this commit, once every check above passed
+  release:
+    needs: [plan, test, sanitizers]
+    if: needs.plan.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # a later commit's run that passed too finds the version taken and stops
+      - name: The version is not released from another commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # gh prints the error body on a miss, so only a found tag is compared
+          if at="$(gh api "repos/$GITHUB_REPOSITORY/commits/v${{ needs.plan.outputs.version }}" --jq .sha 2>/dev/null)"; then
+            test "$at" = "$GITHUB_SHA"
+          fi
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: single-header
+          path: release
+
+      - name: Turbo's licence travels with the header
+        run: cp licenses/turbo-apache-2.0.txt release/
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.plan.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: release/*
+          generate_release_notes: true
+          prerelease: ${{ contains(needs.plan.outputs.version, '-') }}

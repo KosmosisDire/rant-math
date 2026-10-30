@@ -31,6 +31,14 @@
       "cacheVariables": { "CPM_rant_SOURCE": "${sourceDir}/../rant" }
     },
     {
+      "name": "macos",
+      "displayName": "macOS (Ninja)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+    },
+    {
       "name": "gcc",
       "displayName": "GCC (Ninja), local Rant",
       "generator": "Ninja",
@@ -50,6 +58,7 @@
     { "name": "windows-local", "configurePreset": "windows-local", "configuration": "Release" },
     { "name": "linux", "configurePreset": "linux" },
     { "name": "linux-local", "configurePreset": "linux-local" },
+    { "name": "macos", "configurePreset": "macos" },
     { "name": "gcc", "configurePreset": "gcc" },
     { "name": "clang", "configurePreset": "clang" }
   ],
@@ -58,6 +67,7 @@
     { "name": "windows-local", "configurePreset": "windows-local", "configuration": "Release", "output": { "outputOnFailure": true } },
     { "name": "linux", "configurePreset": "linux", "output": { "outputOnFailure": true } },
     { "name": "linux-local", "configurePreset": "linux-local", "output": { "outputOnFailure": true } },
+    { "name": "macos", "configurePreset": "macos", "output": { "outputOnFailure": true } },
     { "name": "gcc", "configurePreset": "gcc", "output": { "outputOnFailure": true } },
     { "name": "clang", "configurePreset": "clang", "output": { "outputOnFailure": true } }
   ]
