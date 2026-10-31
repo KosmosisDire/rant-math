@@ -641,17 +641,42 @@ inline Eigen::MatrixXd to_eigen(const Matrix &m) {
     return Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(m.data.data(), m.rows, m.cols);
 }
 
-inline Double2 from_eigen(const Eigen::Vector2d &v) { return { v.x(), v.y() }; }
-inline Double3 from_eigen(const Eigen::Vector3d &v) { return { v.x(), v.y(), v.z() }; }
-inline Double4 from_eigen(const Eigen::Vector4d &v) { return { v.x(), v.y(), v.z(), v.w() }; }
+/* Any matrix or expression, by its size and scalar: a 3 by 1 is a Double3, a 3 by 3 of float a
+ * Matrix3x3, one of double a Covariance3, and a size known only at run time a Matrix. */
+template <class D> inline auto from_eigen(const Eigen::MatrixBase<D> &m) {
+    constexpr int rows = D::RowsAtCompileTime, cols = D::ColsAtCompileTime;
+    constexpr bool single = std::is_same_v<typename D::Scalar, float>;
+    if constexpr (rows == 2 && cols == 1) {
+        return Double2{ double(m(0)), double(m(1)) };
+    } else if constexpr (rows == 3 && cols == 1) {
+        return Double3{ double(m(0)), double(m(1)), double(m(2)) };
+    } else if constexpr (rows == 4 && cols == 1) {
+        return Double4{ double(m(0)), double(m(1)), double(m(2)), double(m(3)) };
+    } else if constexpr (rows == 3 && cols == 3 && single) {
+        Matrix3x3 out;
+        Eigen::Map<Eigen::Matrix<float, 3, 3, Eigen::RowMajor>>(&out.m[0][0]) = m;
+        return out;
+    } else if constexpr (rows == 4 && cols == 4 && single) {
+        Matrix4x4 out;
+        Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(&out.m[0][0]) = m;
+        return out;
+    } else if constexpr (rows == 3 && cols == 3) {
+        Covariance3 out;
+        Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&out.m[0][0]) = m.template cast<double>();
+        return out;
+    } else if constexpr (rows == 6 && cols == 6) {
+        Covariance6 out;
+        Eigen::Map<Eigen::Matrix<double, 6, 6, Eigen::RowMajor>>(&out.m[0][0]) = m.template cast<double>();
+        return out;
+    } else {
+        Matrix out = impl::matrix_out(impl::count(size_t(m.rows())), impl::count(size_t(m.cols())));
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(out.data.data(), m.rows(), m.cols()) = m.template cast<double>();
+        return out;
+    }
+}
 inline Quaternion from_eigen(const Eigen::Quaterniond &q) { return { q.x(), q.y(), q.z(), q.w() }; }
 inline Pose from_eigen(const Eigen::Isometry3d &t) {
     return { from_eigen(Eigen::Vector3d(t.translation())), from_eigen(Eigen::Quaterniond(t.rotation())) };
-}
-inline Matrix from_eigen(const Eigen::MatrixXd &m) {
-    Matrix out = impl::matrix_out(impl::count(size_t(m.rows())), impl::count(size_t(m.cols())));
-    Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(out.data.data(), m.rows(), m.cols()) = m;
-    return out;
 }
 
 /* Three doubles per point in both: a list as a 3 by n matrix and back, with no copy. */

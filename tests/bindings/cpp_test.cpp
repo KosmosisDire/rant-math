@@ -767,6 +767,13 @@ static void eigen() {
     CHECK(polyline_length(points_from_eigen(columns)) == polyline_length(points));
     Matrix3x3 r = matrix3x3_from_quaternion(q);
     CHECK(near(to_eigen(r)(1, 0), r.m[1][0]));
+    Matrix3x3 r2 = from_eigen(to_eigen(r));
+    CHECK(r2.m[1][0] == r.m[1][0] && r2.m[0][1] == r.m[0][1]);
+    Double3 sum = from_eigen(to_eigen(v) + to_eigen(v));
+    CHECK(sum.z == 6.0);
+    Covariance3 c;
+    c.m[0][1] = 2.5;
+    CHECK(from_eigen(to_eigen(c)).m[0][1] == 2.5);
     std::printf("Eigen conversions checked\n");
 }
 #endif
