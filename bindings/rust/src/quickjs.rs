@@ -123,6 +123,15 @@ macro_rules! numeric {
 }
 numeric!(f64, f32, i8, i32, u8, u32, u64, usize);
 
+impl<'js> Js<'js> for bool {
+    fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<bool> {
+        v.as_bool().ok_or_else(|| Exception::throw_type(ctx, "true or false"))
+    }
+    fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
+        Ok(Value::new_bool(ctx.clone(), *self))
+    }
+}
+
 // Numbers from any list: an array or a typed array of any kind.
 fn numbers<'js, T: Js<'js>>(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Vec<T>> {
     let Some(o) = v.as_object() else { return Err(Exception::throw_type(ctx, "a list")) };
@@ -367,9 +376,15 @@ impl<'js> Js<'js> for PointCloud {
         cloud_in(ctx, v)
     }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
+        let origin = Object::new(ctx.clone())?;
+        origin.set("pose", self.origin.pose.put(ctx)?)?;
+        origin.set("parent", "")?;
         let o = Object::new(ctx.clone())?;
+        o.set("origin", origin)?;
+        o.set("width", self.width)?;
         o.set("fields", list_fields(ctx, &self.fields)?)?;
         o.set("point_step", self.point_step)?;
+        o.set("dense", self.dense)?;
         o.set("data", numbers_out(ctx, &self.data)?)?;
         Ok(o.into_value())
     }

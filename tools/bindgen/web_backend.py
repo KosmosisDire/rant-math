@@ -162,7 +162,8 @@ def structs_ts(m, lay):
                     reads.append(f"{f.name}: {read_value(m, lay, f.type, f.dims, f'p + {off}')}")
         else:
             reads = [f"{f.name}: {read_value(m, lay, f.type, f.dims, f'p + {off}')}" for f, off in fields]
-        out.append(f"function r_{t}(p: number): {short(t)} {{\n    return {{ {', '.join(reads)} }};\n}}\n")
+        ret = "CameraOut" if t == "RantCameraIntrinsics" else short(t)
+        out.append(f"function r_{t}(p: number): {ret} {{\n    return {{ {', '.join(reads)} }};\n}}\n")
     for t in RAW_STRUCTS:
         size, _, fields = lay.of(t)
         body = []
@@ -649,14 +650,16 @@ def output_type(m, w, o):
             return "number"
         if o.type in ALIASES:
             return ALIASES[o.type] + "[]"
+        if o.type == "RantCameraIntrinsics":
+            return "CameraOut"
         return short(o.type)
     if k in ("fixed", "query", "sized", "same", "expr", "room"):
         if o.type in TYPED:
             return TYPED[o.type]
         t = short(o.type) + "[]"
         return f"{t} | Float64Array" if (w.flat_of(o.type) and w.typed) else t
-    return {"matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "PointCloud", "cloud_select": "PointCloud",
-            "field": "PointField | null", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type)}[k]
+    return {"matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "ReturnType<typeof cloudLike>", "cloud_select": "ReturnType<typeof cloudLike>",
+            "field": "PointField | null", "prism": "PrismOut", "handle": "KdTree", "shape_new": short(o.type)}[k]
 
 
 def result_type(m, w, f):
@@ -693,9 +696,13 @@ def api_ts(m, lay):
 HAND_TYPES = """
 export interface Polygon2D { points: readonly Double2[] | Float64Array; }
 export interface Prism { pose: Pose; base: Polygon2D; height: number; }
+/** A camera a call hands back, its coefficients always a Float64Array. */
+export type CameraOut = CameraIntrinsics & { coeffs: Float64Array };
+/** A prism a call hands back, its base always a list. */
+export interface PrismOut { pose: Pose; base: { points: Double2[] }; height: number; }
 export interface Image { width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
 export interface PointField { name: string; offset: number; kind: ScalarKind; count: number; }
-export interface PointCloud { fields: readonly PointField[]; point_step: number; data: Uint8Array; }
+export interface PointCloud { origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
 export interface GridField { name: string; kind: ScalarKind; data: Uint8Array; }
 export interface Grid { origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
 export interface LaserScan { angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
@@ -756,7 +763,7 @@ function prismIn(prism: Prism): number {
     return p;
 }
 
-function prismOf(p: number): Prism {
+function prismOf(p: number): PrismOut {
     const v = r_RantPrismView(p);
     return { pose: v.pose, base: { points: listOut(v.base.points, v.base.count, 16, r_RantDouble2, 2, false) as Double2[] }, height: v.height };
 }
@@ -831,11 +838,14 @@ function fieldOf(p: number): PointField {
     return { name: new TextDecoder().decode(U8.subarray(f.name, f.name + f.name_len)), offset: f.offset, kind: f.kind, count: f.count };
 }
 
-function cloudLike(p: number): PointCloud {
+function cloudLike(p: number): Required<PointCloud> & { fields: PointField[] } {
     const v = r_RantPointCloudView(p);
     return {
+        origin: { pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } }, parent: "" },
+        width: 0,
         fields: Array.from({ length: v.field_count }, (_, i) => fieldOf(v.fields + 20 * i)),
         point_step: v.point_step,
+        dense: false,
         data: new Uint8Array(0),
     };
 }

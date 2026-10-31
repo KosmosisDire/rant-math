@@ -287,9 +287,13 @@ export interface GeoPoint {
 
 export interface Polygon2D { points: readonly Double2[] | Float64Array; }
 export interface Prism { pose: Pose; base: Polygon2D; height: number; }
+/** A camera a call hands back, its coefficients always a Float64Array. */
+export type CameraOut = CameraIntrinsics & { coeffs: Float64Array };
+/** A prism a call hands back, its base always a list. */
+export interface PrismOut { pose: Pose; base: { points: Double2[] }; height: number; }
 export interface Image { width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
 export interface PointField { name: string; offset: number; kind: ScalarKind; count: number; }
-export interface PointCloud { fields: readonly PointField[]; point_step: number; data: Uint8Array; }
+export interface PointCloud { origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
 export interface GridField { name: string; kind: ScalarKind; data: Uint8Array; }
 export interface Grid { origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
 export interface LaserScan { angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
@@ -785,7 +789,7 @@ function w_RantCameraIntrinsics(p: number, v: CameraIntrinsics): void {
     U32[(p + 104) >> 2] = model;
 }
 
-function r_RantCameraIntrinsics(p: number): CameraIntrinsics {
+function r_RantCameraIntrinsics(p: number): CameraOut {
     return { width: U32[(p + 0) >> 2], height: U32[(p + 4) >> 2], fx: F64[(p + 8) >> 3], fy: F64[(p + 16) >> 3], cx: F64[(p + 24) >> 3], cy: F64[(p + 32) >> 3], coeffs: F64.slice((p + 40) >> 3, ((p + 40) >> 3) + 8), model: DistortionModelNames[U32[(p + 104) >> 2]] as DistortionModel };
 }
 
@@ -1027,7 +1031,7 @@ function prismIn(prism: Prism): number {
     return p;
 }
 
-function prismOf(p: number): Prism {
+function prismOf(p: number): PrismOut {
     const v = r_RantPrismView(p);
     return { pose: v.pose, base: { points: listOut(v.base.points, v.base.count, 16, r_RantDouble2, 2, false) as Double2[] }, height: v.height };
 }
@@ -1102,11 +1106,14 @@ function fieldOf(p: number): PointField {
     return { name: new TextDecoder().decode(U8.subarray(f.name, f.name + f.name_len)), offset: f.offset, kind: f.kind, count: f.count };
 }
 
-function cloudLike(p: number): PointCloud {
+function cloudLike(p: number): Required<PointCloud> & { fields: PointField[] } {
     const v = r_RantPointCloudView(p);
     return {
+        origin: { pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } }, parent: "" },
+        width: 0,
         fields: Array.from({ length: v.field_count }, (_, i) => fieldOf(v.fields + 20 * i)),
         point_step: v.point_step,
+        dense: false,
         data: new Uint8Array(0),
     };
 }
@@ -4365,7 +4372,7 @@ export function prismPlanes(prism: Prism): Plane[] {
 }
 
 /** The same base, its pose moved into pose's parent. */
-export function prismTransform(prism: Prism, pose: Pose): Prism {
+export function prismTransform(prism: Prism, pose: Pose): PrismOut {
     begin();
     const c_prism = prismIn(prism);
     const c_pose = alloc(56); w_RantPose(c_pose, pose);
@@ -5449,7 +5456,7 @@ export function cameraUnproject(camera: CameraIntrinsics, pixel: Double2, depth:
 }
 
 /** The intrinsics of the image resized to width by height, and of the part a crop keeps. */
-export function cameraScale(camera: CameraIntrinsics, width: number, height: number): CameraIntrinsics {
+export function cameraScale(camera: CameraIntrinsics, width: number, height: number): CameraOut {
     begin();
     const c_camera = alloc(112); w_RantCameraIntrinsics(c_camera, camera);
     const o0 = alloc(112);
@@ -5458,7 +5465,7 @@ export function cameraScale(camera: CameraIntrinsics, width: number, height: num
     return r_RantCameraIntrinsics(o0);
 }
 
-export function cameraCrop(camera: CameraIntrinsics, x: number, y: number, width: number, height: number): CameraIntrinsics {
+export function cameraCrop(camera: CameraIntrinsics, x: number, y: number, width: number, height: number): CameraOut {
     begin();
     const c_camera = alloc(112); w_RantCameraIntrinsics(c_camera, camera);
     const o0 = alloc(112);
@@ -5479,7 +5486,7 @@ export function cameraFov(camera: CameraIntrinsics): Double2 {
 
 /** A centered pinhole camera with no distortion spanning fov.x across and fov.y down, which 0 makes
  * square pixels. */
-export function cameraFromFov(width: number, height: number, fov: Double2): CameraIntrinsics {
+export function cameraFromFov(width: number, height: number, fov: Double2): CameraOut {
     begin();
     const c_fov = alloc(16); w_RantDouble2(c_fov, fov);
     const o0 = alloc(112);
@@ -5615,7 +5622,7 @@ export function imageDraw(image: Image, shape: Shape2D, color: Color, width: num
 }
 
 /** The fields and point_step of a common layout, with no data yet. */
-export function pointCloudLayout(layout: PointCloudLayout): PointCloud {
+export function pointCloudLayout(layout: PointCloudLayout): ReturnType<typeof cloudLike> {
     begin();
     const ret = alloc(20);
     wasm._rm_point_cloud_layout(ret, enumIn(PointCloudLayoutValues, layout));
@@ -5719,7 +5726,7 @@ export function pointCloudTransform(cloud: PointCloud, pose: Pose): void {
 }
 
 /** The points keep marks with 1, whole and in order, into data at point_step bytes each. */
-export function pointCloudSelect(cloud: PointCloud, keep: ArrayLike<number>): PointCloud {
+export function pointCloudSelect(cloud: PointCloud, keep: ArrayLike<number>): ReturnType<typeof cloudLike> {
     begin();
     const c_cloud = cloudIn(cloud);
     check(wasm._rm_point_cloud_check(c_cloud));

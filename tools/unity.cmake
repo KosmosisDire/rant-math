@@ -192,7 +192,7 @@ using Rant.Math;
 using Rant.Types;
 using UnityEngine;
 
-var pose = transform.position.ToRant();
+Double3 position = transform.position.ToRant();
 \`\`\`
 
 Add it beside \`com.rant.rant\`, or beside \`com.rant.types\` in a project with no Rant.
