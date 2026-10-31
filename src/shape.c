@@ -491,6 +491,23 @@ int rant_shape_overlaps(const RantShape *a, const RantShape *b){
     return rant_shape_gap(a, b, &g, NULL) == RANT_MATH_OK && g == 0.0;
 }
 
+/* Draws in order, one at a time. A call's arguments have no order of their own, so drawing inside
+ * them would give each compiler its own answer for one seed. */
+static RantDouble3 draw3(i_MathRng *r){
+    RantDouble3 v;
+    v.x = i_math_rng_unit(r);
+    v.y = i_math_rng_unit(r);
+    v.z = i_math_rng_unit(r);
+    return v;
+}
+
+static RantDouble2 draw2(i_MathRng *r){
+    RantDouble2 v;
+    v.x = i_math_rng_unit(r);
+    v.y = i_math_rng_unit(r);
+    return v;
+}
+
 static RantDouble3 on_ball(i_MathRng *r){
     double z = 2.0 * i_math_rng_unit(r) - 1.0, a = 2.0 * I_MATH_PI * i_math_rng_unit(r), s = sqrt(i_math_max(0.0, 1.0 - z * z));
     return rant_double3(s * cos(a), s * sin(a), z);
@@ -559,21 +576,24 @@ RantMathResult rant_shape_sample_inside(const RantShape *s, uint64_t seed, RantD
     switch (s->kind){
     case RANT_SHAPE_ALIGNED_BOX: {
         RantAlignedBox b = s->as.aligned_box;
-        for (k = 0; k < count; k++)
-            out[k] = rant_double3(b.min.x + (b.max.x - b.min.x) * i_math_rng_unit(&r), b.min.y + (b.max.y - b.min.y) * i_math_rng_unit(&r),
-                                  b.min.z + (b.max.z - b.min.z) * i_math_rng_unit(&r));
+        for (k = 0; k < count; k++){
+            RantDouble3 d = draw3(&r);
+            out[k] = rant_double3(b.min.x + (b.max.x - b.min.x) * d.x, b.min.y + (b.max.y - b.min.y) * d.y, b.min.z + (b.max.z - b.min.z) * d.z);
+        }
         return RANT_MATH_OK;
     }
     case RANT_SHAPE_ORIENTED_BOX: {
         RantOrientedBox b = s->as.oriented_box;
-        for (k = 0; k < count; k++)
-            out[k] = rant_pose_apply(b.pose, rant_double3(b.size.x * (i_math_rng_unit(&r) - 0.5), b.size.y * (i_math_rng_unit(&r) - 0.5), b.size.z * (i_math_rng_unit(&r) - 0.5)));
+        for (k = 0; k < count; k++){
+            RantDouble3 d = draw3(&r);
+            out[k] = rant_pose_apply(b.pose, rant_double3(b.size.x * (d.x - 0.5), b.size.y * (d.y - 0.5), b.size.z * (d.z - 0.5)));
+        }
         return RANT_MATH_OK;
     }
     case RANT_SHAPE_SPHERE:
         for (k = 0; k < count; k++){
             RantDouble3 v;
-            do v = rant_double3(2.0 * i_math_rng_unit(&r) - 1.0, 2.0 * i_math_rng_unit(&r) - 1.0, 2.0 * i_math_rng_unit(&r) - 1.0);
+            do v = rant_double3_subtract(rant_double3_scale(draw3(&r), 2.0), rant_double3(1.0, 1.0, 1.0));
             while (rant_double3_length_squared(v) > 1.0);
             out[k] = rant_double3_add(s->as.sphere.center, rant_double3_scale(v, fabs(s->as.sphere.radius)));
         }
@@ -587,9 +607,10 @@ RantMathResult rant_shape_sample_inside(const RantShape *s, uint64_t seed, RantD
         for (k = 0; k < count; k++){
             RantDouble3 q;
             do {
-                q = rant_double3_add(c.axis.a, rant_double3_scale(u, -rad + (len + 2.0 * rad) * i_math_rng_unit(&r)));
-                q = rant_double3_add(q, rant_double3_add(rant_double3_scale(s1, rad * (2.0 * i_math_rng_unit(&r) - 1.0)),
-                                                         rant_double3_scale(s2, rad * (2.0 * i_math_rng_unit(&r) - 1.0))));
+                RantDouble3 d = draw3(&r);
+                q = rant_double3_add(c.axis.a, rant_double3_scale(u, -rad + (len + 2.0 * rad) * d.x));
+                q = rant_double3_add(q, rant_double3_add(rant_double3_scale(s1, rad * (2.0 * d.y - 1.0)),
+                                                         rant_double3_scale(s2, rad * (2.0 * d.z - 1.0))));
             } while (rant_segment_distance(c.axis, q) > rad);
             out[k] = q;
         }
@@ -600,9 +621,11 @@ RantMathResult rant_shape_sample_inside(const RantShape *s, uint64_t seed, RantD
         RantDouble3 u = i_math_axis(c.axis.a, c.axis.b), s1, s2;
         double len = rant_segment_length(c.axis);
         axis_frame(u, &s1, &s2);
-        for (k = 0; k < count; k++)
-            out[k] = around(rant_double3_add(c.axis.a, rant_double3_scale(u, len * i_math_rng_unit(&r))), s1, s2,
-                            fabs(c.radius) * sqrt(i_math_rng_unit(&r)), 2.0 * I_MATH_PI * i_math_rng_unit(&r));
+        for (k = 0; k < count; k++){
+            RantDouble3 d = draw3(&r);
+            out[k] = around(rant_double3_add(c.axis.a, rant_double3_scale(u, len * d.x)), s1, s2,
+                            fabs(c.radius) * sqrt(d.y), 2.0 * I_MATH_PI * d.z);
+        }
         return RANT_MATH_OK;
     }
     case RANT_SHAPE_CONE: {
@@ -613,8 +636,9 @@ RantMathResult rant_shape_sample_inside(const RantShape *s, uint64_t seed, RantD
         axis_frame(u, &s1, &s2);
         for (k = 0; k < count; k++){
             double left = cbrt(i_math_rng_unit(&r));
+            RantDouble2 d = draw2(&r);
             out[k] = around(rant_double3_add(c.base, rant_double3_scale(u, h * (1.0 - left))), s1, s2,
-                            fabs(c.radius) * left * sqrt(i_math_rng_unit(&r)), 2.0 * I_MATH_PI * i_math_rng_unit(&r));
+                            fabs(c.radius) * left * sqrt(d.x), 2.0 * I_MATH_PI * d.y);
         }
         return RANT_MATH_OK;
     }
@@ -632,8 +656,8 @@ RantMathResult rant_shape_sample_inside(const RantShape *s, uint64_t seed, RantD
         uint32_t tries = 0;
         if (!(b.min.x <= b.max.x)) return RANT_MATH_ERR_DEGENERATE;
         for (k = 0; k < count; tries++){
-            RantDouble3 q = rant_double3(b.min.x + (b.max.x - b.min.x) * i_math_rng_unit(&r), b.min.y + (b.max.y - b.min.y) * i_math_rng_unit(&r),
-                                         b.min.z + (b.max.z - b.min.z) * i_math_rng_unit(&r));
+            RantDouble3 d = draw3(&r);
+            RantDouble3 q = rant_double3(b.min.x + (b.max.x - b.min.x) * d.x, b.min.y + (b.max.y - b.min.y) * d.y, b.min.z + (b.max.z - b.min.z) * d.z);
             if (tries > 1000u + 100u * count) return RANT_MATH_ERR_DEGENERATE;
             if (rant_mesh_contains(s->as.mesh, q)) out[k++] = q;
         }
@@ -707,7 +731,8 @@ RantMathResult rant_shape_sample_surface(const RantShape *s, uint64_t seed, Rant
         axis_frame(u, &s1, &s2);
         for (k = 0; k < count; k++){
             if (i_math_rng_unit(&r) * (side + ends) < side){
-                out[k] = around(rant_double3_add(c.axis.a, rant_double3_scale(u, len * i_math_rng_unit(&r))), s1, s2, rad, 2.0 * I_MATH_PI * i_math_rng_unit(&r));
+                RantDouble2 d = draw2(&r);
+                out[k] = around(rant_double3_add(c.axis.a, rant_double3_scale(u, len * d.x)), s1, s2, rad, 2.0 * I_MATH_PI * d.y);
             } else {
                 RantDouble3 v = on_ball(&r);
                 out[k] = rant_double3_add(rant_double3_dot(v, u) < 0.0 ? c.axis.a : c.axis.b, rant_double3_scale(v, rad));
@@ -1244,12 +1269,18 @@ RantMathResult rant_shape2d_sample_inside(const RantShape2D *s, uint64_t seed, R
     switch (s->kind){
     case RANT_SHAPE2D_ALIGNED_BOX: {
         RantAlignedBox2D b = s->as.aligned_box;
-        for (k = 0; k < count; k++) out[k] = rant_double2(b.min.x + (b.max.x - b.min.x) * i_math_rng_unit(&r), b.min.y + (b.max.y - b.min.y) * i_math_rng_unit(&r));
+        for (k = 0; k < count; k++){
+            RantDouble2 d = draw2(&r);
+            out[k] = rant_double2(b.min.x + (b.max.x - b.min.x) * d.x, b.min.y + (b.max.y - b.min.y) * d.y);
+        }
         return RANT_MATH_OK;
     }
     case RANT_SHAPE2D_ORIENTED_BOX: {
         RantOrientedBox2D b = s->as.oriented_box;
-        for (k = 0; k < count; k++) out[k] = rant_pose2d_apply(b.pose, rant_double2(b.size.x * (i_math_rng_unit(&r) - 0.5), b.size.y * (i_math_rng_unit(&r) - 0.5)));
+        for (k = 0; k < count; k++){
+            RantDouble2 d = draw2(&r);
+            out[k] = rant_pose2d_apply(b.pose, rant_double2(b.size.x * (d.x - 0.5), b.size.y * (d.y - 0.5)));
+        }
         return RANT_MATH_OK;
     }
     case RANT_SHAPE2D_CIRCLE:
@@ -1263,7 +1294,8 @@ RantMathResult rant_shape2d_sample_inside(const RantShape2D *s, uint64_t seed, R
         RantAlignedBox2D b = rant_capsule2d_bounds(c);
         if (!(fabs(c.radius) > 0.0)) return RANT_MATH_ERR_DEGENERATE;
         for (k = 0; k < count;){
-            RantDouble2 q = rant_double2(b.min.x + (b.max.x - b.min.x) * i_math_rng_unit(&r), b.min.y + (b.max.y - b.min.y) * i_math_rng_unit(&r));
+            RantDouble2 d = draw2(&r);
+            RantDouble2 q = rant_double2(b.min.x + (b.max.x - b.min.x) * d.x, b.min.y + (b.max.y - b.min.y) * d.y);
             if (rant_capsule2d_contains(c, q)) out[k++] = q;
         }
         return RANT_MATH_OK;
