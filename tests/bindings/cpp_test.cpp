@@ -1,6 +1,7 @@
 /* The C++ binding: every case of vectors.json through its call, then what vectors cannot show. */
 #include "rant_math.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <fstream>

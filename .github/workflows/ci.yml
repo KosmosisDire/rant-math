@@ -119,7 +119,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake --preset linux -B build-conversions "-DCMAKE_CXX_FLAGS=-I/usr/include/eigen3 -I/usr/include/opencv4 -I/usr/include/pcl-1.14"
+          cmake --preset linux -B build-conversions "-DCMAKE_CXX_FLAGS=-I/usr/include/eigen3 -I/usr/include/opencv4 -I/usr/include/pcl-1.14" "-DCMAKE_CXX_STANDARD_LIBRARIES=-lopencv_core -lpcl_common"
           cmake --build build-conversions --target rant_math_cpp_test
 
       - name: Test
