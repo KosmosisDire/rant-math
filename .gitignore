@@ -8,3 +8,6 @@ obj/
 bindings/rust/csrc/
 bindings/rust/target/
 bindings/rust/Cargo.lock
+bindings/web/rant_math_wasm.mjs
+bindings/web/dist/
+bindings/web/node_modules/
