@@ -779,12 +779,13 @@ RantMathResult rant_shape_sample_surface(const RantShape *s, uint64_t seed, Rant
         RantMathResult res = pieces_of(s, &caps);
         uint32_t n = p.base.count;
         if (res != RANT_MATH_OK) return res;
-        for (k = 0; k < count && res == RANT_MATH_OK; k++){
+        for (k = 0; k < count; k++){
             double u = i_math_rng_unit(&r) * (2.0 * area + ring);
             if (u < 2.0 * area){
                 RantDouble3 q;
                 RantDouble3 local;
                 res = sample_pieces(&caps, 0, &r, &q, 1);
+                if (res != RANT_MATH_OK) break;
                 local = rant_pose_apply_inverse(p.pose, q);
                 out[k] = rant_pose_apply(p.pose, rant_double3(local.x, local.y, u < area ? lo : hi));
             } else {
@@ -1305,8 +1306,9 @@ RantMathResult rant_shape2d_sample_inside(const RantShape2D *s, uint64_t seed, R
         RantDouble3 q;
         RantMathResult res = pieces2d_of(s, &p);
         if (res != RANT_MATH_OK) return res;
-        for (k = 0; k < count && res == RANT_MATH_OK; k++){
+        for (k = 0; k < count; k++){
             res = sample_pieces(&p, 0, &r, &q, 1);
+            if (res != RANT_MATH_OK) break;
             out[k] = i_math_flat(q);
         }
         pieces_free(&p);
