@@ -19,17 +19,20 @@ CPMAddPackage(NAME rant
   EXCLUDE_FROM_ALL YES
   SYSTEM YES)
 set(RANT_MATH_TYPES "${rant_SOURCE_DIR}/src/common/stdtypes.h")
-if(NOT EXISTS "${RANT_MATH_TYPES}")
+set(RANT_MATH_TYPES_HPP "${rant_SOURCE_DIR}/bindings/cpp/rant_types.hpp")
+if(NOT EXISTS "${RANT_MATH_TYPES}" OR NOT EXISTS "${RANT_MATH_TYPES_HPP}")
   message(FATAL_ERROR "Rant at ${rant_SOURCE_DIR} has no src/common/stdtypes.h, Rant Math needs Rant 0.0.41 or newer")
 endif()
 
 # 1. Pack src/ and the types into dist/rant_math.h in the build tree, which depends on the
 #    Rant it was packed with. Configure packs once, the build packs again when an input changes.
 set(RANT_MATH_DIST "${CMAKE_CURRENT_BINARY_DIR}/dist")
-set(RANT_MATH_OUTPUTS "${RANT_MATH_DIST}/rant_math.h" "${RANT_MATH_DIST}/rant_math.c")
-file(GLOB RANT_MATH_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
-set(RANT_MATH_PACK "${CMAKE_COMMAND}" -D "TYPES=${RANT_MATH_TYPES}" -D "OUT=${RANT_MATH_DIST}"
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/pack.cmake")
+set(RANT_MATH_OUTPUTS "${RANT_MATH_DIST}/rant_math.h" "${RANT_MATH_DIST}/rant_math.c"
+    "${RANT_MATH_DIST}/rant_math.hpp" "${RANT_MATH_DIST}/rant_math.cpp")
+file(GLOB RANT_MATH_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+     "${CMAKE_CURRENT_SOURCE_DIR}/bindings/cpp/*")
+set(RANT_MATH_PACK "${CMAKE_COMMAND}" -D "TYPES=${RANT_MATH_TYPES}" -D "TYPES_HPP=${RANT_MATH_TYPES_HPP}"
+    -D "OUT=${RANT_MATH_DIST}" -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/pack.cmake")
 foreach(out IN LISTS RANT_MATH_OUTPUTS)
   if(NOT EXISTS "${out}")
     execute_process(COMMAND ${RANT_MATH_PACK} RESULT_VARIABLE packed)
@@ -42,9 +45,9 @@ endforeach()
 add_custom_command(
   OUTPUT  ${RANT_MATH_OUTPUTS}
   COMMAND ${RANT_MATH_PACK}
-  DEPENDS ${RANT_MATH_SRC} "${RANT_MATH_TYPES}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/pack.cmake"
+  DEPENDS ${RANT_MATH_SRC} "${RANT_MATH_TYPES}" "${RANT_MATH_TYPES_HPP}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/pack.cmake"
           "${CMAKE_CURRENT_SOURCE_DIR}/VERSION"
-  COMMENT "Rant Math: packing src/ into dist/rant_math.h"
+  COMMENT "Rant Math: packing src/ into dist/rant_math.h and rant_math.hpp"
   VERBATIM)
 add_custom_target(rant_math_dist ALL DEPENDS ${RANT_MATH_OUTPUTS})
 
