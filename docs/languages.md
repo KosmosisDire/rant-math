@@ -21,7 +21,8 @@ this page says how a name reads in each.
 
 - Each brings the standard types with it and goes beside Rant in one program. In C++ include both headers in
   either order. In Python, C# and TypeScript nothing more is needed.
-- Unity allows one assembly of a name: add `com.rant.rant` too, or `com.rant.types` with no Rant.
+- Unity allows one assembly of a name, so add the standard types too: Rant itself from
+  `https://github.com/KosmosisDire/Rant.git#upm`, or with no Rant `https://github.com/KosmosisDire/Rant.git#upm-types`.
 - Rust takes `rant-types` from Rant at one tag. A program using both needs the Rant that tag names.
 
 ## Names
