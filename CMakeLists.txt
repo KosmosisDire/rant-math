@@ -52,9 +52,15 @@ add_custom_command(
 add_custom_target(rant_math_dist ALL DEPENDS ${RANT_MATH_OUTPUTS})
 
 if(MSVC)
-  set(RANT_MATH_WARNINGS /W4 /WX /wd4204)   # 4204: a struct initialized from locals is C99
+  set(RANT_MATH_WARNINGS /W4 /wd4204)   # 4204: a struct initialized from locals is C99
+  set(RANT_MATH_WARNING_IS_ERROR /WX)
 else()
-  set(RANT_MATH_WARNINGS -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wno-sign-conversion -Werror)
+  set(RANT_MATH_WARNINGS -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wno-sign-conversion)
+  set(RANT_MATH_WARNING_IS_ERROR -Werror)
+endif()
+# Only our own builds stop at a warning, since a project taking this one may have a newer compiler.
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+  list(APPEND RANT_MATH_WARNINGS ${RANT_MATH_WARNING_IS_ERROR})
 endif()
 
 # 2. The libraries, built from the single header so they hold exactly what it ships.
