@@ -1,0 +1,9 @@
+{
+  "name": "com.rant.math",
+  "version": "0.0.1",
+  "displayName": "Rant Math",
+  "description": "Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds, with conversions to Unity's axes. Needs com.rant.rant, or com.rant.types with no Rant.",
+  "unity": "2021.3",
+  "keywords": ["robotics", "geometry", "poses", "pointcloud", "rant"],
+  "author": { "name": "Nathan George" }
+}
