@@ -1,0 +1,61 @@
+# The bindings: the shared vectors, the check that every generated file is current, and C++.
+find_package(Python3 COMPONENTS Interpreter)
+if(NOT Python3_Interpreter_FOUND)
+  message(STATUS "Rant Math: no Python, so the binding checks are left out")
+  return()
+endif()
+
+set(GEN "${CMAKE_SOURCE_DIR}/tools/bindgen/gen.py")
+set(VECTORS "${CMAKE_CURRENT_SOURCE_DIR}/vectors.json")
+file(GLOB BINDGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tools/bindgen/*.py" "${CMAKE_SOURCE_DIR}/src/*.h")
+
+add_test(NAME bindings.current COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --check)
+
+# The C program that asks the library every case. Its answers must match the checked in vectors.
+set(RECORD_C "${CMAKE_CURRENT_BINARY_DIR}/record.c")
+add_custom_command(OUTPUT "${RECORD_C}"
+  COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --record-source "${RECORD_C}"
+  DEPENDS ${BINDGEN_SOURCES}
+  VERBATIM)
+add_executable(rant_math_record "${RECORD_C}")
+target_link_libraries(rant_math_record PRIVATE rant_math)
+if(MSVC)
+  target_compile_options(rant_math_record PRIVATE /W0 /bigobj)
+else()
+  target_compile_options(rant_math_record PRIVATE -w)
+endif()
+add_test(NAME bindings.vectors COMMAND "${CMAKE_COMMAND}"
+  "-DPYTHON=${Python3_EXECUTABLE}" "-DGEN=${GEN}" "-DTYPES=${RANT_MATH_TYPES}"
+  "-DRECORD=$<TARGET_FILE:rant_math_record>" "-DANSWERS=${CMAKE_CURRENT_BINARY_DIR}/answers.txt"
+  -P "${CMAKE_CURRENT_SOURCE_DIR}/check_vectors.cmake")
+
+include(CheckLanguage)
+check_language(CXX)
+if(NOT CMAKE_CXX_COMPILER)
+  return()
+endif()
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_executable(rant_math_cpp_test cpp_test.cpp "${RANT_MATH_DIST}/rant_math.cpp")
+add_dependencies(rant_math_cpp_test rant_math_dist)
+target_include_directories(rant_math_cpp_test PRIVATE "${RANT_MATH_DIST}" "${CMAKE_CURRENT_SOURCE_DIR}")
+if(MSVC)
+  target_compile_options(rant_math_cpp_test PRIVATE /W4 /WX /bigobj /wd4244 /wd4267)
+else()
+  target_compile_options(rant_math_cpp_test PRIVATE -Wall -Wextra -Wpedantic -Wshadow)
+  target_link_libraries(rant_math_cpp_test PRIVATE m)
+endif()
+add_test(NAME bindings.cpp COMMAND rant_math_cpp_test "${VECTORS}")
+
+# rant_math.hpp beside rant.hpp in each order, compiled only, and the implementation on its own.
+set(RANT_CPP_INCLUDE "${rant_SOURCE_DIR}/dist")
+foreach(order RANT_FIRST MATH_FIRST TYPES_FIRST ALONE)
+  string(TOLOWER "${order}" lower)
+  add_library(rant_math_cpp_${lower} OBJECT cpp_with_rant.cpp)
+  add_dependencies(rant_math_cpp_${lower} rant_math_dist rant_dist)
+  target_include_directories(rant_math_cpp_${lower} PRIVATE "${RANT_MATH_DIST}" "${RANT_CPP_INCLUDE}")
+  target_compile_definitions(rant_math_cpp_${lower} PRIVATE ${order})
+endforeach()

@@ -24,3 +24,5 @@ foreach(order first after)
   target_compile_options(rant_math_with_rant_${order} PRIVATE ${RANT_MATH_WARNINGS})
 endforeach()
 target_compile_definitions(rant_math_with_rant_first PRIVATE RANT_FIRST)
+
+add_subdirectory(bindings)

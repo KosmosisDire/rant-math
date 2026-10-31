@@ -1,3 +1,4 @@
 # CMake build trees, the single header among them
 /build/
 /build-*/
+__pycache__/
