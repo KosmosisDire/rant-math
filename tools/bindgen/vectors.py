@@ -752,7 +752,21 @@ static void px(const uint8_t *d, size_t n){
     for (i = 0; i < n; i++) fprintf(o, "%02x", d[i]);
     fputc('"', o);
 }
-static void *room(size_t n){ void *p = calloc(n ? n : 1, 1); if (!p) abort(); return p; }
+/* Every case's memory stays until the program ends, then goes, so a sanitizer finds no leak. */
+static void **rooms;
+static size_t room_count;
+static void *room(size_t n){
+    void *p = calloc(n ? n : 1, 1);
+    void **more = (void **)realloc(rooms, sizeof(void *) * (room_count + 1));
+    if (!p || !more) abort();
+    rooms = more;
+    rooms[room_count++] = p;
+    return p;
+}
+static void free_rooms(void){
+    while (room_count) free(rooms[--room_count]);
+    free(rooms);
+}
 static size_t out_bytes(RantImageFormat format, uint32_t w, uint32_t h){ return rant_image_bytes(format, w, h); }
 static void pimage(const RantImageView *v, size_t size){
     fprintf(o, "{\"width\":%u,\"height\":%u,\"stride\":%u,\"format\":%d,\"data\":", v->width, v->height, v->stride, (int)v->format);
@@ -1355,7 +1369,7 @@ def write_record_program(model, cases):
     tail = ["int main(int argc, char **argv){", "    (void)argc;", '    o = fopen(argv[1], "w");', "    if (!o) return 1;"]
     for i in range(len(cases)):
         tail.append(f"    case_{i}();")
-    tail += ["    fclose(o);", "    return 0;", "}", ""]
+    tail += ["    fclose(o);", "    free_rooms();", "    return 0;", "}", ""]
     return "".join(head) + "\n".join(w.head) + "\n" + "\n".join(bodies) + "\n" + "\n".join(tail)
 
 
