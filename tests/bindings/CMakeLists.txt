@@ -40,6 +40,14 @@ endif()
 set_tests_properties(bindings.python PROPERTIES ENVIRONMENT
   "PYTHONPATH=${PYTHON_PATHS};RANT_MATH_LIBRARY=$<TARGET_FILE:rant_math_shared>")
 
+# C# over the shared library.
+find_program(RANT_MATH_DOTNET dotnet)
+if(RANT_MATH_DOTNET)
+  add_test(NAME bindings.csharp COMMAND "${RANT_MATH_DOTNET}" run --project "${CMAKE_CURRENT_SOURCE_DIR}/csharp/Test.csproj" -c Release
+           "-p:NativeLibrary=$<TARGET_FILE:rant_math_shared>" "-p:RantDir=${rant_SOURCE_DIR}" -- "${VECTORS}")
+  set_tests_properties(bindings.csharp PROPERTIES TIMEOUT 600)
+endif()
+
 include(CheckLanguage)
 check_language(CXX)
 if(NOT CMAKE_CXX_COMPILER)
