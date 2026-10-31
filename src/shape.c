@@ -1181,7 +1181,7 @@ static RantMathResult pieces2d_of(const RantShape2D *s, i_Pieces *out){
     case RANT_SHAPE2D_ORIENTED_BOX:
         out->list = &out->one; out->count = 1;
         out->one = box_piece(rant_pose_from_pose2d(s->as.oriented_box.pose),
-                             rant_double3(0.5 * s->as.oriented_box.size.x, 0.5 * s->as.oriented_box.size.y, 0.0));
+                             rant_double3(0.5 * fabs(s->as.oriented_box.size.x), 0.5 * fabs(s->as.oriented_box.size.y), 0.0));
         return RANT_MATH_OK;
     case RANT_SHAPE2D_CIRCLE: {
         RantSphere b;

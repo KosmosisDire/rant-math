@@ -153,7 +153,7 @@ double rant_aligned_box2d_iou(RantAlignedBox2D a, RantAlignedBox2D b){
 
 /* An oriented box is an aligned box about the origin of its own frame. */
 static RantAlignedBox2D local_box2(RantOrientedBox2D b){
-    RantDouble2 h = rant_double2_scale(b.size, 0.5);
+    RantDouble2 h = rant_double2(0.5 * fabs(b.size.x), 0.5 * fabs(b.size.y));
     return box2(rant_double2_scale(h, -1.0), h);
 }
 

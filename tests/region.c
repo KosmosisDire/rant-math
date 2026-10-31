@@ -379,6 +379,29 @@ static void iou(void){
     CHECK(near(rant_oriented_box2d_iou(a, b), 1.0, 1e-12), "turned half round it is the same box");
     b = a; b.size = rant_double2(-2, -3);
     CHECK(near(rant_oriented_box2d_iou(a, b), 1.0, 1e-12), "negative sizes count by their length");
+    {   /* in every call, the same box as the positive one */
+        RantDouble2 point = rant_double2(1.5, 2.25);
+        RantDouble2 far_point = rant_double2(9, -7);
+        RantRay2D ray;
+        RantRayHit2D hp, hn;
+        CHECK(near(rant_oriented_box2d_distance(a, point), rant_oriented_box2d_distance(b, point), 1e-12), "distance inside");
+        CHECK(near(rant_oriented_box2d_distance(a, far_point), rant_oriented_box2d_distance(b, far_point), 1e-12), "distance outside");
+        CHECK(rant_oriented_box2d_contains(b, point) && !rant_oriented_box2d_contains(b, far_point), "contains");
+        CHECK(near(rant_oriented_box2d_closest(a, far_point).point.x, rant_oriented_box2d_closest(b, far_point).point.x, 1e-12), "closest");
+        ray.origin = far_point;
+        ray.direction = rant_double2_subtract(a.pose.position, far_point);
+        CHECK(rant_oriented_box2d_raycast(a, ray, &hp) && rant_oriented_box2d_raycast(b, ray, &hn)
+              && near(hp.distance, hn.distance, 1e-12), "raycast");
+        {
+            RantShape2D sa = rant_shape2d_from_oriented_box2d(a), sb = rant_shape2d_from_oriented_box2d(b), far_shape;
+            RantCircle c;
+            double ga, gb;
+            c.center = far_point; c.radius = 1;
+            far_shape = rant_shape2d_from_circle(c);
+            CHECK(rant_shape2d_gap(&sa, &far_shape, &ga, NULL) == RANT_MATH_OK && rant_shape2d_gap(&sb, &far_shape, &gb, NULL) == RANT_MATH_OK
+                  && near(ga, gb, 1e-9), "gap");
+        }
+    }
     b = obox2(1, 2, 0.7, 1, 1.5);
     CHECK(near(rant_oriented_box2d_iou(a, b), 0.25, 1e-12), "a quarter of it inside it");
     b = obox2(1 + 2 * cos(0.7), 2 + 2 * sin(0.7), 0.7, 2, 3);

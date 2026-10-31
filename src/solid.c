@@ -400,9 +400,10 @@ double rant_aligned_box_iou(RantAlignedBox a, RantAlignedBox b){
     return i_math_iou(both, sa, sb);
 }
 
-/* An oriented box is an aligned box about the origin of its own frame. */
+/* An oriented box is an aligned box about the origin of its own frame. A negative size counts
+ * by its length. */
 static RantAlignedBox local_box(RantOrientedBox b){
-    RantDouble3 h = rant_double3_scale(b.size, 0.5);
+    RantDouble3 h = rant_double3(0.5 * fabs(b.size.x), 0.5 * fabs(b.size.y), 0.5 * fabs(b.size.z));
     return box3(rant_double3_scale(h, -1.0), h);
 }
 

@@ -498,6 +498,25 @@ static void iou(void){
         if (!near(rant_oriented_box_iou(a, b), rant_oriented_box2d_iou(fa, fb), 1e-10)) flat++;
     }
     CHECK(flat == 0, "%d boxes on one floor differ from their top view", flat);
+    /* A negative size counts by its length in every call, the same box as the positive one. */
+    for (i = 0; i < 200; i++){
+        RantDouble3 point = random_double3(4.0);
+        RantRay ray;
+        RantRayHit hp, hn;
+        int cp, cn;
+        a = obox(random_double3(1.0), random_quaternion(), rant_double3(random_range(0.2, 3), random_range(0.2, 3), random_range(0.2, 3)));
+        b = a;
+        b.size = rant_double3(-a.size.x, -a.size.y, -a.size.z);
+        CHECK(near(rant_oriented_box_distance(a, point), rant_oriented_box_distance(b, point), 1e-12), "distance %d", i);
+        CHECK(rant_oriented_box_contains(a, point) == rant_oriented_box_contains(b, point), "contains %d", i);
+        CHECK(near3(rant_oriented_box_closest(a, point).point, rant_oriented_box_closest(b, point).point, 1e-12), "closest %d", i);
+        ray.origin = rant_double3_scale(point, 2.0);
+        ray.direction = rant_double3_subtract(a.pose.position, ray.origin);
+        cp = rant_oriented_box_raycast(a, ray, &hp);
+        cn = rant_oriented_box_raycast(b, ray, &hn);
+        CHECK(cp == cn && (!cp || near(hp.distance, hn.distance, 1e-12)), "raycast %d", i);
+    }
+
     a = obox(rant_double3(1, 2, 3), random_quaternion(), rant_double3(1, 2, 3));
     CHECK(near(rant_oriented_box_iou(a, a), 1.0, 1e-12), "a box with itself: %.17g", rant_oriented_box_iou(a, a));
     b = a;
