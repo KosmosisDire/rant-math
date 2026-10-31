@@ -83,6 +83,20 @@ else()
 endif()
 add_test(NAME bindings.cpp COMMAND rant_math_cpp_test "${VECTORS}")
 
+# rant_math.hpp over the library built as C.
+add_executable(rant_math_cpp_linked cpp_linked.cpp)
+target_link_libraries(rant_math_cpp_linked PRIVATE rant_math)
+add_test(NAME bindings.cpp.linked COMMAND rant_math_cpp_linked)
+
+# Both implementations in one file, compiled only.
+foreach(order RANT_FIRST MATH_FIRST)
+  string(TOLOWER "${order}" lower)
+  add_library(rant_math_cpp_both_${lower} OBJECT cpp_both_built.cpp)
+  add_dependencies(rant_math_cpp_both_${lower} rant_math_dist rant_dist)
+  target_include_directories(rant_math_cpp_both_${lower} PRIVATE "${RANT_MATH_DIST}" "${rant_SOURCE_DIR}/dist")
+  target_compile_definitions(rant_math_cpp_both_${lower} PRIVATE ${order})
+endforeach()
+
 # rant_math.hpp beside rant.hpp in each order, compiled only, and the implementation on its own.
 set(RANT_CPP_INCLUDE "${rant_SOURCE_DIR}/dist")
 foreach(order RANT_FIRST MATH_FIRST TYPES_FIRST ALONE)
