@@ -1384,14 +1384,18 @@ def vectors_file(model, cases, answers):
     last = None
     for (f, row), answer in zip(cases, answers):
         if f is not last:
-            lines.append({"f": f.name, "in": [input_words(i) for i in f.inputs], "tol": tolerance_of(model, f),
-                          "many": len(f.outputs) > 1, "cases": []})
+            lines.append({"f": f.name, "in": [input_words(i) for i in f.inputs], "out": [o.type for o in f.outputs],
+                          "tol": tolerance_of(model, f), "cases": []})
             last = f
         lines[-1]["cases"].append({"a": clean(row), **answer})
-    out = ['{"functions":[']
+    types = {s.name: [{"name": x.name, "type": x.type, **({"dims": list(x.dims)} if x.dims else {})} for x in s.fields]
+             for s in model.used_structs()}
+    out = ['{"types":' + json.dumps(types, separators=(",", ":")) + ",",
+           '"enums":' + json.dumps([e.name for e in model.used_enums()], separators=(",", ":")) + ",",
+           '"functions":[']
     for k, entry in enumerate(lines):
         cases_text = ",\n".join(json.dumps(c, separators=(",", ":")) for c in entry["cases"])
-        head = {x: entry[x] for x in ("f", "in", "tol", "many")}
+        head = {x: entry[x] for x in ("f", "in", "out", "tol")}
         text = json.dumps(head, separators=(",", ":"))[:-1] + ',"cases":[\n' + cases_text + "\n]}"
         out.append(text + ("," if k + 1 < len(lines) else ""))
     out.append("]}")

@@ -75,7 +75,13 @@ target_compile_definitions(rant_math_shared PRIVATE RANT_MATH_BUILD_SHARED INTER
 set_target_properties(rant_math_shared PROPERTIES OUTPUT_NAME rant_math C_VISIBILITY_PRESET hidden
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/shared")
 
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+# A wheel build (scikit-build-core) wants the library next to the package, with a private copy of
+# Rant's Python types for a process with no Rant installed.
+if(SKBUILD)
+  install(TARGETS rant_math_shared RUNTIME DESTINATION rant_math LIBRARY DESTINATION rant_math)
+  install(DIRECTORY "${rant_SOURCE_DIR}/bindings/python/rant_types/" DESTINATION rant_math/_rant_types
+          FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
+elseif(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   enable_testing()
   add_subdirectory(tests)
 endif()

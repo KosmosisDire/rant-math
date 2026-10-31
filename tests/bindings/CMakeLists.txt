@@ -29,6 +29,17 @@ add_test(NAME bindings.vectors COMMAND "${CMAKE_COMMAND}"
   "-DRECORD=$<TARGET_FILE:rant_math_record>" "-DANSWERS=${CMAKE_CURRENT_BINARY_DIR}/answers.txt"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/check_vectors.cmake")
 
+# Python over the shared library, with Rant's checkout for the standard types.
+add_test(NAME bindings.python COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/python_test.py" "${VECTORS}")
+set(PYTHON_PATHS "${CMAKE_SOURCE_DIR}/bindings/python" "${rant_SOURCE_DIR}/bindings/python")
+if(WIN32)
+  string(REPLACE ";" "\\;" PYTHON_PATHS "${PYTHON_PATHS}")
+else()
+  string(REPLACE ";" ":" PYTHON_PATHS "${PYTHON_PATHS}")
+endif()
+set_tests_properties(bindings.python PROPERTIES ENVIRONMENT
+  "PYTHONPATH=${PYTHON_PATHS};RANT_MATH_LIBRARY=$<TARGET_FILE:rant_math_shared>")
+
 include(CheckLanguage)
 check_language(CXX)
 if(NOT CMAKE_CXX_COMPILER)
