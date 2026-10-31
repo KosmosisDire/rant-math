@@ -1,0 +1,27 @@
+[package]
+name = "rant-math"
+description = "Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds"
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.85"
+repository = "https://github.com/KosmosisDire/rant-math"
+links = "rant_math"
+build = "build.rs"
+include = ["src/**", "csrc/rant_math.h", "csrc/rant_math.c", "build.rs", "Cargo.toml"]
+
+[lib]
+name = "rant_math"
+
+[features]
+# Conversions to nalgebra's types.
+nalgebra = ["dep:nalgebra"]
+
+[dependencies]
+rant-types = { git = "https://github.com/KosmosisDire/Rant", tag = "crate-v0.0.41" }
+nalgebra = { version = "0.34", optional = true, default-features = false, features = ["std"] }
+
+[build-dependencies]
+cc = "1.2"
+
+[dev-dependencies]
+serde_json = "1"
