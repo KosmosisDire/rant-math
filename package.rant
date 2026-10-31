@@ -2,5 +2,8 @@ name        = "math"
 description = "Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds"
 
 library {
-  cmake = "rant_math"
+  cmake  = "rant_math"
+  python = "rant-math"
+  csharp = "Rant.Math"
+  rust   = "rant-math"
 }

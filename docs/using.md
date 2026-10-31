@@ -1,7 +1,7 @@
 # Using Rant Math
 
-Math on Rant's standard types, in C99. It needs nothing but the types, so it works with Rant or
-without it.
+Math on Rant's standard types, in C99, with a binding for every language Rant has: see
+[languages.md](languages.md). It needs nothing but the types, so it works with Rant or without it.
 
 ## Add it
 

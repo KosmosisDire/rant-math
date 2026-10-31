@@ -34,6 +34,8 @@ RANT_INSTALL = "OFF"
 [tool.cibuildwheel]
 build = "cp312-*"
 skip = "*-musllinux_*"
+test-requires = ["numpy"]
+test-command = "python {project}/tests/bindings/python_test.py {project}/tests/bindings/vectors.json"
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]

@@ -1,5 +1,6 @@
-# Builds and tests Rant Math on every platform. Run by hand on main, when VERSION has no tag yet, it
-# also releases that version, with the single header and turbo's licence attached.
+# Builds and tests Rant Math and every binding on every platform. Run by hand on main, when VERSION has
+# no tag yet, it also releases that version: the single headers, a wheel per platform, the NuGet and npm
+# packages, the skill, the Unity package on the upm branch and the Rust crate at tag crate-v<VERSION>.
 name: ci
 
 on:
@@ -37,7 +38,7 @@ jobs:
   test:
     name: test ${{ matrix.preset }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +48,15 @@ jobs:
           - { os: macos-15,       preset: macos }
     steps:
       - uses: actions/checkout@v7
+
+      # Before the configure, which registers each binding's test only when it finds the tool
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: pip install numpy
 
       - name: Ninja
         if: runner.os == 'Linux'
@@ -62,7 +72,7 @@ jobs:
           cmake --build --preset ${{ matrix.preset }}
 
       - name: Test
-        timeout-minutes: 10
+        timeout-minutes: 25
         run: ctest --preset ${{ matrix.preset }}
 
       # The release takes the header from one platform, since it packs the same on all.
@@ -73,8 +83,11 @@ jobs:
           path: |
             build/dist/rant_math.h
             build/dist/rant_math.c
+            build/dist/rant_math.hpp
+            build/dist/rant_math.cpp
 
-  # Clang with the address and undefined behaviour sanitizers, which fail on the first report.
+  # Clang with the address and undefined behaviour sanitizers, which fail on the first report. A binding
+  # that loads the library into its own runtime cannot run under them.
   sanitizers:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -86,19 +99,139 @@ jobs:
 
       - name: Build
         run: |
-          cmake --preset linux -B build-sanitizers -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-sanitize-recover=undefined"
+          flags="-fsanitize=address,undefined -fno-sanitize-recover=undefined"
+          cmake --preset linux -B build-sanitizers -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_C_FLAGS=$flags" "-DCMAKE_CXX_FLAGS=$flags"
           cmake --build build-sanitizers
 
       - name: Test
         timeout-minutes: 20
-        run: ctest --test-dir build-sanitizers --output-on-failure
+        run: ctest --test-dir build-sanitizers --output-on-failure -E "bindings[.](python|csharp|rust|web)"
 
-  # The release makes the tag v<VERSION> on this commit, once every check above passed
+  # The C++ conversions against the real libraries, which the test uses when it finds them.
+  conversions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: The libraries
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libeigen3-dev libopencv-dev libpcl-dev
+
+      - name: Build
+        run: |
+          cmake --preset linux -B build-conversions "-DCMAKE_CXX_FLAGS=-I/usr/include/eigen3 -I/usr/include/opencv4 -I/usr/include/pcl-1.14"
+          cmake --build build-conversions --target rant_math_cpp_test
+
+      - name: Test
+        run: |
+          out="$(./build-conversions/tests/bindings/rant_math_cpp_test tests/bindings/vectors.json)"
+          echo "$out"
+          for name in Eigen OpenCV PCL; do echo "$out" | grep -q "$name conversions checked"; done
+
+  # The TypeScript package over wasm, under Node.
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Single header
+        run: |
+          cmake --preset linux
+          cmake --build --preset linux --target rant_math_dist
+
+      - name: Emscripten
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$HOME/emsdk"
+          "$HOME/emsdk/emsdk" install 3.1.56
+          "$HOME/emsdk/emsdk" activate 3.1.56
+
+      - name: Build
+        run: EMSDK="$HOME/emsdk" sh bindings/web/build.sh build/dist
+
+      - name: Test
+        run: node tests/bindings/web_test.mjs tests/bindings/vectors.json
+
+  # The shared library and the Python wheel per platform, both from cibuildwheel: the library inside
+  # each wheel is the one the NuGet and Unity packages bundle too, so on Linux it comes out of the
+  # manylinux container and runs on any glibc since 2.28. cibuildwheel tests each wheel it builds.
+  native:
+    name: native ${{ matrix.name }}
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  name: linux }
+          - { os: windows-latest, name: windows }
+          - { os: macos-latest,   name: macos }
+    steps:
+      - uses: actions/checkout@v7
+
+      # Cargo and npm cannot read VERSION, so the Rust crate and the web package repeat it
+      - name: Cargo and npm say VERSION
+        shell: bash
+        run: |
+          grep -q "^version = \"$(tr -d '\r' < VERSION)\"" bindings/rust/Cargo.toml
+          grep -q "\"version\": \"$(tr -d '\r' < VERSION)\"" bindings/web/package.json
+
+      # aarch64 wheels build under emulation.
+      - uses: docker/setup-qemu-action@v4
+        if: runner.os == 'Linux'
+        with:
+          platforms: arm64
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - uses: pypa/cibuildwheel@v4.2.1
+
+      - name: The libraries out of the wheels
+        shell: bash
+        run: |
+          python - <<'EOF'
+          import glob, os, zipfile
+          for w in glob.glob("wheelhouse/*.whl"):
+              tag = os.path.basename(w).rsplit("-", 1)[1]
+              rid = ("win-x64" if "win_amd64" in tag else "linux-arm64" if "aarch64" in tag
+                     else "linux-x64" if "x86_64" in tag else "osx")
+              with zipfile.ZipFile(w) as z:
+                  for n in z.namelist():
+                      if n in ("rant_math/rant_math.dll", "rant_math/librant_math.so", "rant_math/librant_math.dylib"):
+                          os.makedirs("dist/native/" + rid, exist_ok=True)
+                          with open("dist/native/" + rid + "/" + n[len("rant_math/"):], "wb") as f:
+                              f.write(z.read(n))
+                          print(w, "->", rid)
+          EOF
+          ls -lR dist/native
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.name }}
+          path: wheelhouse/*.whl
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-${{ matrix.name }}
+          path: dist/native/
+
+  # Everything into one GitHub Release, the upm branch and the crate tag, once every check above passed.
+  # The release makes the tag v<VERSION> on this commit.
   release:
-    needs: [plan, test, sanitizers]
+    needs: [plan, test, sanitizers, conversions, web, native]
     if: needs.plan.outputs.release == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       # a later commit's run that passed too finds the version taken and stops
       - name: The version is not released from another commit
@@ -111,14 +244,52 @@ jobs:
           fi
 
       - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
 
       - uses: actions/download-artifact@v8
         with:
-          name: single-header
-          path: release
+          path: artifacts
 
-      - name: Turbo's licence travels with the header
-        run: cp licenses/turbo-apache-2.0.txt release/
+      - name: Merge the platforms
+        run: |
+          mkdir -p dist/native build/dist
+          cp -r artifacts/native-*/. dist/native/
+          cp artifacts/single-header/* build/dist/
+          ls -R dist/native build/dist
+
+      # The C# package carries Rant's types, built from the Rant this version pins.
+      - name: NuGet package
+        run: |
+          rant="$(sed -n '/CPMAddPackage(NAME rant/,/VERSION/s/^ *VERSION //p' CMakeLists.txt | tr -d '\r')"
+          git clone --depth 1 --branch "v$rant" https://github.com/KosmosisDire/Rant.git ../rant
+          dotnet pack bindings/csharp/Rant.Math.csproj -c Release -o dist
+
+      - name: Web package
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$HOME/emsdk"
+          "$HOME/emsdk/emsdk" install 3.1.56
+          "$HOME/emsdk/emsdk" activate 3.1.56
+          EMSDK="$HOME/emsdk" sh bindings/web/build.sh build/dist
+          (cd bindings/web && npm pack --pack-destination ../../dist)
+
+      - name: Unity package
+        run: cmake -D DIST=build/dist -P tools/unity.cmake
+
+      - name: Stage the assets
+        run: |
+          VERSION="$(tr -d '\r\n' < VERSION)"
+          mkdir -p release
+          cp build/dist/rant_math.h build/dist/rant_math.c build/dist/rant_math.hpp build/dist/rant_math.cpp release/
+          cp licenses/turbo-apache-2.0.txt release/
+          cp dist/Rant.Math.*.nupkg dist/rant-math-*.tgz artifacts/wheels-*/*.whl release/
+          # the skill rant add offers, its files at the zip's top
+          (cd skill && zip -r "../release/math-$VERSION-skill.zip" .)
+          ls -la release
 
       - uses: softprops/action-gh-release@v3
         with:
@@ -127,3 +298,32 @@ jobs:
           files: release/*
           generate_release_notes: true
           prerelease: ${{ contains(needs.plan.outputs.version, '-') }}
+
+      # The Unity package as a git URL: https://github.com/OWNER/REPO.git#upm
+      - name: Publish the upm branch
+        run: |
+          pkg="$RUNNER_TEMP/upm"
+          rm -rf "$pkg"
+          cp -r dist/com.rant.math "$pkg"
+          cd "$pkg"
+          git init -q -b upm
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "upm $(cat "$GITHUB_WORKSPACE/VERSION")"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" upm
+
+      # The Rust crate as a git dependency, tag = "crate-vVERSION": the release tree plus the packed C in
+      # csrc/, as a commit with no parents so cargo fetches one snapshot. Never moved.
+      - name: Publish the crate tag
+        run: |
+          tag="crate-v$(tr -d '\r\n' < VERSION)"
+          mkdir -p bindings/rust/csrc
+          cp build/dist/rant_math.h build/dist/rant_math.c bindings/rust/csrc/
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan crate
+          git add -f bindings/rust/csrc
+          git commit -q -m "$tag"
+          git tag "$tag"
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" "refs/tags/$tag"
