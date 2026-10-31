@@ -258,6 +258,8 @@ static void align(void){
     for (i = 0, paired = 0; i < n; i += 9) paired += in[i];
     CHECK(paired == 0, "none of the lifted points paired");
     CHECK(rant_points_align(src, 2, dst, n, start, NULL, &got) == RANT_MATH_ERR_DEGENERATE, "two points fix no pose");
+    CHECK(rant_points_align(src, 0, dst, n, start, NULL, &got) == RANT_MATH_ERR_ARGUMENT, "no source points with a pointer");
+    CHECK(rant_points_align(NULL, 0, dst, n, start, NULL, &got) == RANT_MATH_ERR_ARGUMENT, "no source points");
     o.max_distance = -1.0;
     CHECK(rant_points_align(src, n, dst, n, start, &o, &got) == RANT_MATH_ERR_ARGUMENT, "a negative max distance");
 }

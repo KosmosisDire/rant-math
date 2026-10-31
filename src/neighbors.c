@@ -548,7 +548,7 @@ RantMathResult rant_points_align(const RantDouble3 *source, uint32_t source_coun
     double reach = 0.0, sum2;
     uint32_t i, k, round, valid = 0;
     RantMathResult r = RANT_MATH_OK;
-    if (!source || !target || !out) return RANT_MATH_ERR_ARGUMENT;
+    if (!source || !target || !source_count || !target_count || !out) return RANT_MATH_ERR_ARGUMENT;
     if (options) o = *options;
     else memset(&o, 0, sizeof o);
     if (!(o.max_distance >= 0.0)) return RANT_MATH_ERR_ARGUMENT;
