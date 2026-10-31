@@ -1069,8 +1069,8 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, RantDouble
     case RANT_SHAPE_PRISM: r = prism_mesh(&b, s->as.prism, e); break;
     case RANT_SHAPE_POLYGON: r = polygon_mesh(&b, s->as.polygon, fv, e); break;
     case RANT_SHAPE_MESH:
-        memcpy(vertices, s->as.mesh.vertices, sizeof(RantDouble3) * nv);
-        memcpy(triangles, s->as.mesh.triangles, sizeof(uint32_t) * 3 * nt);
+        memcpy(vertices, s->as.mesh.vertices, sizeof(RantDouble3) * s->as.mesh.vertex_count);
+        memcpy(triangles, s->as.mesh.triangles, sizeof(uint32_t) * 3 * s->as.mesh.triangle_count);
         break;
     default: break;
     }
