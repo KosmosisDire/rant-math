@@ -48,6 +48,20 @@ if(RANT_MATH_DOTNET)
   set_tests_properties(bindings.csharp PROPERTIES TIMEOUT 600)
 endif()
 
+# Rust and its QuickJS glue through cargo.
+find_program(RANT_MATH_CARGO cargo)
+if(RANT_MATH_CARGO)
+  add_test(NAME bindings.rust COMMAND "${CMAKE_COMMAND}" "-DCARGO=${RANT_MATH_CARGO}"
+           "-DCRATE=${CMAKE_SOURCE_DIR}/bindings/rust" "-DDIST=${RANT_MATH_DIST}" -P "${CMAKE_CURRENT_SOURCE_DIR}/check_rust.cmake")
+  set_tests_properties(bindings.rust PROPERTIES TIMEOUT 900)
+endif()
+
+# TypeScript over wasm, once bindings/web/build.sh has built it, which takes the emsdk.
+find_program(RANT_MATH_NODE node)
+if(RANT_MATH_NODE AND EXISTS "${CMAKE_SOURCE_DIR}/bindings/web/dist/index.js")
+  add_test(NAME bindings.web COMMAND "${RANT_MATH_NODE}" "${CMAKE_CURRENT_SOURCE_DIR}/web_test.mjs" "${VECTORS}")
+endif()
+
 include(CheckLanguage)
 check_language(CXX)
 if(NOT CMAKE_CXX_COMPILER)

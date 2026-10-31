@@ -7,9 +7,10 @@
         ".": {
             "types": "./dist/index.d.ts",
             "default": "./dist/index.js"
-        }
+        },
+        "./names": "./names.js"
     },
-    "files": ["dist", "rant_math_wasm.mjs", "rant_math_wasm.d.mts", "README.md"],
+    "files": ["dist", "rant_math_wasm.mjs", "names.js", "README.md"],
     "scripts": {
         "build": "tsc -p .",
         "check": "tsc -p . --noEmit"

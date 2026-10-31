@@ -419,6 +419,9 @@ pub struct Shape2D<'a> {
     pub(crate) data: PhantomData<&'a ()>,
 }
 
+#[cfg(feature = "quickjs")]
+pub mod quickjs;
+
 #[cfg(feature = "nalgebra")]
 mod nalgebra_conversions;
 #[cfg(feature = "nalgebra")]
