@@ -1,0 +1,22 @@
+{
+    "name": "rant-math",
+    "version": "0.0.1",
+    "description": "Math on Rant's standard types over wasm, in a page or in Node.js: poses, shapes, fits, cameras, images and point clouds",
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./names": "./names.js"
+    },
+    "files": ["dist", "rant_math_wasm.mjs", "names.js", "README.md"],
+    "scripts": {
+        "build": "tsc -p .",
+        "check": "tsc -p . --noEmit"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.0",
+        "typescript": "^5.9.0"
+    }
+}
