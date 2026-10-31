@@ -103,8 +103,9 @@ RantMathResult rant_polygon_flatten(RantPolygonView p, RantPose *frame, RantDoub
     RantPose f;
     RantMathResult r;
     uint32_t i;
-    if (!frame || !out) return RANT_MATH_ERR_ARGUMENT;
+    if (!frame) return RANT_MATH_ERR_ARGUMENT;
     if ((r = polygon_frame(p, &f)) != RANT_MATH_OK) return r;
+    if (!out) return RANT_MATH_ERR_ARGUMENT;
     for (i = 0; i < p.count; i++) out[i] = i_math_flat(rant_pose_apply_inverse(f, p.points[i]));
     *frame = f;
     return RANT_MATH_OK;
