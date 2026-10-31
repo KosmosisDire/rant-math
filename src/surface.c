@@ -113,10 +113,10 @@ RantMathResult rant_polygon_flatten(RantPolygonView p, RantPose *frame, RantDoub
 
 /* A polygon flattened for the 2D calls, on the stack when it is small. ok is 0 when it has no
  * plane, or no memory. */
-typedef struct { RantPose frame; RantPolygon2DView view; RantDouble2 *heap; RantDouble2 small[64]; int ok; } i_Flat;
+typedef struct { RantPose frame; RantPolygon2DView view; RantDouble2 *heap; RantDouble2 on_stack[64]; int ok; } i_Flat;
 
 static void flat_open(RantPolygonView p, i_Flat *f){
-    RantDouble2 *pts = f->small;
+    RantDouble2 *pts = f->on_stack;
     f->heap = NULL;
     f->ok = 0;
     if (corners_of(p) > 64){

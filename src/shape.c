@@ -156,11 +156,11 @@ static RantDouble3 support(const i_Piece *s, RantDouble3 d){
     }
     case I_POINTS: default: {
         RantDouble3 best = s->p[0];
-        double far = rant_double3_dot(best, d);
+        double farther = rant_double3_dot(best, d);
         int i;
         for (i = 1; i < s->n; i++){
             double k = rant_double3_dot(s->p[i], d);
-            if (k > far){ far = k; best = s->p[i]; }
+            if (k > farther){ farther = k; best = s->p[i]; }
         }
         return best;
     }

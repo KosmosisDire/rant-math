@@ -159,19 +159,19 @@ static RantMathResult simplify_of(i_Line l, double tolerance, unsigned char **ke
     keep[0] = keep[n - 1] = 1;
     if (n > 2){ stack[top++] = 0; stack[top++] = n - 1; }
     while (top){
-        uint32_t hi = stack[--top], lo = stack[--top], far = lo;
+        uint32_t hi = stack[--top], lo = stack[--top], farther = lo;
         RantSegment chord;
         double worst = -1.0;
         chord.a = point_of(l, lo);
         chord.b = point_of(l, hi);
         for (i = lo + 1; i < hi; i++){
             double d = rant_segment_distance(chord, point_of(l, i));
-            if (d > worst){ worst = d; far = i; }
+            if (d > worst){ worst = d; farther = i; }
         }
         if (worst > tolerance){
-            keep[far] = 1;
-            if (far - lo > 1){ stack[top++] = lo; stack[top++] = far; }
-            if (hi - far > 1){ stack[top++] = far; stack[top++] = hi; }
+            keep[farther] = 1;
+            if (farther - lo > 1){ stack[top++] = lo; stack[top++] = farther; }
+            if (hi - farther > 1){ stack[top++] = farther; stack[top++] = hi; }
         }
     }
     free(stack);

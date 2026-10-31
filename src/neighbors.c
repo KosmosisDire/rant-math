@@ -140,7 +140,7 @@ static void i_offer(i_Best *b, i_Hit x){
  * squares, nearer than which no point of the cell can be. */
 static void i_nearest(const RantKdTree *t, uint32_t node, RantDouble3 q, double reach, double *gap, i_Best *b){
     const i_Node *nd = &t->nodes[node];
-    double diff, old, far;
+    double diff, old, farther;
     uint32_t i;
     if (!nd->left){
         for (i = nd->lo; i < nd->hi; i++){
@@ -154,11 +154,11 @@ static void i_nearest(const RantKdTree *t, uint32_t node, RantDouble3 q, double 
     diff = i_on(q, nd->axis) - nd->split;
     i_nearest(t, diff < 0.0 ? nd->left : nd->right, q, reach, gap, b);
     old = gap[nd->axis];
-    far = reach - old * old + diff * diff;
+    farther = reach - old * old + diff * diff;
     /* the slack covers rounding in reach, and a far point at exactly the worst distance may still win on its index */
-    if (b->n < b->k || far <= b->h[0].d2 * (1.0 + 1e-12)){
+    if (b->n < b->k || farther <= b->h[0].d2 * (1.0 + 1e-12)){
         gap[nd->axis] = diff;
-        i_nearest(t, diff < 0.0 ? nd->right : nd->left, q, far, gap, b);
+        i_nearest(t, diff < 0.0 ? nd->right : nd->left, q, farther, gap, b);
         gap[nd->axis] = old;
     }
 }

@@ -71,8 +71,8 @@ typedef struct {
 /* RANSAC stops once it is this sure some draw held only inliers. */
 #define I_FIT_SURE 0.999
 
-static uint32_t i_tries_needed(uint32_t near, uint32_t n, uint32_t sample, uint32_t cap){
-    double all = pow((double)near / n, (double)sample), t;
+static uint32_t i_tries_needed(uint32_t nearby, uint32_t n, uint32_t sample, uint32_t cap){
+    double all = pow((double)nearby / n, (double)sample), t;
     if (all >= 1.0) return 1;
     t = log(1.0 - I_FIT_SURE) / log1p(-all);
     return t < (double)cap ? (uint32_t)ceil(t) : cap;
@@ -102,7 +102,7 @@ static RantMathResult i_ransac(const i_Model *m, const void *data, uint32_t n, c
     next = set + n;
     for (tries = 0; tries < need; tries++){
         double score = 0.0;
-        uint32_t near = 0;
+        uint32_t nearby = 0;
         for (k = 0; k < m->sample; k++)
             do {
                 pick[k] = (uint32_t)(i_math_rng_unit(&rng) * n);
@@ -111,14 +111,14 @@ static RantMathResult i_ransac(const i_Model *m, const void *data, uint32_t n, c
         if (m->fit(data, pick, m->sample, 0, cand) != RANT_MATH_OK) continue;
         for (i = 0; i < n && score < best_score; i++){
             double e = m->error(data, cand, i);
-            if (e <= tol){ near++; score += e * e; }
+            if (e <= tol){ nearby++; score += e * e; }
             else score += tol * tol;
         }
         if (score < best_score){
             best_score = score;
             memcpy(best, cand, sizeof(double) * m->size);
             found = 1;
-            need = i_tries_needed(near, n, m->sample, cap);
+            need = i_tries_needed(nearby, n, m->sample, cap);
         }
     }
     if (!found){
