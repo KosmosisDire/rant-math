@@ -228,16 +228,6 @@ template <class V, class C, class T> inline V view(Span<const T> s) {
     return V{ reinterpret_cast<const C *>(s.data()), count(s.size()) };
 }
 
-inline detail::RantMeshView mesh(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    if (triangles.size() % 3) argument();
-    detail::RantMeshView m;
-    m.vertices = ptr<detail::RantDouble3>(vertices);
-    m.vertex_count = count(vertices.size());
-    m.triangles = triangles.data();
-    m.triangle_count = count(triangles.size() / 3);
-    return m;
-}
-
 inline detail::RantPrismView prism(const Prism &p) {
     detail::RantPrismView v;
     v.pose = bits<detail::RantPose>(p.pose);
@@ -344,6 +334,31 @@ inline PointCloud cloud_like(const detail::RantPointCloudView &v) {
     out.point_step = v.point_step;
     return out;
 }
+
+/* The C view of a Mesh: its corners read once in C from whatever fields they are, its triangles as they are. */
+struct MeshRef {
+    std::vector<detail::RantDouble3> points;
+    detail::RantMeshView raw;
+
+    explicit MeshRef(const Mesh &m) {
+        if (m.triangles.size() % 3) argument();
+        std::vector<detail::RantPointFieldView> fields = field_views(m.vertices.fields);
+        detail::RantPointCloudView cloud;
+        cloud.fields = fields.data();
+        cloud.field_count = count(fields.size());
+        cloud.point_step = m.vertices.point_step;
+        cloud.data = const_cast<uint8_t *>(m.vertices.data.data());
+        cloud.size = m.vertices.data.size();
+        uint32_t n = 0;
+        room(detail::rant_point_cloud_read_points(&cloud, nullptr, &n));
+        points.resize(n);
+        check(detail::rant_point_cloud_read_points(&cloud, points.data(), &n));
+        raw.vertices = points.data();
+        raw.vertex_count = n;
+        raw.triangles = m.triangles.data();
+        raw.triangle_count = count(m.triangles.size() / 3);
+    }
+};
 
 /* The C view of a grid, its fields held beside it. */
 struct GridRef {
@@ -529,12 +544,13 @@ public:
         s.aim();
         return s;
     }
-    static Shape mesh(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-        impl::mesh(vertices, triangles);
+    static Shape mesh(const Mesh &m) {
+        impl::MeshRef c(m);
         Shape s;
         s.raw_.kind = detail::RANT_SHAPE_MESH;
-        s.points_.assign(vertices.begin(), vertices.end());
-        s.triangles_.assign(triangles.begin(), triangles.end());
+        s.points_.resize(c.points.size());
+        std::memcpy(static_cast<void *>(s.points_.data()), c.points.data(), sizeof(Double3) * c.points.size());
+        s.triangles_ = m.triangles;
         s.aim();
         return s;
     }

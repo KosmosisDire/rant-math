@@ -816,7 +816,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_overlaps(RawShape* a, RawShape* b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_sample_inside(RawShape* s, ulong seed, Double3* @out, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_sample_surface(RawShape* s, ulong seed, Double3* @out, uint count);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_mesh(RawShape* s, uint segments, double crease, Double3* vertices, Double3* normals, uint* vertex_count, uint* triangles, uint* triangle_count);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_mesh(RawShape* s, uint segments, double crease, RawPointCloudView* vertices, uint* vertex_count, uint* triangles, uint* triangle_count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_aligned_box2d(AlignedBox2D b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_oriented_box2d(OrientedBox2D b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_circle(Circle c);
@@ -3642,118 +3642,118 @@ namespace Rant.Math
         }
 
         /// <summary>Fails when an index runs past the vertices. Every other mesh call skips such a triangle.</summary>
-        public static unsafe void MeshCheck(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe void MeshCheck(Mesh mesh)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                Impl.Check(Native.rant_mesh_check(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length)));
+                var c_mesh = c_mesh_p.Raw;
+                Impl.Check(Native.rant_mesh_check(c_mesh));
             }
         }
 
-        public static unsafe double MeshDistance(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles, Double3 point)
+        public static unsafe double MeshDistance(Mesh mesh, Double3 point)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_distance(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), point);
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_distance(c_mesh, point);
                 return r;
             }
         }
 
-        public static unsafe SurfacePoint MeshClosest(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles, Double3 point)
+        public static unsafe SurfacePoint MeshClosest(Mesh mesh, Double3 point)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_closest(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), point);
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_closest(c_mesh, point);
                 return r;
             }
         }
 
         /// <summary>1 when the triangles of a closed mesh wind round the point, which puts it inside.</summary>
-        public static unsafe bool MeshContains(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles, Double3 point)
+        public static unsafe bool MeshContains(Mesh mesh, Double3 point)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                return Native.rant_mesh_contains(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), point) != 0;
+                var c_mesh = c_mesh_p.Raw;
+                return Native.rant_mesh_contains(c_mesh, point) != 0;
             }
         }
 
-        public static unsafe RayHit? MeshRaycast(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles, Ray ray)
+        public static unsafe RayHit? MeshRaycast(Mesh mesh, Ray ray)
         {
             RayHit o0 = default;
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                if (Native.rant_mesh_raycast(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), ray, &o0) == 0) return null;
+                var c_mesh = c_mesh_p.Raw;
+                if (Native.rant_mesh_raycast(c_mesh, ray, &o0) == 0) return null;
                 return o0;
             }
         }
 
-        public static unsafe AlignedBox MeshBounds(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe AlignedBox MeshBounds(Mesh mesh)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_bounds(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length));
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_bounds(c_mesh);
                 return r;
             }
         }
 
-        public static unsafe double MeshArea(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe double MeshArea(Mesh mesh)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_area(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length));
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_area(c_mesh);
                 return r;
             }
         }
 
         /// <summary>What a closed mesh holds, from the signed solids its triangles make with one point. The centroid
         /// is of that volume, or of the surface when the mesh holds none.</summary>
-        public static unsafe double MeshVolume(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe double MeshVolume(Mesh mesh)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_volume(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length));
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_volume(c_mesh);
                 return r;
             }
         }
 
-        public static unsafe Double3 MeshCentroid(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe Double3 MeshCentroid(Mesh mesh)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_centroid(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length));
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_centroid(c_mesh);
                 return r;
             }
         }
 
-        public static unsafe Inertia MeshInertia(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles, double mass)
+        public static unsafe Inertia MeshInertia(Mesh mesh, double mass)
         {
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            using (var c_mesh_p = new MeshPin(mesh))
             {
-                var r = Native.rant_mesh_inertia(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), mass);
+                var c_mesh = c_mesh_p.Raw;
+                var r = Native.rant_mesh_inertia(c_mesh, mass);
                 return r;
             }
         }
 
         /// <summary>The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a
         /// vertex in none. normals holds vertex_count.</summary>
-        public static unsafe Double3[] MeshNormals(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe Double3[] MeshNormals(Mesh mesh)
         {
-            var o0 = new Double3[vertices.Length];
-            fixed (Double3* c_vertices = vertices)
-            fixed (uint* c_triangles = triangles)
+            var o0 = new Double3[Impl.Corners(mesh)];
+            using (var c_mesh_p = new MeshPin(mesh))
             fixed (Double3* p0 = o0)
             {
-                Impl.Check(Native.rant_mesh_normals(Impl.Mesh(c_vertices, vertices.Length, c_triangles, triangles.Length), p0));
+                var c_mesh = c_mesh_p.Raw;
+                Impl.Check(Native.rant_mesh_normals(c_mesh, p0));
                 return o0;
             }
         }
@@ -3924,12 +3924,10 @@ namespace Rant.Math
             return new Shape(Native.rant_shape_from_polygon(new RawPolygonView { points = (Double3*)block, count = (uint)points.Length }), block);
         }
 
-        public static unsafe Shape ShapeFromMesh(ReadOnlySpan<Double3> vertices, ReadOnlySpan<uint> triangles)
+        public static unsafe Shape ShapeFromMesh(Mesh mesh)
         {
-            var v = Impl.Copy(vertices);
-            var t = Impl.Copy(triangles);
-            var m = Impl.Mesh((Double3*)v, vertices.Length, (uint*)t, triangles.Length);
-            return new Shape(Native.rant_shape_from_mesh(m), v, t);
+            var p = new MeshPin(mesh);
+            return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release());
         }
 
         /// <summary>Signed for a solid, never negative for a curve or surface. A curve's closest normal points to
@@ -4038,29 +4036,24 @@ namespace Rant.Math
             }
         }
 
-        /// <summary>Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0
-        /// for 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md
-        /// says.</summary>
-        public static unsafe (Double3[] Vertices, Double3[] Normals, uint[] Triangles) ShapeMesh(Shape s, uint segments, double crease)
+        /// <summary>Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces
+        /// meet at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z,
+        /// as docs/shapes.md says.</summary>
+        public static unsafe Mesh ShapeMesh(Shape s, uint segments, double crease)
         {
-            fixed (RawShape* c_s = &s.Raw)
+            uint n = 0, t = 0;
+            fixed (RawShape* c = &s.Raw)
             {
-                uint n0 = 0;
-                uint n2 = 0;
-                Impl.Room(Native.rant_shape_mesh(c_s, segments, crease, null, null, &n0, null, &n2));
-                var o0 = new Double3[(int)n0];
-                var o1 = new Double3[(int)n0];
-                var o2 = new uint[(int)n2 * 3];
-                fixed (Double3* p0 = o0)
-                fixed (Double3* p1 = o1)
-                fixed (uint* p2 = o2)
+                Impl.Room(Native.rant_shape_mesh(c, segments, crease, null, &n, null, &t));
+                var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)Rant.Math.PointCloudLayout.XyzNormal)), Triangles = new uint[(int)t * 3] };
+                mesh.Vertices.Data = new byte[(int)n * (int)mesh.Vertices.PointStep];
+                using (var p = new CloudPin(mesh.Vertices))
+                fixed (uint* tp = mesh.Triangles)
                 {
-                    Impl.Check(Native.rant_shape_mesh(c_s, segments, crease, p0, p1, &n0, p2, &n2));
-                    Array.Resize(ref o0, (int)n0);
-                    Array.Resize(ref o1, (int)n0);
-                    Array.Resize(ref o2, (int)n2 * 3);
-                    return (o0, o1, o2);
+                    var v = p.Raw;
+                    Impl.Check(Native.rant_shape_mesh(c, segments, crease, &v, &n, tp, &t));
                 }
+                return mesh;
             }
         }
 

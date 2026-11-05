@@ -86,15 +86,6 @@ pub(crate) fn cstring(s: &str) -> CString {
     CString::new(s).expect("a name holds no NUL")
 }
 
-pub(crate) fn mesh_raw(vertices: &[Double3], triangles: &[u32]) -> ffi::RawMeshView {
-    assert!(triangles.len() % 3 == 0, "triangles come in threes");
-    ffi::RawMeshView {
-        vertices: vertices.as_ptr(),
-        vertex_count: len32(vertices.len()),
-        triangles: triangles.as_ptr(),
-        triangle_count: len32(triangles.len() / 3),
-    }
-}
 
 pub(crate) fn prism_raw(p: &Prism) -> ffi::RawPrismView {
     ffi::RawPrismView {
@@ -241,6 +232,38 @@ pub(crate) fn field_of(f: &ffi::RawPointFieldView) -> PointField {
 pub(crate) fn cloud_like(v: &ffi::RawPointCloudView) -> PointCloud {
     let fields = unsafe { std::slice::from_raw_parts(v.fields, v.field_count as usize) };
     PointCloud { fields: fields.iter().map(field_of).collect(), point_step: v.point_step, ..PointCloud::default() }
+}
+
+// The C view of a Mesh: its corners read once in C from whatever fields they are, its triangles as they are.
+pub(crate) struct MeshRaw {
+    pub raw: ffi::RawMeshView,
+    pub points: std::sync::Arc<Vec<Double3>>,
+}
+
+impl MeshRaw {
+    pub(crate) fn new(mesh: &Mesh) -> Result<MeshRaw, MathError> {
+        if mesh.triangles.len() % 3 != 0 {
+            return Err(MathError::Argument);
+        }
+        let cloud = CloudRaw::new(&mesh.vertices);
+        let mut n = 0u32;
+        room(unsafe { ffi::rant_point_cloud_read_points(&cloud.raw, std::ptr::null_mut(), &mut n) })?;
+        let mut points = vec![Double3::default(); n as usize];
+        check(unsafe { ffi::rant_point_cloud_read_points(&cloud.raw, points.as_mut_ptr(), &mut n) })?;
+        let points = std::sync::Arc::new(points);
+        let raw = ffi::RawMeshView {
+            vertices: points.as_ptr(),
+            vertex_count: n,
+            triangles: mesh.triangles.as_ptr(),
+            triangle_count: len32(mesh.triangles.len() / 3),
+        };
+        Ok(MeshRaw { raw, points })
+    }
+
+    // A call that answers with no error panics on a Mesh it cannot read, as on triangles not in threes.
+    pub(crate) fn sure(mesh: &Mesh) -> MeshRaw {
+        MeshRaw::new(mesh).expect("a Mesh needs x, y and z among its fields, a whole number of points and triangles in threes")
+    }
 }
 
 // The C view of a cloud, its fields held beside it.
@@ -405,11 +428,13 @@ impl Drop for KdTree {
     }
 }
 
-/// Any shape behind one type, made by a shape_from_ call. It borrows any list it was made from.
-#[derive(Clone, Copy)]
+/// Any shape behind one type, made by a shape_from_ call. It borrows any list it was made from, and
+/// holds a Mesh's corners read once.
+#[derive(Clone)]
 pub struct Shape<'a> {
     pub(crate) raw: ffi::RawShape,
     pub(crate) data: PhantomData<&'a ()>,
+    pub(crate) _corners: Option<std::sync::Arc<Vec<Double3>>>,   // a Mesh's corners, read once
 }
 
 /// The same in 2D.

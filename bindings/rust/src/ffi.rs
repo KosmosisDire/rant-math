@@ -595,7 +595,7 @@ unsafe extern "C" {
     pub fn rant_shape_overlaps(a: *const RawShape, b: *const RawShape) -> i32;
     pub fn rant_shape_sample_inside(s: *const RawShape, seed: u64, out: *mut Double3, count: u32) -> c_int;
     pub fn rant_shape_sample_surface(s: *const RawShape, seed: u64, out: *mut Double3, count: u32) -> c_int;
-    pub fn rant_shape_mesh(s: *const RawShape, segments: u32, crease: f64, vertices: *mut Double3, normals: *mut Double3, vertex_count: *mut u32, triangles: *mut u32, triangle_count: *mut u32) -> c_int;
+    pub fn rant_shape_mesh(s: *const RawShape, segments: u32, crease: f64, vertices: *mut RawPointCloudView, vertex_count: *mut u32, triangles: *mut u32, triangle_count: *mut u32) -> c_int;
     pub fn rant_shape2d_from_aligned_box2d(b: AlignedBox2D) -> RawShape2D;
     pub fn rant_shape2d_from_oriented_box2d(b: OrientedBox2D) -> RawShape2D;
     pub fn rant_shape2d_from_circle(c: Circle) -> RawShape2D;

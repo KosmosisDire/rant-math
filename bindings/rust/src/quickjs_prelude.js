@@ -513,7 +513,7 @@
         shapeFromSegment: (value) => ({ kind: "segment", value }),
         shapeFromPolyline: (points) => ({ kind: "polyline", value: flatCopy(points, 3) }),
         shapeFromPolygon: (points) => ({ kind: "polygon", value: flatCopy(points, 3) }),
-        shapeFromMesh: (vertices, triangles) => { if (triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return { kind: "mesh", value: { vertices: flatCopy(vertices, 3), triangles: Uint32Array.from(triangles) } }; },
+        shapeFromMesh: (mesh) => { if (mesh.triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return { kind: "mesh", value: mesh }; },
         shape2dFromAlignedBox2d: (value) => ({ kind: "aligned_box2d", value }),
         shape2dFromOrientedBox2d: (value) => ({ kind: "oriented_box2d", value }),
         shape2dFromCircle: (value) => ({ kind: "circle", value }),

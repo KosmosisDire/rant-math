@@ -458,8 +458,8 @@ static void meshes(void){
             uint32_t segments = round ? 128 : 64;
             RantMeshView m;
             nv = 0; nt = 0;
-            CHECK(rant_shape_mesh(&s[k], segments, SMOOTH, NULL, NULL, &nv, NULL, &nt) == RANT_MATH_ERR_SPACE && nv && nt, "shape %u: asks its room", k);
-            CHECK(rant_shape_mesh(&s[k], segments, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK, "shape %u: meshes", k);
+            CHECK(mesh_of(&s[k], segments, SMOOTH, NULL, NULL, &nv, NULL, &nt) == RANT_MATH_ERR_SPACE && nv && nt, "shape %u: asks its room", k);
+            CHECK(mesh_of(&s[k], segments, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK, "shape %u: meshes", k);
             m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt;
             CHECK(rant_mesh_check(m) == RANT_MATH_OK, "shape %u: every index is a vertex", k);
             for (i = 0, bad = 0; i < nv; i++) bad += !(fabs(rant_shape_distance(&s[k], v[i])) < 1e-9);
@@ -481,31 +481,60 @@ static void meshes(void){
         else if (k < 7) CHECK(err[0] < 0.01 && err[1] < 0.3 * err[0], "shape %u: volume off %.3g, then %.3g with twice the segments", k, err[0], err[1]);
     }
     nv = 20000; nt = 40000;
-    CHECK(rant_shape_mesh(&s[2], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 15 * 32 && nt == 2 * 32 * 15, "0 segments is 32");
-    CHECK(rant_shape_mesh(&s[2], 2, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_ARGUMENT, "2 segments make no ring");
-    CHECK(rant_shape_mesh(&s[5], 3, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK && nv == 5 && nt == 6 && closed(t, nt), "a cone of 3 is a closed pyramid");
+    CHECK(mesh_of(&s[2], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 15 * 32 && nt == 2 * 32 * 15, "0 segments is 32");
+    CHECK(mesh_of(&s[2], 2, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_ARGUMENT, "2 segments make no ring");
+    CHECK(mesh_of(&s[5], 3, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK && nv == 5 && nt == 6 && closed(t, nt), "a cone of 3 is a closed pyramid");
     nv = 4; nt = 100; t[0] = 77;
-    CHECK(rant_shape_mesh(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_SPACE && nv == 8 && nt == 12 && t[0] == 77,
+    CHECK(mesh_of(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_SPACE && nv == 8 && nt == 12 && t[0] == 77,
           "room for one list but not the other writes neither");
     mv.vertices = v; mv.vertex_count = 8; mv.triangles = t; mv.triangle_count = 12;
     nv = 8; nt = 12;
-    rant_shape_mesh(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt);
+    mesh_of(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt);
     s[8] = rant_shape_from_mesh(mv);
     {   RantDouble3 v2[8];
         uint32_t t2[36];
         nv = 8; nt = 12;
-        CHECK(rant_shape_mesh(&s[8], 0, SMOOTH, v2, NULL, &nv, t2, &nt) == RANT_MATH_OK && !memcmp(v2, v, sizeof v2) && !memcmp(t2, t, sizeof t2),
+        CHECK(mesh_of(&s[8], 0, SMOOTH, v2, NULL, &nv, t2, &nt) == RANT_MATH_OK && !memcmp(v2, v, sizeof v2) && !memcmp(t2, t, sizeof t2),
               "a mesh is its own copy");
     }
     {   RantSegment seg;
         RantShape line;
         seg.a = rant_double3(0, 0, 0); seg.b = rant_double3(1, 0, 0);
         line = rant_shape_from_segment(seg);
-        CHECK(rant_shape_mesh(&line, 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_ARGUMENT, "a segment has no surface");
+        CHECK(mesh_of(&line, 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_ARGUMENT, "a segment has no surface");
     }
     pr.base.count = 2;
     s[6] = rant_shape_from_prism(pr);
-    CHECK(rant_shape_mesh(&s[6], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_DEGENERATE, "a prism on two corners");
+    CHECK(mesh_of(&s[6], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_DEGENERATE, "a prism on two corners");
+}
+
+RantMathResult mesh_of(const RantShape *s, uint32_t segments, double crease, RantDouble3 *v, RantDouble3 *n,
+                       uint32_t *nv, uint32_t *t, uint32_t *nt){
+    static const RantPointFieldView fields[6] = {
+        { "x", 1, 0, RANT_SCALAR_KIND_F64, 1 }, { "y", 1, 8, RANT_SCALAR_KIND_F64, 1 }, { "z", 1, 16, RANT_SCALAR_KIND_F64, 1 },
+        { "normal_x", 8, 24, RANT_SCALAR_KIND_F64, 1 }, { "normal_y", 8, 32, RANT_SCALAR_KIND_F64, 1 },
+        { "normal_z", 8, 40, RANT_SCALAR_KIND_F64, 1 } };
+    RantPointCloudView cloud;
+    RantDouble3 *both = NULL;
+    RantMathResult r;
+    uint32_t i;
+    cloud.fields = fields;
+    cloud.field_count = n ? 6 : 3;
+    cloud.point_step = n ? 48 : 24;
+    cloud.data = (uint8_t *)v;
+    cloud.size = v ? (size_t)*nv * 24 : 0;
+    if (v && n){
+        both = (RantDouble3 *)malloc(sizeof(RantDouble3) * 2 * (*nv ? *nv : 1));
+        if (!both) return RANT_MATH_ERR_MEMORY;
+        cloud.data = (uint8_t *)both;
+        cloud.size = (size_t)*nv * 48;
+    }
+    r = rant_shape_mesh(s, segments, crease, v ? &cloud : NULL, nv, t, nt);
+    if (both){
+        if (r == RANT_MATH_OK) for (i = 0; i < *nv; i++){ v[i] = both[2 * i]; n[i] = both[2 * i + 1]; }
+        free(both);
+    }
+    return r;
 }
 
 /* Every corner of each triangle shaded as its own face. */
@@ -535,10 +564,10 @@ static void creases(void){
     ab.min = rant_double3(-1, 0, 2); ab.max = rant_double3(2, 1.5, 3);
     s = rant_shape_from_aligned_box(ab);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 0, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 24 && nt == 12 && shaded_flat(v, n, t, nt),
+    CHECK(mesh_of(&s, 0, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 24 && nt == 12 && shaded_flat(v, n, t, nt),
           "a box's faces each flat");
     nv = 4000; nt = 4000;
-    rant_shape_mesh(&s, 0, SMOOTH, v, n, &nv, t, &nt);
+    mesh_of(&s, 0, SMOOTH, v, n, &nv, t, &nt);
     for (i = 0, bad = 0; i < nv; i++){
         RantDouble3 out = rant_double3(v[i].x > 0.5 ? 1 : -1, v[i].y > 0.75 ? 1 : -1, v[i].z > 2.5 ? 1 : -1);
         bad += !near3(n[i], rant_double3_scale(out, 1.0 / sqrt(3.0)), 1e-12);
@@ -548,31 +577,31 @@ static void creases(void){
     sp.center = rant_double3(1, 2, 3); sp.radius = 1.5;
     s = rant_shape_from_sphere(sp);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 15 * 32 && nt == 2 * 32 * 15, "a ball smooth at 0.5");
+    CHECK(mesh_of(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 15 * 32 && nt == 2 * 32 * 15, "a ball smooth at 0.5");
     for (i = 0; i < nv; i++) worst = fmax(worst, rant_double3_angle(n[i], rant_double3_subtract(v[i], sp.center)));
     CHECK(worst < 0.01, "a ball's normals point out, worst %.3g rad", worst);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 32, 0.0, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 3 * 2 * 32 + 4 * 14 * 32 && shaded_flat(v, n, t, nt),
+    CHECK(mesh_of(&s, 32, 0.0, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 3 * 2 * 32 + 4 * 14 * 32 && shaded_flat(v, n, t, nt),
           "a ball all facets at 0, each band's flat quad one facet: %u vertices", nv);
 
     cy.axis.a = rant_double3(1, 1, 1); cy.axis.b = rant_double3(1, 1, -2); cy.radius = 0.7;
     s = rant_shape_from_cylinder(cy);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 4 * 32, "a cylinder's rims split");
+    CHECK(mesh_of(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 4 * 32, "a cylinder's rims split");
     for (i = 0, bad = 0; i < nv; i++){
         int cap = fabs(fabs(n[i].z) - 1.0) < 1e-12, side = fabs(n[i].z) < 1e-12 && near(n[i].x * (v[i].x - 1) + n[i].y * (v[i].y - 1), 0.7, 1e-9);
         bad += !(cap || side);
     }
     CHECK(bad == 0, "%d cylinder normals neither along its axis nor out from it", bad);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 8, PI / 4, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 4 * 8, "faces at the crease itself join");
+    CHECK(mesh_of(&s, 8, PI / 4, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 4 * 8, "faces at the crease itself join");
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 8, PI / 4 - 0.01, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 3 * 16, "and just past it split");
+    CHECK(mesh_of(&s, 8, PI / 4 - 0.01, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 3 * 16, "and just past it split");
 
     co.base = rant_double3(0, 0, 0); co.tip = rant_double3(-1, 0.5, 2); co.radius = 1.0;
     s = rant_shape_from_cone(co);
     nv = 4000; nt = 4000;
-    CHECK(rant_shape_mesh(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 2 * 32, "a cone's base rim splits, its tip does not");
+    CHECK(mesh_of(&s, 32, 0.5, v, n, &nv, t, &nt) == RANT_MATH_OK && nv == 2 + 2 * 32, "a cone's base rim splits, its tip does not");
 
     {   /* a square as two triangles that share no vertex, then folded along their diagonal */
         RantDouble3 sq[6], sv[6], sn[6];
@@ -583,21 +612,46 @@ static void creases(void){
         mv.vertices = sq; mv.vertex_count = 6; mv.triangles = st; mv.triangle_count = 2;
         s = rant_shape_from_mesh(mv);
         nv = 6; nt = 3;
-        CHECK(rant_shape_mesh(&s, 0, 0.0, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 4 && nt == 2 &&
+        CHECK(mesh_of(&s, 0, 0.0, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 4 && nt == 2 &&
               near3(sn[0], rant_double3(0, 0, 1), 1e-15) && near3(sn[3], rant_double3(0, 0, 1), 1e-15), "one point is one vertex, flat even at 0");
         sq[5] = rant_double3(0, 1, 1);
         nv = 6; nt = 3;
-        CHECK(rant_shape_mesh(&s, 0, 0.5, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 6, "a fold of 0.96 rad splits at 0.5");
+        CHECK(mesh_of(&s, 0, 0.5, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 6, "a fold of 0.96 rad splits at 0.5");
         nv = 6; nt = 3;
-        CHECK(rant_shape_mesh(&s, 0, 1.0, sv, NULL, &nv, out, &nt) == RANT_MATH_OK && nv == 4, "and joins at 1, normals left out");
+        CHECK(mesh_of(&s, 0, 1.0, sv, NULL, &nv, out, &nt) == RANT_MATH_OK && nv == 4, "and joins at 1, normals left out");
         mv.triangle_count = 3;
         st[3] = 0; st[4] = 9;
         s = rant_shape_from_mesh(mv);
         nv = 6; nt = 3;
-        CHECK(rant_shape_mesh(&s, 0, 1.0, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 3 && nt == 1,
+        CHECK(mesh_of(&s, 0, 1.0, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 3 && nt == 1,
               "a face with no area and one past the vertices drop out, and so do vertices no face keeps");
-        CHECK(rant_shape_mesh(&s, 0, -0.1, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "no crease below 0");
-        CHECK(rant_shape_mesh(&s, 0, NAN, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "nor NaN");
+        CHECK(mesh_of(&s, 0, -0.1, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "no crease below 0");
+        CHECK(mesh_of(&s, 0, NAN, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "nor NaN");
+    }
+    {   /* into the floats a GPU reads, which hold what the doubles do, and into a cloud with no z */
+        static uint8_t data[24 * 30];
+        RantPointCloudView c = rant_point_cloud_layout(RANT_POINT_CLOUD_XYZ_NORMAL), flat;
+        RantDouble3 got[30];
+        double nz[30];
+        uint32_t m = 30, mt = 100, k = 30;
+        s = rant_shape_from_aligned_box(ab);
+        c.data = data;
+        c.size = sizeof data;
+        nv = 4000; nt = 4000;
+        mesh_of(&s, 0, 0.5, v, n, &nv, t, &nt);
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &c, &m, t, &mt) == RANT_MATH_OK && m == 24 && mt == 12, "a box into floats");
+        c.size = (size_t)m * c.point_step;
+        CHECK(rant_point_cloud_read_points(&c, got, &k) == RANT_MATH_OK && k == 24, "its corners read back");
+        CHECK(rant_point_cloud_read_values(&c, "normal_z", nz, &k) == RANT_MATH_OK, "and its normals");
+        for (i = 0, bad = 0; i < 24; i++) bad += !near3(got[i], v[i], 1e-6) || !near(nz[i], n[i].z, 1e-7);
+        CHECK(bad == 0, "%d float corners or normals off the doubles", bad);
+        m = 0;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, NULL, &m, NULL, &mt) == RANT_MATH_ERR_SPACE && m == 24, "no cloud asks its room");
+        c.size = 23 * (size_t)c.point_step;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &c, &m, t, &mt) == RANT_MATH_ERR_SPACE && m == 24, "a cloud's size is its room");
+        flat = c;
+        flat.field_count = 2;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &flat, &m, t, &mt) == RANT_MATH_ERR_FORMAT, "a cloud with no z");
     }
 }
 

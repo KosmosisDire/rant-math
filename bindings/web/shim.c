@@ -670,7 +670,7 @@ EMSCRIPTEN_KEEPALIVE RantMathResult rm_shape_gap(const RantShape *a, const RantS
 EMSCRIPTEN_KEEPALIVE int rm_shape_overlaps(const RantShape *a, const RantShape *b) { return rant_shape_overlaps(a, b); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_shape_sample_inside(const RantShape *s, double seed, RantDouble3 *out, uint32_t count) { return rant_shape_sample_inside(s, (uint64_t)seed, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_shape_sample_surface(const RantShape *s, double seed, RantDouble3 *out, uint32_t count) { return rant_shape_sample_surface(s, (uint64_t)seed, out, count); }
-EMSCRIPTEN_KEEPALIVE RantMathResult rm_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantDouble3 *vertices, RantDouble3 *normals, uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count) { return rant_shape_mesh(s, segments, crease, vertices, normals, vertex_count, triangles, triangle_count); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantPointCloudView *vertices, uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count) { return rant_shape_mesh(s, segments, crease, vertices, vertex_count, triangles, triangle_count); }
 EMSCRIPTEN_KEEPALIVE void rm_shape2d_from_aligned_box2d(RantShape2D *ret, const RantAlignedBox2D *b) { *ret = rant_shape2d_from_aligned_box2d(*b); }
 EMSCRIPTEN_KEEPALIVE void rm_shape2d_from_oriented_box2d(RantShape2D *ret, const RantOrientedBox2D *b) { *ret = rant_shape2d_from_oriented_box2d(*b); }
 EMSCRIPTEN_KEEPALIVE void rm_shape2d_from_circle(RantShape2D *ret, const RantCircle *c) { *ret = rant_shape2d_from_circle(*c); }

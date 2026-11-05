@@ -166,7 +166,7 @@ def input_decl(m, f, i):
     if k == "image_mut":
         return f"{n}: impl Into<ImageMut<'a>>"
     return f"{n}: " + {
-        "string": "&str", "prism": "&Prism", "shape": "&Shape", "shape2d": "&Shape2D", "cloud": "&PointCloud", "cloud_mut": "&mut PointCloud",
+        "string": "&str", "prism": "&Prism", "mesh": "&Mesh", "shape": "&Shape", "shape2d": "&Shape2D", "cloud": "&PointCloud", "cloud_mut": "&mut PointCloud",
         "grid": "&Grid", "grid_mut": "&mut Grid", "scan": "&LaserScan", "det2d": "&[Detection2D]", "det3d": "&[Detection3D]",
         "matrix": "&Matrix", "tree": "&KdTree", "fit_options": "Option<&mut FitOptions<'_>>", "align_options": "Option<&mut AlignOptions<'_>>",
     }[k]
@@ -181,7 +181,7 @@ def output_type(m, o):
     if k in ("query", "sized", "same", "expr", "room"):
         return f"Vec<{rs_type(m, o.type)}>"
     return {"matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "PointCloud", "cloud_select": "PointCloud",
-            "field": "Option<PointField>", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type)}[k]
+            "field": "Option<PointField>", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type), "mesh_new": "Mesh"}[k]
 
 
 def result_type(m, f):
@@ -225,6 +225,8 @@ class Writer:
                 self.emit(f"let mut {c} = {n}.raw();")
             elif k == "cloud":
                 self.emit(f"let {c} = CloudRaw::new({n});")
+            elif k == "mesh":
+                self.emit(f"let {c} = MeshRaw::new({n})?;" if self.fails else f"let {c} = MeshRaw::sure({n});")
             elif k == "cloud_mut":
                 self.emit(f"let mut {c} = CloudRaw::new_mut({n});")
             elif k == "grid":
@@ -278,7 +280,9 @@ class Writer:
             elif k == "fixed":
                 self.emit(f"let mut {name} = [{t}::default(); {o.size}];" if o.type not in RUST_SCALARS else f"let mut {name} = [0.0 as {t}; {o.size}];")
             elif k == "same":
-                self.emit(f"let mut {name} = vec![{t}::default(); {self.names[id(o.size)]}.len()];")
+                n = self.names[id(o.size)]
+                size = f"c_{self.plain(n)}.raw.vertex_count as usize" if o.size.kind == "mesh" else f"{n}.len()"
+                self.emit(f"let mut {name} = vec![{t}::default(); {size}];")
             elif k in ("sized", "room"):
                 self.emit(f"let mut {name} = vec![{t}::default(); {self.names[id(o.size)]} as usize];")
             elif k == "expr":
@@ -321,7 +325,7 @@ class Writer:
             word = m.structs[a.b].fields[0].name
             return f"ffi::Raw{short(a.b)} {{ {word}: {n}.as_ptr(), count: len32({n}.len()) }}"
         if k == "mesh":
-            return f"mesh_raw({n}, {self.names[id(a.b)]})"
+            return f"{c}.raw"
         if k == "prism":
             return c
         if k == "shape" or k == "shape2d":
@@ -405,6 +409,17 @@ class Writer:
             self.emit("let found = unsafe { ffi::rant_point_cloud_field(&c_cloud.raw, c_name.as_ptr()) };")
             self.emit("if found.is_null() { None } else { Some(field_of(unsafe { &*found })) }")
             return
+        if f.c == "rant_shape_mesh":
+            self.emit("let (mut n, mut t) = (0u32, 0u32);")
+            self.emit("room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), &mut n, std::ptr::null_mut(), &mut t) })?;")
+            self.emit("let layout = unsafe { ffi::rant_point_cloud_layout(PointCloudLayout::XyzNormal as i32) };")
+            self.emit("let mut out = Mesh { vertices: cloud_like(&layout), triangles: vec![0u32; t as usize * 3] };")
+            self.emit("out.vertices.data = vec![0u8; n as usize * out.vertices.point_step as usize];")
+            self.emit("let mut c = CloudRaw::new_mut(&mut out.vertices);")
+            self.emit("check(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, &mut c.raw, &mut n, out.triangles.as_mut_ptr(), &mut t) })?;")
+            self.emit("drop(c);")
+            self.emit("Ok(out)")
+            return
         if f.c == "rant_point_cloud_select":
             self.emit("let c_cloud = CloudRaw::new(cloud);")
             self.emit("check(unsafe { ffi::rant_point_cloud_check(&c_cloud.raw) })?;")
@@ -475,13 +490,16 @@ class Writer:
         cls = "Shape2D" if two else "Shape"
         if word in ("polyline", "polygon", "polyline2d", "polygon2d"):
             view = {"polyline": "RawPolylineView", "polygon": "RawPolygonView", "polyline2d": "RawPolyline2DView", "polygon2d": "RawPolygon2DView"}[word]
-            self.emit(f"{cls} {{ raw: unsafe {{ ffi::{f.c}(ffi::{view} {{ points: {n}.as_ptr(), count: len32({n}.len()) }}) }}, data: PhantomData }}")
+            own = "" if two else ", _corners: None"
+            self.emit(f"{cls} {{ raw: unsafe {{ ffi::{f.c}(ffi::{view} {{ points: {n}.as_ptr(), count: len32({n}.len()) }}) }}, data: PhantomData{own} }}")
         elif word == "mesh":
-            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_mesh(mesh_raw(vertices, triangles)) }, data: PhantomData }")
+            self.emit("let c = MeshRaw::sure(mesh);")
+            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.points) }")
         elif word == "prism":
-            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_prism(prism_raw(prism)) }, data: PhantomData }")
+            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_prism(prism_raw(prism)) }, data: PhantomData, _corners: None }")
         else:
-            self.emit(f"{cls} {{ raw: unsafe {{ ffi::{f.c}({n}) }}, data: PhantomData }}")
+            own = "" if two else ", _corners: None"
+            self.emit(f"{cls} {{ raw: unsafe {{ ffi::{f.c}({n}) }}, data: PhantomData{own} }}")
 
 
 def function(m, f):
@@ -501,6 +519,8 @@ def function(m, f):
             args = [f"{name_of(i.name)}: &'a [{rs_type(m, i.type)}]" for i in f.inputs]
         elif kind == "prism":
             args = ["prism: &'a Prism"]
+        elif kind == "mesh":
+            args = ["mesh: &'a Mesh"]
     doc = ""
     if f.doc:
         wrapped = textwrap.wrap(f.doc, 100)
@@ -581,6 +601,9 @@ def thunk(m, f):
             args.append("&mut " + x)
         elif k == "cloud":
             lines.append(f"let {x} = get_cloud({a});")
+            args.append("&" + x)
+        elif k == "mesh":
+            lines.append(f"let {x} = get_mesh({a});")
             args.append("&" + x)
         elif k == "cloud_mut":
             lines.append(f"let mut {x} = get_cloud({a});")

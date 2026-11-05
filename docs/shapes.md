@@ -49,15 +49,22 @@ rant_shape_distances(&zone, points, distances, count);   /* inside where distanc
 ## Meshes
 
 ```c
-rant_shape_mesh(&zone, 0, 0.5, vertices, normals, &vertex_count, triangles, &triangle_count);
+RantPointCloudView corners = rant_point_cloud_layout(RANT_POINT_CLOUD_XYZ_NORMAL);   /* x, y, z, a normal, f32 */
+corners.data = data;
+corners.size = room * corners.point_step;
+rant_shape_mesh(&zone, 0, 0.5, &corners, &vertex_count, triangles, &triangle_count);
 ```
 
-- `rant_shape_mesh` makes the triangles that draw a shape, facing out, with a unit normal at each vertex.
+- `rant_shape_mesh` makes the triangles that draw a shape, facing out, as a Mesh holds them.
+- Corners fill the cloud's x, y and z, and their unit normals its normal_x, normal_y and normal_z when it has
+  them. The cloud's size is its room. Every binding returns a Mesh laid out as above.
 - Where two faces meet at more than `crease` radians, each keeps its own vertex, so the edge shows sharp.
   0.5 splits a box's edges and a cylinder's rims, and a ball stays smooth.
 - 0 makes every face flat. Pi or more splits no edge, so a solid stays closed by index.
 - Vertices at one point count as one, so a mesh sent with a vertex per corner still smooths.
-- A face with no area is left out. `normals` may be NULL.
+- A face with no area is left out.
+- Every binding's mesh calls take a Mesh, its corners read in C from whatever fields they are. For many
+  questions of one mesh, make it a shape once with `shape_from_mesh`, which reads them once.
 
 ## Lines and planes
 

@@ -33,6 +33,24 @@ typedef struct { const RantPose *poses; uint32_t count; } RantPathView;
 typedef struct { const RantPose2D *poses; uint32_t count; } RantPath2DView;
 /* base lies in the xy plane of pose and rises height along its +z. */
 typedef struct { RantPose pose; RantPolygon2DView base; double height; } RantPrismView;
+/* count numbers of kind, offset bytes into each point. name has name_len bytes and needs no NUL. */
+typedef struct {
+    const char *name;
+    size_t name_len;
+    uint32_t offset;
+    RantScalarKind kind;
+    uint32_t count;
+} RantPointFieldView;
+
+/* A PointCloud's points, as a Mesh's corners are too: size / point_step of them, little endian. */
+typedef struct {
+    const RantPointFieldView *fields;
+    uint32_t field_count;
+    uint32_t point_step;
+    uint8_t *data;
+    size_t size;                 /* the bytes data holds */
+} RantPointCloudView;
+
 /* Three indices into vertices per triangle, counterclockwise seen from outside. */
 typedef struct {
     const RantDouble3 *vertices; uint32_t vertex_count;

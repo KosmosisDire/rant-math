@@ -96,6 +96,8 @@ static class J
         Data = Hex(e.GetProperty("data").GetString()),
     };
 
+    public static Mesh ToMesh(JsonElement e) => new Mesh { Vertices = ToCloud(e.GetProperty("vertices")), Triangles = To<uint[]>(e.GetProperty("triangles")) };
+
     public static Grid ToGrid(JsonElement e) => new Grid
     {
         Origin = new Transform { Pose = To<Pose>(e.GetProperty("origin")) },
@@ -146,7 +148,7 @@ static class J
             "segment" => RantMath.ShapeFromSegment(To<Segment>(v)),
             "polyline" => RantMath.ShapeFromPolyline(To<Double3[]>(v)),
             "polygon" => RantMath.ShapeFromPolygon(To<Double3[]>(v)),
-            "mesh" => RantMath.ShapeFromMesh(To<Double3[]>(v.GetProperty("vertices")), To<uint[]>(v.GetProperty("triangles"))),
+            "mesh" => RantMath.ShapeFromMesh(ToMesh(v)),
             _ => throw new Exception("no shape " + k),
         };
     }
@@ -223,6 +225,16 @@ static class J
                        Same(want.GetProperty("data"), c.Data ?? Array.Empty<byte>(), tol);
             case Grid g:
                 return Same(want.GetProperty("origin"), g.Origin.Pose, tol) && Same(want.GetProperty("fields"), g.Fields, tol);
+            case Mesh m:
+            {
+                // its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
+                double[] x = RantMath.PointCloudReadValues(m.Vertices, "normal_x"), y = RantMath.PointCloudReadValues(m.Vertices, "normal_y"),
+                         z = RantMath.PointCloudReadValues(m.Vertices, "normal_z");
+                var normals = new Double3[x.Length];
+                for (int i = 0; i < x.Length; i++) normals[i] = new Double3 { X = x[i], Y = y[i], Z = z[i] };
+                return Same(want.GetProperty("point_step"), m.Vertices.PointStep, tol) && Same(want.GetProperty("points"), RantMath.PointCloudReadPoints(m.Vertices), tol) &&
+                       Same(want.GetProperty("normals"), normals, tol) && Same(want.GetProperty("triangles"), m.Triangles, tol);
+            }
             case Prism p:
                 return Same(want.GetProperty("pose"), p.Pose, tol) && Same(want.GetProperty("base").GetProperty("points"), p.Base.Points, tol) &&
                        Same(want.GetProperty("height"), p.Height, tol);
@@ -392,7 +404,11 @@ public static class Program
         Check(RantMath.ShapeContains(solid, D3(0, 0, 1)) && !RantMath.ShapeContains(solid, D3(0, 0, 3)), "a prism shape keeps its base");
         var turned = RantMath.PrismTransform(prism, new Pose { Position = D3(1, 0, 0), Orientation = Identity });
         Check(turned.Pose.Position.X == 1 && turned.Base.Points.Length == 4 && !ReferenceEquals(turned.Base.Points, prism.Base.Points), "a transformed prism owns its base");
-        for (int i = 0; i < 2000; i++) RantMath.ShapeFromMesh(new Double3[3], new uint[] { 0, 1, 2 });
+        var ball = RantMath.ShapeMesh(RantMath.ShapeFromSphere(new Sphere { Radius = 1 }), 8, 0.5);
+        Check(ball.Vertices.PointStep == 24 && ball.Triangles.Length % 3 == 0 && RantMath.MeshNormals(ball).Length == ball.Vertices.Data.Length / 24, "a ball as a Mesh");
+        var again = RantMath.ShapeFromMesh(ball);
+        Check(RantMath.ShapeContains(again, D3(0, 0, 0)) && !RantMath.ShapeContains(again, D3(0, 0, 1.01)), "a Mesh as a shape");
+        for (int i = 0; i < 2000; i++) RantMath.ShapeFromMesh(ball);
         GC.Collect();
         GC.WaitForPendingFinalizers();
     }

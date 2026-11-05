@@ -308,12 +308,6 @@ CUBE_V = [d3(float(x), float(y), float(z)) for z in (0, 1) for y in (0, 1) for x
 CUBE_T = [0, 2, 1, 1, 2, 3, 4, 5, 6, 5, 7, 6, 0, 1, 4, 1, 5, 4, 2, 6, 3, 3, 6, 7, 0, 4, 2, 2, 4, 6, 1, 3, 5, 3, 7, 5]
 TETRA_V = [d3(0.0, 0.0, 0.0), d3(2.0, 0.0, 0.0), d3(0.0, 2.0, 0.0), d3(0.0, 0.0, 2.0)]
 TETRA_T = [0, 2, 1, 0, 1, 3, 1, 2, 3, 0, 3, 2]
-MESHES = [
-    (CUBE_V, CUBE_T),
-    (TETRA_V, TETRA_T),
-    (TRIANGLE3, [0, 1, 2]),
-    (TETRA_V, [0, 1, 9]),
-]
 
 PRISMS = [
     {"pose": {"position": V3[3], "orientation": QUATS[0]}, "base": {"points": SQUARE}, "height": 2.0},
@@ -372,6 +366,33 @@ CLOUD_NONE = cloud([("q", 0, 8, 1)], 8, struct.pack("<2d", 1.5, 2.5).hex())
 CLOUD_BAD = cloud(XYZ, 12, "0102")
 CLOUDS = [CLOUD_XYZ, CLOUD_I, CLOUD_RGB, CLOUD_N, CLOUD_NONE, CLOUD_BAD]
 
+
+def mesh(vertices, triangles):
+    """A Mesh whose corners are doubles, so a binding reads back exactly what C was given."""
+    fields = [("x", 0, 8, 1), ("y", 8, 8, 1), ("z", 16, 8, 1)]
+    data = struct.pack("<%dd" % (3 * len(vertices)), *[p[a] for p in vertices for a in "xyz"]).hex()
+    return {"vertices": cloud(fields, 24, data), "triangles": triangles}
+
+
+def mesh_points(v):
+    """A Mesh's corners by its x, y and z fields, as a binding reads them."""
+    c = v["vertices"]
+    data = bytes.fromhex(c["data"])
+    at = {f["name"]: f for f in c["fields"]}
+    out = []
+    for k in range(len(data) // c["point_step"]):
+        xyz = [struct.unpack_from("<d" if at[a]["kind"] == 8 else "<f", data, k * c["point_step"] + at[a]["offset"])[0] for a in "xyz"]
+        out.append(d3(*xyz))
+    return out
+
+
+MESHES = [
+    mesh(CUBE_V, CUBE_T),
+    mesh(TETRA_V, TETRA_T),
+    mesh(TRIANGLE3, [0, 1, 2]),
+    mesh(TETRA_V, [0, 1, 9]),
+]
+
 GRID_A = {"origin": POSES[0], "resolution": 0.5, "cells_x": 3, "cells_y": 2, "cells_z": 1,
           "fields": [{"name": "occupancy", "kind": 2, "data": hexof([0, 10, 20, 30, 40, 50])},
                      {"name": "height", "kind": 7, "data": floats([0.5, 1.0, 1.5, 2.0, 2.5, 3.0])}]}
@@ -422,8 +443,8 @@ SHAPES = [
     {"kind": "segment", "value": POOLS["RantSegment"][0]},
     {"kind": "polyline", "value": ZIGZAG3},
     {"kind": "polygon", "value": POLYGON3},
-    {"kind": "mesh", "value": {"vertices": CUBE_V, "triangles": CUBE_T}},
-    {"kind": "mesh", "value": {"vertices": TRIANGLE3, "triangles": [0, 1, 2]}},
+    {"kind": "mesh", "value": MESHES[0]},
+    {"kind": "mesh", "value": MESHES[2]},
     {"kind": "polygon", "value": []},
 ]
 SHAPES2 = [
@@ -665,10 +686,6 @@ def list_value(f, inp, i):
     for prefix, pool in BY_PREFIX.items():
         if f.name.startswith(prefix):
             return pool[i % 4]
-    if inp.name in ("vertices",):
-        return MESHES[i % 4][0]
-    if inp.name in ("triangles",):
-        return MESHES[i % 4][1]
     return LISTS[inp.type][i % 4]
 
 
@@ -683,6 +700,8 @@ def auto_inputs(f, i):
             row.append(list_value(f, inp, i))
         elif k == "prism":
             row.append(PRISMS[i % 4])
+        elif k == "mesh":
+            row.append(MESHES[i % 4])
         elif k == "shape":
             row.append(SHAPES[(i * 3 + j) % len(SHAPES)])
         elif k == "shape2d":
@@ -923,6 +942,12 @@ class CCase:
             return {"ptr": name, "count": n}
         if k == "string":
             return {"str": c_string(v)}
+        if k == "mesh":
+            l1, n1 = c_array(w, name + "v", "RantDouble3", mesh_points(v))
+            l2, n2 = c_array(w, name + "t", "uint32_t", v["triangles"])
+            self.decl(l1)
+            self.decl(l2)
+            return {"ptr": name + "v", "count": n1, "tptr": name + "t", "tcount": n2}
         if k == "prism":
             line, n = c_array(w, name + "b", "RantDouble2", v["base"]["points"])
             self.decl(line)
@@ -1017,7 +1042,7 @@ class CCase:
         prefix = "rant_shape_from_" if k == "shape" else "rant_shape2d_from_"
         t = "RantShape" if k == "shape" else "RantShape2D"
         if kind == "mesh":
-            l1, n1 = c_array(w, name + "v", "RantDouble3", value["vertices"])
+            l1, n1 = c_array(w, name + "v", "RantDouble3", mesh_points(value))
             l2, n2 = c_array(w, name + "t", "uint32_t", value["triangles"])
             self.decl(l1)
             self.decl(l2)
@@ -1091,7 +1116,7 @@ class CCase:
                 if v.get("error"):
                     self.decl(f"double {name}e = 0; {name}.error = &{name}e;")
                     self.options_extra.append(("error", f"pd({name}e)"))
-        queries = [o for o in f.outputs if o.kind in ("query", "cloud_select") and not isinstance(o.size, type(o))]
+        queries = [o for o in f.outputs if o.kind in ("query", "cloud_select", "mesh_new") and not isinstance(o.size, type(o))]
         for j, out in enumerate(f.outputs):
             self.emit_output(out, j)
         for a in f.args:
@@ -1115,6 +1140,8 @@ class CCase:
                     elif out.kind == "cloud_select":
                         src = self.names[id(out.size)]
                         self.decl(f"    o{j} = room(n{j} * {src['cloud']}.point_step);")
+                    elif out.kind == "mesh_new":
+                        self.decl(f"    o{j}.size = (size_t)n{j} * o{j}.point_step; o{j}.data = (uint8_t *)room(o{j}.size); o{j}t = (uint32_t *)room(sizeof(uint32_t) * 3 * m{j});")
                 self.decl(f"    r = {call};")
                 self.decl("}")
             else:
@@ -1194,6 +1221,8 @@ class CCase:
             self.decl(f"RantImageView o{j}; memset(&o{j}, 0, sizeof o{j});")
         elif k == "cloud_select":
             self.decl(f"uint8_t *o{j} = NULL; uint32_t n{j} = 0;")
+        elif k == "mesh_new":
+            self.decl(f"RantPointCloudView o{j} = rant_point_cloud_layout(RANT_POINT_CLOUD_XYZ_NORMAL); uint32_t *o{j}t = NULL; uint32_t n{j} = 0, m{j} = 0;")
         else:
             raise KeyError(k)
 
@@ -1233,8 +1262,11 @@ class CCase:
             n = names[id(a.a)]
             return f"rv_{a.b}({n['ptr']}, {n['count']})"
         if k == "mesh":
-            v, t = names[id(a.a)], names[id(a.b)]
-            return f"rv_mesh({v['ptr']}, {v['count']}, {t['ptr']}, {t['count']})"
+            n = names[id(a.a)]
+            return f"rv_mesh({n['ptr']}, {n['count']}, {n['tptr']}, {n['tcount']})"
+        if k == "mesh_out":
+            j = self.f.outputs.index(a.a)
+            return f"NULL, &n{j}, NULL, &m{j}" if pre else f"&o{j}, &n{j}, o{j}t, &m{j}"
         if k == "prism" or k == "matrix":
             return names[id(a.a)]["view"]
         if k in ("shape", "shape2d"):
@@ -1333,6 +1365,23 @@ class CCase:
             return [f"pcloud(&{src['cloud']}, o{j}, (size_t)n{j} * {src['cloud']}.point_step);"]
         if k == "field":
             return ['if (!r) fputs("null", o); else pfield(r);']
+        if k == "mesh_new":
+            # its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
+            room = f"sizeof(RantDouble3) * (n{j} ? n{j} : 1)"
+            lines = [f"{{ uint32_t c = n{j}, k; RantDouble3 *pp = (RantDouble3 *)room({room}), *nn = (RantDouble3 *)room({room}); "
+                     f"double *v = (double *)room(sizeof(double) * (n{j} ? n{j} : 1));",
+                     f"if (rant_point_cloud_read_points(&o{j}, pp, &c) != RANT_MATH_OK) abort();"]
+            for a in "xyz":
+                lines.append(f'c = n{j}; if (rant_point_cloud_read_values(&o{j}, "normal_{a}", v, &c) != RANT_MATH_OK) abort(); '
+                             f"for (k = 0; k < c; k++) nn[k].{a} = v[k];")
+            lines.append(f'fprintf(o, "{{\\"point_step\\":%u,\\"points\\":", o{j}.point_step);')
+            lines += self.print_list("RantDouble3", "pp", f"n{j}")
+            lines.append('fputs(",\\"normals\\":", o);')
+            lines += self.print_list("RantDouble3", "nn", f"n{j}")
+            lines.append('fputs(",\\"triangles\\":", o);')
+            lines += self.print_list("uint32_t", f"o{j}t", f"(size_t)m{j} * 3")
+            lines.append("fputc('}', o); }")
+            return lines
         if k == "prism":
             return ['fputs("{\\"pose\\":", o);', w.print_value("RantPose", "r.pose") + ";",
                     'fputs(",\\"base\\":{\\"points\\":", o);'] + self.print_list("RantDouble2", "r.base.points", "r.base.count") + [
@@ -1378,7 +1427,7 @@ def write_record_program(model, cases):
 def tolerance_of(model, f):
     types = [o.type for o in f.outputs]
     def has_float(t, seen=()):
-        if t == "float":
+        if t in ("float", "RantMesh"):
             return True
         s = model.structs.get(t)
         return bool(s) and any(has_float(x.type) for x in s.fields)

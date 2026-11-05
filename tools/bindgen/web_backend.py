@@ -323,6 +323,8 @@ class Writer:
                 self.emit(f"const {c} = imageIn({n});")
             elif k in ("cloud", "cloud_mut"):
                 self.emit(f"const {c} = cloudIn({n});")
+            elif k == "mesh":
+                self.emit(f"const [{c}, n_{n.rstrip('_')}] = meshViewIn({n});")
             elif k in ("grid", "grid_mut"):
                 self.emit(f"const {c} = gridIn({n});")
             elif k == "scan":
@@ -450,8 +452,7 @@ class Writer:
             word = m.structs[a.b].fields[0].name
             return f"viewIn({c}, n_{bare})"
         if k == "mesh":
-            other = self.names[id(a.b)].rstrip("_")
-            return f"meshIn(c_{bare}, n_{bare}, c_{other}, n_{other})"
+            return c
         if k == "tree":
             return f"{n}.handle()"
         if k == "out":
@@ -526,6 +527,26 @@ class Writer:
             self.emit("const found = wasm._rm_point_cloud_field(c_cloud, stringIn(name));")
             self.emit("refresh();")
             self.emit("return found ? fieldOf(found) : null;")
+            return
+        if f.c == "rant_shape_mesh":
+            self.emit("begin();")
+            self.emit("const c_s = shapeIn(s);")
+            self.emit("const n = alloc(4), t = alloc(4);")
+            self.emit("U32[n >> 2] = 0; U32[t >> 2] = 0;")
+            self.emit("room(wasm._rm_shape_mesh(c_s, segments, crease, 0, n, 0, t));")
+            self.emit("refresh();")
+            self.emit('const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, "XyzNormal"));')
+            self.emit("refresh();")
+            self.emit("const out: MeshOut = { vertices: cloudLike(cloud), triangles: new Uint32Array(0) };")
+            self.emit("const bytes = U32[n >> 2] * out.vertices.point_step, count = U32[t >> 2] * 3;")
+            self.emit("const v = cloudIn({ ...out.vertices, data: new Uint8Array(bytes) });")
+            self.emit("const o = alloc(4 * count);")
+            self.emit("check(wasm._rm_shape_mesh(c_s, segments, crease, v, n, o, t));")
+            self.emit("refresh();")
+            self.emit("const view = r_RantPointCloudView(v);")
+            self.emit("out.vertices.data = U8.slice(view.data, view.data + bytes);")
+            self.emit("out.triangles = numbersOut(o, count, Uint32Array) as Uint32Array;")
+            self.emit("return out;")
             return
         if f.c == "rant_point_cloud_select":
             self.emit("begin();")
@@ -614,8 +635,10 @@ class Writer:
         elif word in ("polyline2d", "polygon2d"):
             self.emit(f'return {{ kind: "{word}", value: flatCopy({n}, 2) }};')
         elif word == "mesh":
-            self.emit('if (lengthOf(triangles) % 3) throw new MathError(-1);')
-            self.emit('return { kind: "mesh", value: { vertices: flatCopy(vertices, 3), triangles: Uint32Array.from(triangles) } };')
+            self.emit('if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);')
+            self.emit("begin();")
+            self.emit("const [points, count] = cornersIn(mesh);")
+            self.emit('return { kind: "mesh", value: { vertices: numbersOut(points, 3 * count, Float64Array), triangles: Uint32Array.from(mesh.triangles) } };')
         elif word == "prism":
             self.emit(f'return {{ kind: "prism", value: {{ pose: {n}.pose, base: flatCopy({n}.base.points, 2), height: {n}.height }} }};')
         else:
@@ -637,7 +660,7 @@ def input_decl(m, w, i):
         return f"{n}: readonly {short(i.type)}[]"
     return f"{n}: " + {
         "string": "string", "prism": "Prism", "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image",
-        "cloud": "PointCloud", "cloud_mut": "PointCloud", "grid": "Grid", "grid_mut": "Grid", "scan": "LaserScan",
+        "cloud": "PointCloud", "cloud_mut": "PointCloud", "mesh": "Mesh", "grid": "Grid", "grid_mut": "Grid", "scan": "LaserScan",
         "det2d": "readonly Detection2D[]", "det3d": "readonly Detection3D[]", "matrix": "Matrix", "tree": "KdTree",
         "fit_options": "FitOptions | null = null", "align_options": "AlignOptions | null = null",
     }[k]
@@ -659,7 +682,7 @@ def output_type(m, w, o):
         t = short(o.type) + "[]"
         return f"{t} | Float64Array" if (w.flat_of(o.type) and w.typed) else t
     return {"matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "ReturnType<typeof cloudLike>", "cloud_select": "ReturnType<typeof cloudLike>",
-            "field": "PointField | null", "prism": "PrismOut", "handle": "KdTree", "shape_new": short(o.type)}[k]
+            "field": "PointField | null", "prism": "PrismOut", "handle": "KdTree", "shape_new": short(o.type), "mesh_new": "MeshOut"}[k]
 
 
 def result_type(m, w, f):
@@ -703,6 +726,9 @@ export interface PrismOut { pose: Pose; base: { points: Double2[] }; height: num
 export interface Image { width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
 export interface PointField { name: string; offset: number; kind: ScalarKind; count: number; }
 export interface PointCloud { origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
+export interface Mesh { vertices: PointCloud; triangles: ArrayLike<number>; }
+/** A mesh a call hands back, its corners x, y, z and a normal as f32. */
+export interface MeshOut { vertices: ReturnType<typeof cloudLike>; triangles: Uint32Array; }
 export interface GridField { name: string; kind: ScalarKind; data: Uint8Array; }
 export interface Grid { origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
 export interface LaserScan { angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
@@ -826,6 +852,26 @@ function cloudIn(cloud: PointCloud): number {
     const p = alloc(20);
     w_RantPointCloudView(p, { fields: fieldsIn(cloud.fields), field_count: cloud.fields.length, point_step: cloud.point_step, data, size: cloud.data.length });
     return p;
+}
+
+/** A Mesh's corners read in C from whatever fields they are, as doubles, and how many. */
+function cornersIn(mesh: Mesh): [number, number] {
+    const cloud = cloudIn(mesh.vertices);
+    const n = alloc(4);
+    U32[n >> 2] = 0;
+    room(wasm._rm_point_cloud_read_points(cloud, 0, n));
+    refresh();
+    const out = alloc(24 * U32[n >> 2]);
+    check(wasm._rm_point_cloud_read_points(cloud, out, n));
+    refresh();
+    return [out, U32[n >> 2]];
+}
+
+/** A Mesh as the C view, and how many corners it has. */
+function meshViewIn(mesh: Mesh): [number, number] {
+    if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
+    const [points, count] = cornersIn(mesh);
+    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles)), count];
 }
 
 function cloudDone(cloud: PointCloud, p: number): void {

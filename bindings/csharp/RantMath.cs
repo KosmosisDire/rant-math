@@ -172,11 +172,8 @@ namespace Rant.Math
             return bytes;
         }
 
-        internal static RawMeshView Mesh(Double3* vertices, int vertexCount, uint* triangles, int triangleCount)
-        {
-            if (triangleCount % 3 != 0) throw new MathException(ErrorKind.Argument);
-            return new RawMeshView { vertices = vertices, vertex_count = (uint)vertexCount, triangles = triangles, triangle_count = (uint)(triangleCount / 3) };
-        }
+        // How many corners a Mesh holds, before its fields are read.
+        internal static int Corners(Mesh mesh) => mesh.Vertices.PointStep == 0 ? 0 : (mesh.Vertices.Data?.Length ?? 0) / (int)mesh.Vertices.PointStep;
 
         internal static RawPrismView Prism(Prism p, Double2* points)
         {
@@ -321,6 +318,41 @@ namespace Rant.Math
             };
         }
         public void Dispose() => pins.Dispose();
+    }
+
+    // A Mesh as the C view: its corners read once in C from whatever fields they are, both lists in blocks of their own.
+    internal sealed unsafe class MeshPin : IDisposable
+    {
+        internal RawMeshView Raw;
+        private IntPtr points, triangles;
+        internal MeshPin(Mesh mesh)
+        {
+            uint[] t = mesh.Triangles ?? Array.Empty<uint>();
+            if (t.Length % 3 != 0) throw new MathException(ErrorKind.Argument);
+            using (var cloud = new CloudPin(mesh.Vertices))
+            {
+                var c = cloud.Raw;
+                uint n = 0;
+                Impl.Room(Native.rant_point_cloud_read_points(&c, null, &n));
+                points = Marshal.AllocHGlobal(sizeof(Double3) * (int)n + 1);
+                triangles = Impl.Copy<uint>(t);
+                Impl.Check(Native.rant_point_cloud_read_points(&c, (Double3*)points, &n));
+                Raw = new RawMeshView { vertices = (Double3*)points, vertex_count = n, triangles = (uint*)triangles, triangle_count = (uint)(t.Length / 3) };
+            }
+        }
+        // Hands both blocks to a Shape, which frees them.
+        internal IntPtr[] Release()
+        {
+            var blocks = new[] { points, triangles };
+            points = triangles = IntPtr.Zero;
+            return blocks;
+        }
+        public void Dispose()
+        {
+            if (points != IntPtr.Zero) Marshal.FreeHGlobal(points);
+            if (triangles != IntPtr.Zero) Marshal.FreeHGlobal(triangles);
+            points = triangles = IntPtr.Zero;
+        }
     }
 
     internal sealed unsafe class GridPin : IDisposable

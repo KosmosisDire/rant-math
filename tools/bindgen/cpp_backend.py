@@ -52,6 +52,8 @@ def input_decl(i, fn):
         return f"const char *{i.name}"
     if k == "prism":
         return f"const Prism &{i.name}"
+    if k == "mesh":
+        return f"const Mesh &{i.name}"
     if k == "shape":
         return f"const Shape &{i.name}"
     if k == "shape2d":
@@ -107,6 +109,8 @@ def output_type(o):
         return "KdTree"
     if k == "shape_new":
         return short(o.type)
+    if k == "mesh_new":
+        return "Mesh"
     raise KeyError(k)
 
 
@@ -159,7 +163,7 @@ class Writer:
         if k == "view":
             return f"impl::view<detail::{a.b}, detail::{a.a.type}>({a.a.name})"
         if k == "mesh":
-            return f"impl::mesh({a.a.name}, {a.b.name})"
+            return f"c_{a.a.name}.raw"
         if k == "prism":
             return f"impl::prism({a.a.name})"
         if k == "matrix":
@@ -222,6 +226,8 @@ class Writer:
             k = i.kind
             if k in ("image", "image_mut"):
                 self.emit(f"detail::RantImageView c_{i.name} = impl::image({i.name});")
+            elif k == "mesh":
+                self.emit(f"impl::MeshRef c_{i.name}({i.name});")
             elif k in ("grid", "grid_mut"):
                 self.emit(f"impl::GridRef c_{i.name}({i.name});")
             elif k == "scan":
@@ -249,7 +255,8 @@ class Writer:
             elif k == "fixed":
                 self.emit(f"std::array<{type_of(o.type)}, {o.size}> {name}{{}};")
             elif k == "same":
-                self.emit(f"std::vector<{type_of(o.type)}> {name}({o.size.name}.size());")
+                size = f"c_{o.size.name}.points.size()" if o.size.kind == "mesh" else f"{o.size.name}.size()"
+                self.emit(f"std::vector<{type_of(o.type)}> {name}({size});")
             elif k == "sized":
                 self.emit(f"std::vector<{type_of(o.type)}> {name}({o.size.name});")
             elif k == "expr":
@@ -313,6 +320,8 @@ class Writer:
             return self.field_body()
         if f.c == "rant_point_cloud_select":
             return self.select_body()
+        if f.c == "rant_shape_mesh":
+            return self.mesh_body()
         self.declare_inputs()
         self.declare_outputs()
         asked = [o for o in f.outputs if o.kind == "query" and not hasattr(o.size, "kind")]
@@ -367,7 +376,7 @@ class Writer:
         if word in kinds:
             self.emit(f"return {cls}::polyline({i.name}, {kinds[word]});")
         elif word == "mesh":
-            self.emit(f"return Shape::mesh({f.inputs[0].name}, {f.inputs[1].name});")
+            self.emit(f"return Shape::mesh({i.name});")
         elif word == "prism":
             self.emit(f"return Shape::prism({i.name});")
         else:
@@ -377,6 +386,17 @@ class Writer:
         self.emit("const detail::RantPointFieldView *found = detail::rant_point_cloud_field(cloud.raw(), name);")
         self.emit("if (!found) return std::nullopt;")
         self.emit("return impl::fields_of(found, 1)[0];")
+
+    def mesh_body(self):
+        self.emit("uint32_t n = 0, t = 0;")
+        self.emit("impl::room(detail::rant_shape_mesh(s.raw(), segments, crease, nullptr, &n, nullptr, &t));")
+        self.emit("Mesh out;")
+        self.emit("out.vertices = impl::cloud_like(detail::rant_point_cloud_layout(detail::RANT_POINT_CLOUD_XYZ_NORMAL));")
+        self.emit("out.vertices.data.resize(size_t(n) * out.vertices.point_step);")
+        self.emit("out.triangles.resize(size_t(t) * 3);")
+        self.emit("MutablePointCloudView v(out.vertices);")
+        self.emit("impl::check(detail::rant_shape_mesh(s.raw(), segments, crease, v.raw(), &n, out.triangles.data(), &t));")
+        self.emit("return out;")
 
     def select_body(self):
         self.emit("const detail::RantPointCloudView &c = *cloud.raw();")
@@ -440,6 +460,7 @@ def thunk_input(m, i, n):
         return f"std::string x{n}s = {a}.str; const char *x{n} = x{n}s.c_str();"
     return {
         "prism": f"Prism x{n} = get_prism({a});",
+        "mesh": f"Mesh x{n} = get_mesh({a});",
         "shape": f"Shape x{n} = get_shape({a});",
         "shape2d": f"Shape2D x{n} = get_shape2d({a});",
         "image": f"Image x{n} = get_image({a});",

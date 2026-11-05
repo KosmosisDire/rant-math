@@ -246,6 +246,23 @@ impl Json for GridField {
     }
 }
 
+impl Json for Mesh {
+    fn get(v: &Value) -> Mesh {
+        Mesh { vertices: Json::get(&v["vertices"]), triangles: Json::get(&v["triangles"]) }
+    }
+    // its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
+    fn put(&self) -> Value {
+        let n: Vec<Vec<f64>> = ["normal_x", "normal_y", "normal_z"].iter().map(|f| point_cloud_read_values(&self.vertices, f).unwrap()).collect();
+        let normals: Vec<Double3> = (0..n[0].len()).map(|i| d3(n[0][i], n[1][i], n[2][i])).collect();
+        let mut m = Map::new();
+        m.insert("point_step".into(), self.vertices.point_step.put());
+        m.insert("points".into(), point_cloud_read_points(&self.vertices).unwrap().put());
+        m.insert("normals".into(), normals.put());
+        m.insert("triangles".into(), self.triangles.put());
+        Value::Object(m)
+    }
+}
+
 impl Json for Grid {
     fn get(v: &Value) -> Grid {
         Grid {
@@ -293,6 +310,9 @@ fn get_image(v: &Value) -> Image {
 fn get_cloud(v: &Value) -> PointCloud {
     Json::get(v)
 }
+fn get_mesh(v: &Value) -> Mesh {
+    Json::get(v)
+}
 fn get_grid(v: &Value) -> Grid {
     Json::get(v)
 }
@@ -333,20 +353,17 @@ struct ShapeData {
     v: Value,
     prism: Option<Prism>,
     points: Vec<Double3>,
-    triangles: Vec<u32>,
+    mesh: Mesh,
 }
 
 impl ShapeData {
     fn new(v: &Value) -> ShapeData {
-        let mut d = ShapeData { v: v.clone(), prism: None, points: vec![], triangles: vec![] };
+        let mut d = ShapeData { v: v.clone(), prism: None, points: vec![], mesh: Mesh::default() };
         let value = &v["value"];
         match v["kind"].as_str().unwrap() {
             "prism" => d.prism = Some(Json::get(value)),
             "polyline" | "polygon" => d.points = Json::get(value),
-            "mesh" => {
-                d.points = Json::get(&value["vertices"]);
-                d.triangles = Json::get(&value["triangles"]);
-            }
+            "mesh" => d.mesh = get_mesh(value),
             _ => {}
         }
         d
@@ -364,7 +381,7 @@ impl ShapeData {
             "segment" => shape_from_segment(Json::get(value)),
             "polyline" => shape_from_polyline(&self.points),
             "polygon" => shape_from_polygon(&self.points),
-            "mesh" => shape_from_mesh(&self.points, &self.triangles),
+            "mesh" => shape_from_mesh(&self.mesh),
             k => panic!("no shape {k}"),
         }
     }
@@ -586,7 +603,7 @@ fn lists_and_options() {
 #[test]
 #[should_panic(expected = "threes")]
 fn triangles_not_in_threes_panic() {
-    mesh_area(&[d3(0.0, 0.0, 0.0)], &[0, 1]);
+    mesh_area(&Mesh { triangles: vec![0, 1], ..Mesh::default() });
 }
 
 #[test]
@@ -595,8 +612,13 @@ fn shapes_borrow() {
     let line = shape_from_polyline(&points);
     let copy = line;
     assert!((shape_distance(&copy, d3(1.0, 1.0, 0.0)) - 1.0).abs() < 1e-12);
-    let (vertices, normals, triangles) = shape_mesh(&shape_from_sphere(Sphere { center: d3(0.0, 0.0, 0.0), radius: 1.0 }), 8, 0.5).unwrap();
-    assert!(!vertices.is_empty() && normals.len() == vertices.len() && !triangles.is_empty() && triangles.len() % 3 == 0);
+    let ball = shape_mesh(&shape_from_sphere(Sphere { center: d3(0.0, 0.0, 0.0), radius: 1.0 }), 8, 0.5).unwrap();
+    assert!(ball.vertices.point_step == 24 && !ball.triangles.is_empty() && ball.triangles.len() % 3 == 0);
+    assert!(mesh_normals(&ball).unwrap().len() == ball.vertices.data.len() / 24 && mesh_area(&ball) > 9.0);
+    let again = shape_from_mesh(&ball);
+    let kept = again.clone();
+    drop(again);
+    assert!(shape_contains(&kept, d3(0.0, 0.0, 0.0)) && !shape_contains(&kept, d3(0.0, 0.0, 1.01)));
 }
 
 #[test]

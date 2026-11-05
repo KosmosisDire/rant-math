@@ -115,7 +115,7 @@ def arm(m, f, index):
             lines.append(f"let {x} = prism_in(ctx, {a})?;")
             args.append("&" + x)
         elif k == "shape":
-            lines.append(f"let h{n} = ShapeHold::new(ctx, {a})?;")
+            lines.append(f"let h{n} = ShapeHold::new(ctx, fail, {a})?;")
             lines.append(f"let {x} = h{n}.shape(ctx)?;")
             args.append("&" + x)
         elif k == "shape2d":
@@ -130,6 +130,9 @@ def arm(m, f, index):
             args.append("&mut " + x)
         elif k == "cloud":
             lines.append(f"let {x} = cloud_in(ctx, {a})?;")
+            args.append("&" + x)
+        elif k == "mesh":
+            lines.append(f"let {x} = mesh_in(ctx, {a})?;")
             args.append("&" + x)
         elif k == "cloud_mut":
             lines.append(f"let mut {x} = cloud_in(ctx, {a})?;")
@@ -169,7 +172,7 @@ def arm(m, f, index):
     guards = ""
     for a2 in f.args:
         if a2.kind == "mesh":
-            guards += f"if x{f.inputs.index(a2.b)}.len() % 3 != 0 {{ return Err(math_error(ctx, fail, MathError::Argument)); }} "
+            guards += f"crate::MeshRaw::new(&x{f.inputs.index(a2.a)}).map_err(|e| math_error(ctx, fail, e))?; "
         elif a2.kind == "degree":
             guards += f"if x{f.inputs.index(a2.a)}.is_empty() {{ return Err(math_error(ctx, fail, MathError::Argument)); }} "
     if guards:
@@ -290,7 +293,7 @@ def prelude_js(m):
         elif word in ("polyline2d", "polygon2d"):
             shapes.append(f'        {name}: (points) => ({{ kind: "{word}", value: flatCopy(points, 2) }}),')
         elif word == "mesh":
-            shapes.append(f'        {name}: (vertices, triangles) => {{ if (triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return {{ kind: "mesh", value: {{ vertices: flatCopy(vertices, 3), triangles: Uint32Array.from(triangles) }} }}; }},')
+            shapes.append(f'        {name}: (mesh) => {{ if (mesh.triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return {{ kind: "mesh", value: mesh }}; }},')
         elif word == "prism":
             shapes.append(f'        {name}: (prism) => ({{ kind: "prism", value: {{ pose: prism.pose, base: flatCopy(prism.base.points, 2), height: prism.height }} }}),')
         else:

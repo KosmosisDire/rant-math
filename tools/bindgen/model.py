@@ -100,14 +100,14 @@ class CParam:
 class Input:
     name: str
     kind: str   # value ref opt_ref list prism shape shape2d image image_mut cloud cloud_mut grid grid_mut
-                # scan det2d det3d matrix fit_options align_options tree string
+                # scan det2d det3d matrix fit_options align_options tree string mesh
     type: str = ""
 
 
 @dataclass
 class Output:
     name: str
-    kind: str   # return out fixed query sized same expr matrix image cloud field mutated handle
+    kind: str   # return out fixed query sized same expr matrix image cloud field mutated handle mesh_new
     type: str = ""
     size: object = None     # fixed: N. sized: the input that gives the count. same: the input it matches.
                             # expr: a size in words a backend reads, see SIZE_EXPRS.
@@ -121,7 +121,7 @@ class Output:
 class Arg:
     kind: str   # value ref opt_ref list_ptr list_count degree view mesh prism shape shape2d image cloud grid scan
                 # det_ptr det_count matrix string options tree out out_size count_ptr null
-                # matrix_out image_out cloud_data
+                # matrix_out image_out cloud_data mesh_out
     a: object = None
     b: object = None
 
@@ -311,12 +311,11 @@ def auto(f, m):
             f.inputs.append(inp)
             f.args.append(Arg("view", inp, p.type))
             last_list = inp
-        elif p.type == "RantMeshView" and not p.pointer:
-            v = Input("vertices", "list", "RantDouble3")
-            t = Input("triangles", "list", "uint32_t")
-            f.inputs += [v, t]
-            f.args.append(Arg("mesh", v, t))
-            last_list = v
+        elif p.type == "RantMeshView" and not p.pointer:            # a binding's Mesh, its corners read in C
+            inp = Input("mesh", "mesh", "RantMesh")
+            f.inputs.append(inp)
+            f.args.append(Arg("mesh", inp))
+            last_list = inp
         elif p.type == "RantPrismView" and not p.pointer:
             inp = Input("prism", "prism", "RantPrism")
             f.inputs.append(inp)
@@ -480,12 +479,11 @@ def _(f, m):
 
 @special("rant_mesh_normals")
 def _(f, m):
-    v = Input("vertices", "list", "RantDouble3")
-    t = Input("triangles", "list", "uint32_t")
-    out = Output("normals", "same", "RantDouble3", v)
-    f.inputs = [v, t]
+    mesh = Input("mesh", "mesh", "RantMesh")
+    out = Output("normals", "same", "RantDouble3", mesh)   # one for each of its corners
+    f.inputs = [mesh]
     f.outputs = [out]
-    f.args = [Arg("mesh", v, t), Arg("out", out)]
+    f.args = [Arg("mesh", mesh), Arg("out", out)]
 
 
 @special("rant_polygon2d_triangulate")
@@ -517,13 +515,10 @@ def _(f, m):
     s = Input("s", "shape", "RantShape")
     seg = Input("segments", "value", "uint32_t")
     crease = Input("crease", "value", "double")
-    v = Output("vertices", "query", "RantDouble3")
-    n = Output("normals", "query", "RantDouble3", v)   # shares the count of vertices
-    t = Output("triangles", "query", "uint32_t", per=3)
+    out = Output("mesh", "mesh_new", "RantMesh")   # a binding's Mesh, corners and normals as f32
     f.inputs = [s, seg, crease]
-    f.outputs = [v, n, t]
-    f.args = [Arg("shape", s), Arg("value", seg), Arg("value", crease), Arg("out", v), Arg("out", n), Arg("count_ptr", v),
-              Arg("out", t), Arg("count_ptr", t)]
+    f.outputs = [out]
+    f.args = [Arg("shape", s), Arg("value", seg), Arg("value", crease), Arg("mesh_out", out)]
 
 
 @special("rant_polynomial_fit")

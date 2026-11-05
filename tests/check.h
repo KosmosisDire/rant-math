@@ -39,6 +39,9 @@ uint32_t random_polygon(RantDouble2 *out, uint32_t most);
 #define PI 3.14159265358979323846
 /* A crease past a half turn, so a mesh splits at no edge and a solid stays closed by index. */
 #define SMOOTH 4.0
+/* rant_shape_mesh into a cloud of doubles, its corners copied to v and its normals to n when n is not NULL. */
+RantMathResult mesh_of(const RantShape *s, uint32_t segments, double crease, RantDouble3 *v, RantDouble3 *n,
+                       uint32_t *nv, uint32_t *t, uint32_t *nt);
 
 /* Each test file holds one of these per part. */
 void test_vector(void);

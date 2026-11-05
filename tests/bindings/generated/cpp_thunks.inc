@@ -3242,85 +3242,74 @@ const std::map<std::string, Thunk> thunks = {
     }},
     {"mesh_check", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        rant::math::mesh_check(x0, x1);
+        Mesh x0 = get_mesh(a[0]);
+        rant::math::mesh_check(x0);
         J out;
         return out;
     }},
     {"mesh_distance", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        Double3 x2 = get<Double3>(a[2]);
-        J out = put(rant::math::mesh_distance(x0, x1, x2));
+        Mesh x0 = get_mesh(a[0]);
+        Double3 x1 = get<Double3>(a[1]);
+        J out = put(rant::math::mesh_distance(x0, x1));
         return out;
     }},
     {"mesh_closest", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        Double3 x2 = get<Double3>(a[2]);
-        J out = put(rant::math::mesh_closest(x0, x1, x2));
+        Mesh x0 = get_mesh(a[0]);
+        Double3 x1 = get<Double3>(a[1]);
+        J out = put(rant::math::mesh_closest(x0, x1));
         return out;
     }},
     {"mesh_contains", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        Double3 x2 = get<Double3>(a[2]);
-        J out = put(rant::math::mesh_contains(x0, x1, x2));
+        Mesh x0 = get_mesh(a[0]);
+        Double3 x1 = get<Double3>(a[1]);
+        J out = put(rant::math::mesh_contains(x0, x1));
         return out;
     }},
     {"mesh_raycast", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        Ray x2 = get<Ray>(a[2]);
-        J out = put(rant::math::mesh_raycast(x0, x1, x2));
+        Mesh x0 = get_mesh(a[0]);
+        Ray x1 = get<Ray>(a[1]);
+        J out = put(rant::math::mesh_raycast(x0, x1));
         return out;
     }},
     {"mesh_bounds", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        J out = put(rant::math::mesh_bounds(x0, x1));
+        Mesh x0 = get_mesh(a[0]);
+        J out = put(rant::math::mesh_bounds(x0));
         return out;
     }},
     {"mesh_area", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        J out = put(rant::math::mesh_area(x0, x1));
+        Mesh x0 = get_mesh(a[0]);
+        J out = put(rant::math::mesh_area(x0));
         return out;
     }},
     {"mesh_volume", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        J out = put(rant::math::mesh_volume(x0, x1));
+        Mesh x0 = get_mesh(a[0]);
+        J out = put(rant::math::mesh_volume(x0));
         return out;
     }},
     {"mesh_centroid", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        J out = put(rant::math::mesh_centroid(x0, x1));
+        Mesh x0 = get_mesh(a[0]);
+        J out = put(rant::math::mesh_centroid(x0));
         return out;
     }},
     {"mesh_inertia", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        double x2 = get<double>(a[2]);
-        J out = put(rant::math::mesh_inertia(x0, x1, x2));
+        Mesh x0 = get_mesh(a[0]);
+        double x1 = get<double>(a[1]);
+        J out = put(rant::math::mesh_inertia(x0, x1));
         return out;
     }},
     {"mesh_normals", [](const std::vector<J> &a) {
         (void)a;
-        std::vector<Double3> x0 = get_list<Double3>(a[0]);
-        std::vector<uint32_t> x1 = get_list<uint32_t>(a[1]);
-        J out = put(rant::math::mesh_normals(x0, x1));
+        Mesh x0 = get_mesh(a[0]);
+        J out = put(rant::math::mesh_normals(x0));
         return out;
     }},
     {"points_bounds", [](const std::vector<J> &a) {

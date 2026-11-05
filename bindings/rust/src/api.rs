@@ -2082,64 +2082,75 @@ pub fn polygon_edges(points: &[Double3]) -> Result<Vec<Segment>, MathError> {
 }
 
 /// Fails when an index runs past the vertices. Every other mesh call skips such a triangle.
-pub fn mesh_check(vertices: &[Double3], triangles: &[u32]) -> Result<(), MathError> {
-    check(unsafe { ffi::rant_mesh_check(mesh_raw(vertices, triangles)) })?;
+pub fn mesh_check(mesh: &Mesh) -> Result<(), MathError> {
+    let c_mesh = MeshRaw::new(mesh)?;
+    check(unsafe { ffi::rant_mesh_check(c_mesh.raw) })?;
     Ok(())
 }
 
-pub fn mesh_distance(vertices: &[Double3], triangles: &[u32], point: Double3) -> f64 {
-    let r = unsafe { ffi::rant_mesh_distance(mesh_raw(vertices, triangles), point) };
+pub fn mesh_distance(mesh: &Mesh, point: Double3) -> f64 {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_distance(c_mesh.raw, point) };
     r
 }
 
-pub fn mesh_closest(vertices: &[Double3], triangles: &[u32], point: Double3) -> SurfacePoint {
-    let r = unsafe { ffi::rant_mesh_closest(mesh_raw(vertices, triangles), point) };
+pub fn mesh_closest(mesh: &Mesh, point: Double3) -> SurfacePoint {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_closest(c_mesh.raw, point) };
     r
 }
 
 /// 1 when the triangles of a closed mesh wind round the point, which puts it inside.
-pub fn mesh_contains(vertices: &[Double3], triangles: &[u32], point: Double3) -> bool {
-    (unsafe { ffi::rant_mesh_contains(mesh_raw(vertices, triangles), point) }) != 0
+pub fn mesh_contains(mesh: &Mesh, point: Double3) -> bool {
+    let c_mesh = MeshRaw::sure(mesh);
+    (unsafe { ffi::rant_mesh_contains(c_mesh.raw, point) }) != 0
 }
 
-pub fn mesh_raycast(vertices: &[Double3], triangles: &[u32], ray: Ray) -> Option<RayHit> {
+pub fn mesh_raycast(mesh: &Mesh, ray: Ray) -> Option<RayHit> {
+    let c_mesh = MeshRaw::sure(mesh);
     let mut o0 = RayHit::default();
-    if unsafe { ffi::rant_mesh_raycast(mesh_raw(vertices, triangles), ray, &mut o0) } == 0 { return None; }
+    if unsafe { ffi::rant_mesh_raycast(c_mesh.raw, ray, &mut o0) } == 0 { return None; }
     Some(o0)
 }
 
-pub fn mesh_bounds(vertices: &[Double3], triangles: &[u32]) -> AlignedBox {
-    let r = unsafe { ffi::rant_mesh_bounds(mesh_raw(vertices, triangles)) };
+pub fn mesh_bounds(mesh: &Mesh) -> AlignedBox {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_bounds(c_mesh.raw) };
     r
 }
 
-pub fn mesh_area(vertices: &[Double3], triangles: &[u32]) -> f64 {
-    let r = unsafe { ffi::rant_mesh_area(mesh_raw(vertices, triangles)) };
+pub fn mesh_area(mesh: &Mesh) -> f64 {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_area(c_mesh.raw) };
     r
 }
 
 /// What a closed mesh holds, from the signed solids its triangles make with one point. The centroid is
 /// of that volume, or of the surface when the mesh holds none.
-pub fn mesh_volume(vertices: &[Double3], triangles: &[u32]) -> f64 {
-    let r = unsafe { ffi::rant_mesh_volume(mesh_raw(vertices, triangles)) };
+pub fn mesh_volume(mesh: &Mesh) -> f64 {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_volume(c_mesh.raw) };
     r
 }
 
-pub fn mesh_centroid(vertices: &[Double3], triangles: &[u32]) -> Double3 {
-    let r = unsafe { ffi::rant_mesh_centroid(mesh_raw(vertices, triangles)) };
+pub fn mesh_centroid(mesh: &Mesh) -> Double3 {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_centroid(c_mesh.raw) };
     r
 }
 
-pub fn mesh_inertia(vertices: &[Double3], triangles: &[u32], mass: f64) -> Inertia {
-    let r = unsafe { ffi::rant_mesh_inertia(mesh_raw(vertices, triangles), mass) };
+pub fn mesh_inertia(mesh: &Mesh, mass: f64) -> Inertia {
+    let c_mesh = MeshRaw::sure(mesh);
+    let r = unsafe { ffi::rant_mesh_inertia(c_mesh.raw, mass) };
     r
 }
 
 /// The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a vertex in
 /// none. normals holds vertex_count.
-pub fn mesh_normals(vertices: &[Double3], triangles: &[u32]) -> Result<Vec<Double3>, MathError> {
-    let mut o0 = vec![Double3::default(); vertices.len()];
-    check(unsafe { ffi::rant_mesh_normals(mesh_raw(vertices, triangles), o0.as_mut_ptr()) })?;
+pub fn mesh_normals(mesh: &Mesh) -> Result<Vec<Double3>, MathError> {
+    let c_mesh = MeshRaw::new(mesh)?;
+    let mut o0 = vec![Double3::default(); c_mesh.raw.vertex_count as usize];
+    check(unsafe { ffi::rant_mesh_normals(c_mesh.raw, o0.as_mut_ptr()) })?;
     Ok(o0)
 }
 
@@ -2212,47 +2223,48 @@ pub fn points2d_enclosing_circle(points: &[Double2]) -> Result<Circle, MathError
 }
 
 pub fn shape_from_aligned_box<'a>(b: AlignedBox) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_aligned_box(b) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_aligned_box(b) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_oriented_box<'a>(b: OrientedBox) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_oriented_box(b) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_oriented_box(b) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_sphere<'a>(s: Sphere) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_sphere(s) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_sphere(s) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_capsule<'a>(c: Capsule) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_capsule(c) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_capsule(c) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_cylinder<'a>(c: Cylinder) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_cylinder(c) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_cylinder(c) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_cone<'a>(c: Cone) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_cone(c) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_cone(c) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_prism<'a>(prism: &'a Prism) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_prism(prism_raw(prism)) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_prism(prism_raw(prism)) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_segment<'a>(s: Segment) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_segment(s) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_segment(s) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_polyline<'a>(points: &'a [Double3]) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_polyline(ffi::RawPolylineView { points: points.as_ptr(), count: len32(points.len()) }) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_polyline(ffi::RawPolylineView { points: points.as_ptr(), count: len32(points.len()) }) }, data: PhantomData, _corners: None }
 }
 
 pub fn shape_from_polygon<'a>(points: &'a [Double3]) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_polygon(ffi::RawPolygonView { points: points.as_ptr(), count: len32(points.len()) }) }, data: PhantomData }
+    Shape { raw: unsafe { ffi::rant_shape_from_polygon(ffi::RawPolygonView { points: points.as_ptr(), count: len32(points.len()) }) }, data: PhantomData, _corners: None }
 }
 
-pub fn shape_from_mesh<'a>(vertices: &'a [Double3], triangles: &'a [u32]) -> Shape<'a> {
-    Shape { raw: unsafe { ffi::rant_shape_from_mesh(mesh_raw(vertices, triangles)) }, data: PhantomData }
+pub fn shape_from_mesh<'a>(mesh: &'a Mesh) -> Shape<'a> {
+    let c = MeshRaw::sure(mesh);
+    Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.points) }
 }
 
 /// Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the
@@ -2314,20 +2326,19 @@ pub fn shape_sample_surface(s: &Shape, seed: u64, count: u32) -> Result<Vec<Doub
     Ok(o0)
 }
 
-/// Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
-/// 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says.
-pub fn shape_mesh(s: &Shape, segments: u32, crease: f64) -> Result<(Vec<Double3>, Vec<Double3>, Vec<u32>), MathError> {
-    let mut n0 = 0u32;
-    let mut n2 = 0u32;
-    room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), std::ptr::null_mut(), &mut n0, std::ptr::null_mut(), &mut n2) })?;
-    let mut o0 = vec![Double3::default(); n0 as usize];
-    let mut o1 = vec![Double3::default(); n0 as usize];
-    let mut o2 = vec![u32::default(); n2 as usize * 3];
-    check(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, o0.as_mut_ptr(), o1.as_mut_ptr(), &mut n0, o2.as_mut_ptr(), &mut n2) })?;
-    o0.truncate(n0 as usize);
-    o1.truncate(n0 as usize);
-    o2.truncate(n2 as usize * 3);
-    Ok((o0, o1, o2))
+/// Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
+/// at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
+/// docs/shapes.md says.
+pub fn shape_mesh(s: &Shape, segments: u32, crease: f64) -> Result<Mesh, MathError> {
+    let (mut n, mut t) = (0u32, 0u32);
+    room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), &mut n, std::ptr::null_mut(), &mut t) })?;
+    let layout = unsafe { ffi::rant_point_cloud_layout(PointCloudLayout::XyzNormal as i32) };
+    let mut out = Mesh { vertices: cloud_like(&layout), triangles: vec![0u32; t as usize * 3] };
+    out.vertices.data = vec![0u8; n as usize * out.vertices.point_step as usize];
+    let mut c = CloudRaw::new_mut(&mut out.vertices);
+    check(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, &mut c.raw, &mut n, out.triangles.as_mut_ptr(), &mut t) })?;
+    drop(c);
+    Ok(out)
 }
 
 pub fn shape2d_from_aligned_box2d<'a>(b: AlignedBox2D) -> Shape2D<'a> {

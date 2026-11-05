@@ -954,21 +954,21 @@ static double angle_between(RantDouble3 u, RantDouble3 v){
 
 /* m with vertices at one point welded, a face with no area left out, and a vertex for each group of
  * corners joined across edges where faces meet within crease, its normal the faces' by their angle there. */
-static RantMathResult shade_mesh(RantMeshView m, double crease, RantDouble3 *vertices, RantDouble3 *normals,
-                                 uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count){
-    uint32_t nv = m.vertex_count, nt = m.triangle_count, kept = 0, groups = 0, room_v = *vertex_count,
-             room_t = *triangle_count, lo, hi, i, j, c, f;
+static RantMathResult shade_mesh(RantMeshView m, double crease, RantPointCloudView *vertices, uint32_t *vertex_count,
+                                 uint32_t *triangles, uint32_t *triangle_count){
+    uint32_t nv = m.vertex_count, nt = m.triangle_count, kept = 0, groups = 0, room_t = *triangle_count, lo, hi, i, j, c, f;
+    uint32_t room_v = vertices ? (uint32_t)(vertices->size / vertices->point_step) : 0;
     size_t corners = 3 * (size_t)nt + 1;
     uint32_t *weld = (uint32_t *)malloc(sizeof(uint32_t) * ((size_t)nv + 1));
     uint32_t *at = (uint32_t *)malloc(sizeof(uint32_t) * corners), *up = (uint32_t *)malloc(sizeof(uint32_t) * corners);
     uint32_t *id = (uint32_t *)malloc(sizeof(uint32_t) * corners), *home = (uint32_t *)malloc(sizeof(uint32_t) * corners);
     uint32_t *start = (uint32_t *)malloc(sizeof(uint32_t) * ((size_t)nv + 2)), *order = (uint32_t *)malloc(sizeof(uint32_t) * corners);
     RantDouble3 *unit = (RantDouble3 *)malloc(sizeof(RantDouble3) * ((size_t)nt + 1));
-    RantDouble3 *sum = (RantDouble3 *)malloc(sizeof(RantDouble3) * corners);
+    RantDouble3 *sum = (RantDouble3 *)malloc(sizeof(RantDouble3) * corners), *pos = (RantDouble3 *)malloc(sizeof(RantDouble3) * corners);
     i_MathKey *keys = (i_MathKey *)malloc(sizeof(i_MathKey) * ((size_t)nv + 1));
     i_MeshSide *sides = (i_MeshSide *)malloc(sizeof(i_MeshSide) * corners);
     RantMathResult r = RANT_MATH_ERR_MEMORY;
-    if (!weld || !at || !up || !id || !home || !start || !order || !unit || !sum || !keys || !sides) goto done;
+    if (!weld || !at || !up || !id || !home || !start || !order || !unit || !sum || !pos || !keys || !sides) goto done;
     for (i = 0, j = 0; i < nv; i++){
         weld[i] = i;
         if (!i_math_finite3(m.vertices[i])) continue;
@@ -1046,22 +1046,44 @@ static RantMathResult shade_mesh(RantMeshView m, double crease, RantDouble3 *ver
     *vertex_count = groups;
     *triangle_count = kept;
     r = RANT_MATH_ERR_SPACE;
-    if (groups > room_v || kept > room_t || (groups && !vertices) || (kept && !triangles)) goto done;
+    if (groups > room_v || kept > room_t || (kept && !triangles)) goto done;
     for (i = 0; i < groups; i++){
         double l = rant_double3_length(sum[i]);
-        vertices[i] = m.vertices[at[home[i]]];
+        pos[i] = m.vertices[at[home[i]]];
         /* faces back to back cancel, and then the first one's stands */
-        if (normals) normals[i] = l > 0.0 ? rant_double3_scale(sum[i], 1.0 / l) : unit[home[i] / 3];
+        sum[i] = l > 0.0 ? rant_double3_scale(sum[i], 1.0 / l) : unit[home[i] / 3];
+    }
+    if (groups){
+        RantPointCloudView out = *vertices;
+        const RantPointFieldView *n[3];
+        out.size = (size_t)groups * out.point_step;
+        if ((r = rant_point_cloud_write_points(&out, pos, groups)) != RANT_MATH_OK) goto done;
+        n[0] = rant_point_cloud_field(vertices, "normal_x");
+        n[1] = rant_point_cloud_field(vertices, "normal_y");
+        n[2] = rant_point_cloud_field(vertices, "normal_z");
+        if (n[0] && n[1] && n[2]){
+            /* the normal fields named x, y and z, so writing points writes the normals */
+            static const char *const names[3] = { "x", "y", "z" };
+            RantPointFieldView as_xyz[3];
+            for (i = 0; i < 3; i++){
+                as_xyz[i] = *n[i];
+                as_xyz[i].name = names[i];
+                as_xyz[i].name_len = 1;
+            }
+            out.fields = as_xyz;
+            out.field_count = 3;
+            if ((r = rant_point_cloud_write_points(&out, sum, groups)) != RANT_MATH_OK) goto done;
+        }
     }
     for (c = 0; c < 3 * kept; c++) triangles[c] = id[c];
     r = RANT_MATH_OK;
 done:
-    free(weld); free(at); free(up); free(id); free(home); free(start); free(order); free(unit); free(sum);
+    free(weld); free(at); free(up); free(id); free(home); free(start); free(order); free(unit); free(sum); free(pos);
     free(keys); free(sides);
     return r;
 }
 
-RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantDouble3 *vertices, RantDouble3 *normals,
+RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantPointCloudView *vertices,
                                uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count){
     uint32_t n = segments ? segments : 32, rings = n / 2 < 2 ? 2 : n / 2, half = n / 4 < 1 ? 1 : n / 4, e = 0, i;
     uint64_t nv = 0, nt = 0;
@@ -1071,6 +1093,9 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double cre
     RantMathResult r = RANT_MATH_OK;
     i_Build b;
     if (!s || !vertex_count || !triangle_count || (segments && segments < 3) || !(crease >= 0.0)) return RANT_MATH_ERR_ARGUMENT;
+    if (vertices && (r = rant_point_cloud_check(vertices)) != RANT_MATH_OK) return r;
+    if (vertices && (!rant_point_cloud_field(vertices, "x") || !rant_point_cloud_field(vertices, "y") ||
+                     !rant_point_cloud_field(vertices, "z"))) return RANT_MATH_ERR_FORMAT;
     fv.points = NULL;
     fv.count = 0;
     switch (s->kind){
@@ -1107,7 +1132,7 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double cre
     default: return RANT_MATH_ERR_ARGUMENT;
     }
     if (nv > UINT32_MAX || nt > UINT32_MAX / 3){ free(flat); return RANT_MATH_ERR_ARGUMENT; }
-    if (s->kind == RANT_SHAPE_MESH) return shade_mesh(s->as.mesh, crease, vertices, normals, vertex_count, triangles, triangle_count);
+    if (s->kind == RANT_SHAPE_MESH) return shade_mesh(s->as.mesh, crease, vertices, vertex_count, triangles, triangle_count);
     b.v = (RantDouble3 *)malloc(sizeof(RantDouble3) * (size_t)nv);
     b.t = (uint32_t *)malloc(sizeof(uint32_t) * 3 * (size_t)nt);
     b.nv = 0; b.nt = 0;
@@ -1200,7 +1225,7 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double cre
     default: break;
     }
     m.vertices = b.v; m.vertex_count = b.nv; m.triangles = b.t; m.triangle_count = b.nt;
-    if (r == RANT_MATH_OK) r = shade_mesh(m, crease, vertices, normals, vertex_count, triangles, triangle_count);
+    if (r == RANT_MATH_OK) r = shade_mesh(m, crease, vertices, vertex_count, triangles, triangle_count);
     free(b.v); free(b.t); free(flat);
     return r;
 }

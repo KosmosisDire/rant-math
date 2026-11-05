@@ -28,7 +28,8 @@ C `rant_pose_inverse` is:
   `RantMathResult` and writes through its last pointer.
 - A call that can miss, such as a raycast, gives an optional, `None` or `null`.
 - A list comes back as a list. No binding needs a count or room.
-- A view of a list in C is the list: `polyline_length(points)`, `mesh_area(vertices, triangles)`.
+- A view of a list in C is the list: `polyline_length(points)`. A mesh is the standard Mesh: `mesh_area(mesh)`,
+  and `shape_mesh(shape, segments, crease)` returns one, its corners x, y, z and a normal as f32.
 
 ```python
 import rant_math as m

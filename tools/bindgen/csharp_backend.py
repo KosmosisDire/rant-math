@@ -216,7 +216,7 @@ def input_decl(m, i):
     if k == "list":
         return f"ReadOnlySpan<{cs_type(m, i.type)}> {n}"
     words = {
-        "string": "string", "prism": "Prism", "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image",
+        "string": "string", "prism": "Prism", "mesh": "Mesh", "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image",
         "cloud": "PointCloud", "cloud_mut": "PointCloud", "grid": "Grid", "grid_mut": "Grid", "scan": "LaserScan",
         "det2d": "ReadOnlySpan<Detection2D>", "det3d": "ReadOnlySpan<Detection3D>", "matrix": "Matrix", "tree": "KdTree",
     }
@@ -234,7 +234,7 @@ def output_type(m, o):
     if k in ("fixed", "query", "sized", "same", "expr", "room"):
         return f"{cs_type(m, o.type)}[]"
     return {"matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "PointCloud", "cloud_select": "PointCloud",
-            "field": "PointField?", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type)}[k]
+            "field": "PointField?", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type), "mesh_new": "Mesh"}[k]
 
 
 def result_type(m, f):
@@ -288,6 +288,9 @@ class Writer:
             elif k in ("cloud", "cloud_mut"):
                 self.using.append(f"var {c}_p = new CloudPin({n})")
                 self.body.append(f"var {c} = {c}_p.Raw;")
+            elif k == "mesh":
+                self.using.append(f"var {c}_p = new MeshPin({n})")
+                self.body.append(f"var {c} = {c}_p.Raw;")
             elif k in ("grid", "grid_mut"):
                 self.using.append(f"var {c}_p = new GridPin({n})")
                 self.body.append(f"var {c} = {c}_p.Raw;")
@@ -340,6 +343,8 @@ class Writer:
                 t = cs_type(m, o.type)
                 if k == "fixed":
                     size = str(o.size)
+                elif k == "same" and o.size.kind == "mesh":
+                    size = f"Impl.Corners({self.names[id(o.size)]})"
                 elif k == "same":
                     size = f"{self.names[id(o.size)]}.Length"
                 elif k in ("sized", "room"):
@@ -383,8 +388,7 @@ class Writer:
             word = m.structs[a.b].fields[0].name
             return f"new Raw{short(a.b)} {{ {word} = {c}, count = (uint){n}.Length }}"
         if k == "mesh":
-            other = self.names[id(a.b)]
-            return f"Impl.Mesh({c}, {n}.Length, {self.raw_name(other)}, {other}.Length)"
+            return c
         if k == "prism":
             return c
         if k == "shape" or k == "shape2d":
@@ -452,6 +456,13 @@ class Writer:
         if f.c == "rant_point_cloud_field":
             return ["using (var p = new CloudPin(cloud))", "fixed (byte* s = Impl.Utf8(name))", "{", "    var c = p.Raw;",
                     "    var found = Native.rant_point_cloud_field(&c, s);", "    return found == null ? (PointField?)null : Impl.Field(*found);", "}"]
+        if f.c == "rant_shape_mesh":
+            return ["uint n = 0, t = 0;", "fixed (RawShape* c = &s.Raw)", "{",
+                    "    Impl.Room(Native.rant_shape_mesh(c, segments, crease, null, &n, null, &t));",
+                    "    var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)Rant.Math.PointCloudLayout.XyzNormal)), Triangles = new uint[(int)t * 3] };",
+                    "    mesh.Vertices.Data = new byte[(int)n * (int)mesh.Vertices.PointStep];",
+                    "    using (var p = new CloudPin(mesh.Vertices))", "    fixed (uint* tp = mesh.Triangles)", "    {", "        var v = p.Raw;",
+                    "        Impl.Check(Native.rant_shape_mesh(c, segments, crease, &v, &n, tp, &t));", "    }", "    return mesh;", "}"]
         if f.c == "rant_point_cloud_select":
             return ["using (var p = new CloudPin(cloud))", "fixed (byte* k = keep)", "{", "    var c = p.Raw;",
                     "    Impl.Check(Native.rant_point_cloud_check(&c));",
@@ -543,9 +554,7 @@ class Writer:
             return [f"var block = Impl.Copy({n});",
                     f"return new {cls}(Native.{f.c}(new {view} {{ points = ({el}*)block, count = (uint){n}.Length }}), block);"]
         if word == "mesh":
-            return ["var v = Impl.Copy(vertices);", "var t = Impl.Copy(triangles);",
-                    "var m = Impl.Mesh((Double3*)v, vertices.Length, (uint*)t, triangles.Length);",
-                    "return new Shape(Native.rant_shape_from_mesh(m), v, t);"]
+            return ["var p = new MeshPin(mesh);", "return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release());"]
         if word == "prism":
             return ["var b = Impl.Copy<Double2>(prism.Base.Points);",
                     "var c = Impl.Prism(prism, (Double2*)b);",
@@ -617,6 +626,7 @@ def thunk_input(m, i, n):
         "image": f"var x{n} = J.ToImage({a});",
         "image_mut": f"var x{n} = J.ToImage({a});",
         "cloud": f"var x{n} = J.ToCloud({a});",
+        "mesh": f"var x{n} = J.ToMesh({a});",
         "cloud_mut": f"var x{n} = J.ToCloud({a});",
         "grid": f"var x{n} = J.ToGrid({a});",
         "grid_mut": f"var x{n} = J.ToGrid({a});",

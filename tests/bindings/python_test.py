@@ -71,7 +71,7 @@ def make_shape(types, enums, v, two):
     kind, value = v["kind"], v["value"]
     build = getattr(rant_math, ("shape2d_from_" if two else "shape_from_") + kind)
     if kind == "mesh":
-        return build(items(types, enums, "RantDouble3", value["vertices"]), value["triangles"])
+        return build(make_mesh(value))
     if kind == "prism":
         return build(make_prism(types, enums, value))
     if kind in ("polygon", "polyline"):
@@ -93,6 +93,10 @@ def make_cloud(v, writable=False):
     fields = [rant_math.PointField(f["name"], f["offset"], rant_math.ScalarKind(f["kind"]), f["count"]) for f in v["fields"]]
     data = bytes.fromhex(v["data"])
     return rant_math.PointCloud(rant_math.Transform(), 0, fields, v["point_step"], False, data)
+
+
+def make_mesh(v):
+    return rant_math.Mesh(make_cloud(v["vertices"]), [int(x) for x in v["triangles"]])
 
 
 def make_grid(types, enums, v):
@@ -139,6 +143,8 @@ def make_input(types, enums, kind, v, extras, points, source, use_numpy):
         return make_image(v)
     if k in ("cloud", "cloud_mut"):
         return make_cloud(v)
+    if k == "mesh":
+        return make_mesh(v)
     if k in ("grid", "grid_mut"):
         return make_grid(types, enums, v)
     if k == "scan":
@@ -193,6 +199,11 @@ def to_json(v, top=True):
         return bytes(v).hex()
     if isinstance(v, rant_math.Image):
         return {"width": v.width, "height": v.height, "stride": v.stride, "format": int(v.format), "data": bytes(v.data).hex()}
+    if isinstance(v, rant_math.Mesh):
+        # its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
+        n = [rant_math.point_cloud_read_values(v.vertices, "normal_" + a) for a in "xyz"]
+        return {"point_step": v.vertices.point_step, "points": to_json(rant_math.point_cloud_read_points(v.vertices)),
+                "normals": [to_json(rant_math.Double3(float(x), float(y), float(z))) for x, y, z in zip(*n)], "triangles": [int(x) for x in v.triangles]}
     if isinstance(v, rant_math.PointCloud):
         return {"fields": [to_json(f) for f in v.fields], "point_step": v.point_step, "data": bytes(v.data).hex()}
     if isinstance(v, rant_math.PointField):

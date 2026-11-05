@@ -239,6 +239,8 @@ class Writer:
                 self.emit(f"c_{n} = _image_mut(_RantImageView, {n})")
             elif k == "cloud":
                 self.emit(f"c_{n} = _cloud({n})")
+            elif k == "mesh":
+                self.emit(f"c_{n} = _mesh({n})")
             elif k == "cloud_mut":
                 self.emit(f"c_{n} = _cloud({n}, True)")
             elif k == "grid":
@@ -285,6 +287,8 @@ class Writer:
                 size = f"n_{self.names[id(o.size)]}"
                 if o.size.kind in ("det2d", "det3d"):
                     size = f"len({self.names[id(o.size)]})"
+                elif o.size.kind == "mesh":
+                    size = f"c_{self.names[id(o.size)]}.vertex_count"
                 self.emit(f"{name}, p{j} = {self.new_list(o, size)}")
             elif k == "sized":
                 self.emit(f"{name}, p{j} = {self.new_list(o, self.names[id(o.size)])}")
@@ -338,7 +342,7 @@ class Writer:
             n = self.names[id(a.a)]
             return f"{c_struct(a.b)}(c_{n}, n_{n})"
         if k == "mesh":
-            return f"_mesh(c_{self.names[id(a.a)]}, n_{self.names[id(a.a)]}, c_{self.names[id(a.b)]}, n_{self.names[id(a.b)]})"
+            return f"c_{self.names[id(a.a)]}"
         if k == "prism" or k == "matrix":
             return f"c_{self.names[id(a.a)]}"
         if k in ("shape", "shape2d", "image", "image_mut", "cloud", "cloud_mut", "grid", "grid_mut", "scan"):
@@ -425,6 +429,19 @@ class Writer:
             self.emit("found = _lib.rant_point_cloud_field(byref(c_cloud), name.encode())")
             self.emit("return _field(found.contents) if found else None")
             return
+        if f.c == "rant_shape_mesh":
+            self.emit("n, t = c_uint32(0), c_uint32(0)")
+            self.emit("_room(_lib.rant_shape_mesh(byref(s._raw), segments, crease, None, byref(n), None, byref(t)))")
+            self.emit("out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(PointCloudLayout.XyzNormal)), [])")
+            self.emit("data = (c_uint8 * (n.value * out.vertices.point_step))()")
+            self.emit("triangles = (c_uint32 * (t.value * 3))()")
+            self.emit("c_out = _cloud(out.vertices)")
+            self.emit("c_out.data, c_out.size = data, len(data)")
+            self.emit("_check(_lib.rant_shape_mesh(byref(s._raw), segments, crease, byref(c_out), byref(n), triangles, byref(t)))")
+            self.emit("out.vertices.data = bytes(data)")
+            self.emit("out.triangles = list(triangles)")
+            self.emit("return out")
+            return
         if f.c == "rant_point_cloud_select":
             self.emit("c_cloud = _cloud(cloud)")
             self.emit("_check(_lib.rant_point_cloud_check(byref(c_cloud)))")
@@ -493,9 +510,8 @@ class Writer:
             self.emit(f"c_{n}, n_{n}, _np = _list_in({n}, {self.list_ctype(i.type)}, {self.list_conv(i.type)}, {kind!r}, {per}, True)")
             self.emit(f"return {cls}(_lib.{f.c}({c_struct(view)}(c_{n}, n_{n})), c_{n})")
         elif word == "mesh":
-            self.emit("c_v, n_v, _np = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3, True)")
-            self.emit("c_t, n_t, _np = _list_in(triangles, c_uint32, None, 'uint32', 1, True)")
-            self.emit("return Shape(_lib.rant_shape_from_mesh(_mesh(c_v, n_v, c_t, n_t)), c_v, c_t)")
+            self.emit(f"c_{n} = _mesh({n})")
+            self.emit(f"return Shape(_lib.rant_shape_from_mesh(c_{n}), c_{n})")
         elif word == "prism":
             self.emit(f"c_prism = _prism({n})")
             self.emit("return Shape(_lib.rant_shape_from_prism(c_prism), c_prism)")
@@ -523,7 +539,7 @@ def input_hint(i):
     if k == "list":
         return f"Sequence[{hint(i.type)}]"
     return {
-        "string": "str", "prism": "Prism", "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image",
+        "string": "str", "prism": "Prism", "mesh": "Mesh", "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image",
         "cloud": "PointCloud", "cloud_mut": "PointCloud", "grid": "Grid", "grid_mut": "Grid", "scan": "LaserScan",
         "det2d": "Sequence[Detection2D]", "det3d": "Sequence[Detection3D]", "matrix": "Matrix", "tree": "KdTree",
         "fit_options": "Optional[FitOptions]", "align_options": "Optional[AlignOptions]",
@@ -538,7 +554,7 @@ def output_hint(o):
         return "bytes" if o.type == "uint8_t" else f"List[{hint(o.type)}]"
     return {
         "matrix": "Matrix", "image": "Image", "image_copy": "Image", "cloud_layout": "PointCloud", "cloud_select": "PointCloud",
-        "field": "Optional[PointField]", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type),
+        "field": "Optional[PointField]", "prism": "Prism", "handle": "KdTree", "shape_new": short(o.type), "mesh_new": "Mesh",
     }[k]
 
 
@@ -674,10 +690,19 @@ def _mask_out(buffer, size):
     return data if size is None else data[:size]
 
 
-def _mesh(vertices, vertex_count, triangles, triangle_count):
-    if triangle_count % 3:
+def _mesh(mesh):
+    """A Mesh as the C view: its corners read once in C from whatever fields they are, its triangles as they are."""
+    cloud = _cloud(mesh.vertices)
+    n = c_uint32(0)
+    _room(_lib.rant_point_cloud_read_points(byref(cloud), None, byref(n)))
+    points = (_RantDouble3 * n.value)()
+    _check(_lib.rant_point_cloud_read_points(byref(cloud), points, byref(n)))
+    triangles, count, _np = _list_in(mesh.triangles, c_uint32, None, "uint32", 1, True)
+    if count % 3:
         raise MathError(ErrorKind.Argument)
-    return _RantMeshView(vertices, vertex_count, triangles, triangle_count // 3)
+    view = _RantMeshView(points, n.value, triangles, count // 3)
+    view._keep = (points, triangles)
+    return view
 
 
 def _prism(p):

@@ -194,6 +194,7 @@ static J put(const Matrix &m);
 static J put(const Image &i);
 static J put(const PointField &f);
 static J put(const PointCloud &c);
+static J put(const Mesh &m);
 static J put(const GridField &f);
 static J put(const Grid &g);
 static J put(const Prism &p);
@@ -262,6 +263,19 @@ static J put(const PointCloud &c) {
     o.add("data", put(c.data));
     return o;
 }
+/* A Mesh answer's points and normals as numbers, since their f32 bytes differ by a last digit between libraries. */
+static J put(const Mesh &m) {
+    std::vector<double> x = point_cloud_read_values(m.vertices, "normal_x"), y = point_cloud_read_values(m.vertices, "normal_y"),
+                        z = point_cloud_read_values(m.vertices, "normal_z");
+    std::vector<Double3> normals(x.size());
+    for (size_t i = 0; i < x.size(); i++) normals[i] = { x[i], y[i], z[i] };
+    J o = J::object();
+    o.add("point_step", put(m.vertices.point_step));
+    o.add("points", put(point_cloud_read_points(m.vertices)));
+    o.add("normals", put(normals));
+    o.add("triangles", put(m.triangles));
+    return o;
+}
 static J put(const GridField &f) {
     J o = J::object();
     o.add("name", put(f.name));
@@ -324,6 +338,12 @@ static PointCloud get_cloud(const J &j) {
     c.point_step = get<uint32_t>(j.at("point_step"));
     c.data = unhex(j.at("data").str);
     return c;
+}
+static Mesh get_mesh(const J &j) {
+    Mesh m;
+    m.vertices = get_cloud(j.at("vertices"));
+    m.triangles = get_list<uint32_t>(j.at("triangles"));
+    return m;
 }
 static Grid get_grid(const J &j) {
     Grid g;
@@ -393,7 +413,7 @@ static Shape get_shape(const J &j) {
     if (k == "segment") return shape_from_segment(get<Segment>(v));
     if (k == "polyline") return shape_from_polyline(get_list<Double3>(v));
     if (k == "polygon") return shape_from_polygon(get_list<Double3>(v));
-    if (k == "mesh") return shape_from_mesh(get_list<Double3>(v.at("vertices")), get_list<uint32_t>(v.at("triangles")));
+    if (k == "mesh") return shape_from_mesh(get_mesh(v));
     throw std::runtime_error("no shape " + k);
 }
 static Shape2D get_shape2d(const J &j) {
@@ -562,9 +582,12 @@ static void shapes() {
 
     Shape mesh_copy;
     {
-        std::vector<Double3> v = { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 } };
-        std::vector<uint32_t> t = { 0, 1, 2 };
-        mesh_copy = shape_from_mesh(v, t);
+        Mesh m;
+        m.vertices = point_cloud_layout(PointCloudLayout::Xyz);
+        m.vertices.data.resize(3 * m.vertices.point_step);
+        point_cloud_write_points(m.vertices, std::vector<Double3>{ { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 } });
+        m.triangles = { 0, 1, 2 };
+        mesh_copy = shape_from_mesh(m);
     }
     Shape again = mesh_copy;
     mesh_copy = Shape();
@@ -591,7 +614,8 @@ static void shapes() {
     flat = Shape2D();
     CHECK(shape2d_contains(flat_copy, { 1, 1 }));
 
-    throws(ErrorKind::Argument, [] { shape_from_mesh(std::vector<Double3>(3), std::vector<uint32_t>{ 0, 1 }); });
+    throws(ErrorKind::Argument, [] { Mesh m; m.triangles = { 0, 1 }; shape_from_mesh(m); });
+    throws(ErrorKind::Format, [] { Mesh m; m.vertices.point_step = 4; m.triangles = { 0, 1, 2 }; shape_from_mesh(m); });
 }
 
 static void results() {
@@ -645,8 +669,11 @@ static void lists() {
     CHECK(indices.size() == 2 && indices[0] == 0 && near(distances[0], 0.1));
     auto [inside, far] = kdtree_within(other, { 0, 0, 0 }, 0.5);
     CHECK(inside.size() == 1 && far.size() == 1);
-    auto [vertices, normals, triangles] = shape_mesh(shape_from_sphere(Sphere{ { 0, 0, 0 }, 1 }), 8, 0.5);
-    CHECK(!vertices.empty() && normals.size() == vertices.size() && triangles.size() % 3 == 0 && !triangles.empty());
+    Mesh ball = shape_mesh(shape_from_sphere(Sphere{ { 0, 0, 0 }, 1 }), 8, 0.5);
+    CHECK(ball.vertices.point_step == 24 && !ball.triangles.empty() && ball.triangles.size() % 3 == 0);
+    CHECK(mesh_area(ball) > 9.0 && mesh_area(ball) < 4.0 * 3.14159265358979 && mesh_normals(ball).size() == ball.vertices.data.size() / 24);
+    Shape again = shape_from_mesh(ball);
+    CHECK(shape_contains(again, { 0, 0, 0 }) && !shape_contains(again, { 0, 0, 1.01 }));
 }
 
 static void images() {

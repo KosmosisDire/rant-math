@@ -53,7 +53,7 @@ itself. A wrong shape a plain answer cannot report, such as triangles not in thr
 | Masks | `std::vector<uint8_t>` | `bytes`, numpy for numpy | `byte[]` | `Vec<u8>` | `Uint8Array` |
 
 - A call asks a list's size for you, so `*count` never shows.
-- A C view of a list is the list: `polygon2d_area(points)`, `mesh_area(vertices, triangles)`.
+- A C view of a list is the list: `polygon2d_area(points)`. A mesh is the standard Mesh: `mesh_area(mesh)`.
 - In C++ and Python, numpy and `std::span` go in with no copy. A `Float64Array` holds a point's numbers in a row.
 
 ## Shapes

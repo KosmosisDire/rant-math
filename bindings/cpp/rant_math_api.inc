@@ -2123,63 +2123,74 @@ inline std::vector<Segment> polygon_edges(Span<const Double3> points) {
 }
 
 /* Fails when an index runs past the vertices. Every other mesh call skips such a triangle. */
-inline void mesh_check(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    impl::check(detail::rant_mesh_check(impl::mesh(vertices, triangles)));
+inline void mesh_check(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    impl::check(detail::rant_mesh_check(c_mesh.raw));
 }
 
-inline double mesh_distance(Span<const Double3> vertices, Span<const uint32_t> triangles, Double3 point) {
-    auto r = detail::rant_mesh_distance(impl::mesh(vertices, triangles), impl::bits<detail::RantDouble3>(point));
+inline double mesh_distance(const Mesh &mesh, Double3 point) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_distance(c_mesh.raw, impl::bits<detail::RantDouble3>(point));
     return r;
 }
 
-inline SurfacePoint mesh_closest(Span<const Double3> vertices, Span<const uint32_t> triangles, Double3 point) {
-    auto r = detail::rant_mesh_closest(impl::mesh(vertices, triangles), impl::bits<detail::RantDouble3>(point));
+inline SurfacePoint mesh_closest(const Mesh &mesh, Double3 point) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_closest(c_mesh.raw, impl::bits<detail::RantDouble3>(point));
     return impl::bits<SurfacePoint>(r);
 }
 
 /* 1 when the triangles of a closed mesh wind round the point, which puts it inside. */
-inline bool mesh_contains(Span<const Double3> vertices, Span<const uint32_t> triangles, Double3 point) {
-    return detail::rant_mesh_contains(impl::mesh(vertices, triangles), impl::bits<detail::RantDouble3>(point)) != 0;
+inline bool mesh_contains(const Mesh &mesh, Double3 point) {
+    impl::MeshRef c_mesh(mesh);
+    return detail::rant_mesh_contains(c_mesh.raw, impl::bits<detail::RantDouble3>(point)) != 0;
 }
 
-inline std::optional<RayHit> mesh_raycast(Span<const Double3> vertices, Span<const uint32_t> triangles, Ray ray) {
+inline std::optional<RayHit> mesh_raycast(const Mesh &mesh, Ray ray) {
+    impl::MeshRef c_mesh(mesh);
     RayHit o0{};
-    if (!detail::rant_mesh_raycast(impl::mesh(vertices, triangles), impl::bits<detail::RantRay>(ray), impl::mut<detail::RantRayHit>(&o0))) return std::nullopt;
+    if (!detail::rant_mesh_raycast(c_mesh.raw, impl::bits<detail::RantRay>(ray), impl::mut<detail::RantRayHit>(&o0))) return std::nullopt;
     return o0;
 }
 
-inline AlignedBox mesh_bounds(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    auto r = detail::rant_mesh_bounds(impl::mesh(vertices, triangles));
+inline AlignedBox mesh_bounds(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_bounds(c_mesh.raw);
     return impl::bits<AlignedBox>(r);
 }
 
-inline double mesh_area(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    auto r = detail::rant_mesh_area(impl::mesh(vertices, triangles));
+inline double mesh_area(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_area(c_mesh.raw);
     return r;
 }
 
 /* What a closed mesh holds, from the signed solids its triangles make with one point. The centroid is */
 /* of that volume, or of the surface when the mesh holds none. */
-inline double mesh_volume(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    auto r = detail::rant_mesh_volume(impl::mesh(vertices, triangles));
+inline double mesh_volume(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_volume(c_mesh.raw);
     return r;
 }
 
-inline Double3 mesh_centroid(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    auto r = detail::rant_mesh_centroid(impl::mesh(vertices, triangles));
+inline Double3 mesh_centroid(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_centroid(c_mesh.raw);
     return impl::bits<Double3>(r);
 }
 
-inline Inertia mesh_inertia(Span<const Double3> vertices, Span<const uint32_t> triangles, double mass) {
-    auto r = detail::rant_mesh_inertia(impl::mesh(vertices, triangles), mass);
+inline Inertia mesh_inertia(const Mesh &mesh, double mass) {
+    impl::MeshRef c_mesh(mesh);
+    auto r = detail::rant_mesh_inertia(c_mesh.raw, mass);
     return impl::bits<Inertia>(r);
 }
 
 /* The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a vertex in */
 /* none. normals holds vertex_count. */
-inline std::vector<Double3> mesh_normals(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    std::vector<Double3> o0(vertices.size());
-    impl::check(detail::rant_mesh_normals(impl::mesh(vertices, triangles), impl::mut<detail::RantDouble3>(o0.data())));
+inline std::vector<Double3> mesh_normals(const Mesh &mesh) {
+    impl::MeshRef c_mesh(mesh);
+    std::vector<Double3> o0(c_mesh.points.size());
+    impl::check(detail::rant_mesh_normals(c_mesh.raw, impl::mut<detail::RantDouble3>(o0.data())));
     return o0;
 }
 
@@ -2291,8 +2302,8 @@ inline Shape shape_from_polygon(Span<const Double3> points) {
     return Shape::polyline(points, detail::RANT_SHAPE_POLYGON);
 }
 
-inline Shape shape_from_mesh(Span<const Double3> vertices, Span<const uint32_t> triangles) {
-    return Shape::mesh(vertices, triangles);
+inline Shape shape_from_mesh(const Mesh &mesh) {
+    return Shape::mesh(mesh);
 }
 
 /* Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the */
@@ -2354,20 +2365,19 @@ inline std::vector<Double3> shape_sample_surface(const Shape &s, uint64_t seed, 
     return o0;
 }
 
-/* Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for */
-/* 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says. */
-inline std::tuple<std::vector<Double3>, std::vector<Double3>, std::vector<uint32_t>> shape_mesh(const Shape &s, uint32_t segments, double crease) {
-    uint32_t n0 = 0;
-    uint32_t n2 = 0;
-    impl::room(detail::rant_shape_mesh(s.raw(), segments, crease, nullptr, nullptr, &n0, nullptr, &n2));
-    std::vector<Double3> o0(n0);
-    std::vector<Double3> o1(n0);
-    std::vector<uint32_t> o2(size_t(n2) * 3);
-    impl::check(detail::rant_shape_mesh(s.raw(), segments, crease, impl::mut<detail::RantDouble3>(o0.data()), impl::mut<detail::RantDouble3>(o1.data()), &n0, o2.data(), &n2));
-    o0.resize(n0);
-    o1.resize(n0);
-    o2.resize(size_t(n2) * 3);
-    return std::tuple<std::vector<Double3>, std::vector<Double3>, std::vector<uint32_t>>{ std::move(o0), std::move(o1), std::move(o2) };
+/* Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet */
+/* at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as */
+/* docs/shapes.md says. */
+inline Mesh shape_mesh(const Shape &s, uint32_t segments, double crease) {
+    uint32_t n = 0, t = 0;
+    impl::room(detail::rant_shape_mesh(s.raw(), segments, crease, nullptr, &n, nullptr, &t));
+    Mesh out;
+    out.vertices = impl::cloud_like(detail::rant_point_cloud_layout(detail::RANT_POINT_CLOUD_XYZ_NORMAL));
+    out.vertices.data.resize(size_t(n) * out.vertices.point_step);
+    out.triangles.resize(size_t(t) * 3);
+    MutablePointCloudView v(out.vertices);
+    impl::check(detail::rant_shape_mesh(s.raw(), segments, crease, v.raw(), &n, out.triangles.data(), &t));
+    return out;
 }
 
 inline Shape2D shape2d_from_aligned_box2d(AlignedBox2D b) {

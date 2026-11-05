@@ -1410,7 +1410,7 @@ _lib.rant_shape_sample_inside.argtypes = [POINTER(_RantShape), c_uint64, POINTER
 _lib.rant_shape_sample_inside.restype = c_int
 _lib.rant_shape_sample_surface.argtypes = [POINTER(_RantShape), c_uint64, POINTER(_RantDouble3), c_uint32]
 _lib.rant_shape_sample_surface.restype = c_int
-_lib.rant_shape_mesh.argtypes = [POINTER(_RantShape), c_uint32, c_double, POINTER(_RantDouble3), POINTER(_RantDouble3), POINTER(c_uint32), POINTER(c_uint32), POINTER(c_uint32)]
+_lib.rant_shape_mesh.argtypes = [POINTER(_RantShape), c_uint32, c_double, POINTER(_RantPointCloudView), POINTER(c_uint32), POINTER(c_uint32), POINTER(c_uint32)]
 _lib.rant_shape_mesh.restype = c_int
 _lib.rant_shape2d_from_aligned_box2d.argtypes = [_RantAlignedBox2D]
 _lib.rant_shape2d_from_aligned_box2d.restype = _RantShape2D
@@ -1632,10 +1632,19 @@ def _mask_out(buffer, size):
     return data if size is None else data[:size]
 
 
-def _mesh(vertices, vertex_count, triangles, triangle_count):
-    if triangle_count % 3:
+def _mesh(mesh):
+    """A Mesh as the C view: its corners read once in C from whatever fields they are, its triangles as they are."""
+    cloud = _cloud(mesh.vertices)
+    n = c_uint32(0)
+    _room(_lib.rant_point_cloud_read_points(byref(cloud), None, byref(n)))
+    points = (_RantDouble3 * n.value)()
+    _check(_lib.rant_point_cloud_read_points(byref(cloud), points, byref(n)))
+    triangles, count, _np = _list_in(mesh.triangles, c_uint32, None, "uint32", 1, True)
+    if count % 3:
         raise MathError(ErrorKind.Argument)
-    return _RantMeshView(vertices, vertex_count, triangles, triangle_count // 3)
+    view = _RantMeshView(points, n.value, triangles, count // 3)
+    view._keep = (points, triangles)
+    return view
 
 
 def _prism(p):
@@ -3653,77 +3662,66 @@ def polygon_edges(points: Sequence[Double3]) -> List[Segment]:
     _check(_lib.rant_polygon_edges(_RantPolygonView(c_points, n_points), p0, byref(n0)))
     return _list_out(o0, _py_Segment, n0.value * 1)
 
-def mesh_check(vertices: Sequence[Double3], triangles: Sequence[int]) -> None:
+def mesh_check(mesh: Mesh) -> None:
     """Fails when an index runs past the vertices. Every other mesh call skips such a triangle."""
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    _check(_lib.rant_mesh_check(_mesh(c_vertices, n_vertices, c_triangles, n_triangles)))
+    c_mesh = _mesh(mesh)
+    _check(_lib.rant_mesh_check(c_mesh))
 
-def mesh_distance(vertices: Sequence[Double3], triangles: Sequence[int], point: Double3) -> float:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_distance(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), _c_Double3(point))
+def mesh_distance(mesh: Mesh, point: Double3) -> float:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_distance(c_mesh, _c_Double3(point))
     return r
 
-def mesh_closest(vertices: Sequence[Double3], triangles: Sequence[int], point: Double3) -> SurfacePoint:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_closest(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), _c_Double3(point))
+def mesh_closest(mesh: Mesh, point: Double3) -> SurfacePoint:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_closest(c_mesh, _c_Double3(point))
     return _py_SurfacePoint(r)
 
-def mesh_contains(vertices: Sequence[Double3], triangles: Sequence[int], point: Double3) -> bool:
+def mesh_contains(mesh: Mesh, point: Double3) -> bool:
     """1 when the triangles of a closed mesh wind round the point, which puts it inside."""
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    return bool(_lib.rant_mesh_contains(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), _c_Double3(point)))
+    c_mesh = _mesh(mesh)
+    return bool(_lib.rant_mesh_contains(c_mesh, _c_Double3(point)))
 
-def mesh_raycast(vertices: Sequence[Double3], triangles: Sequence[int], ray: Ray) -> Optional[RayHit]:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
+def mesh_raycast(mesh: Mesh, ray: Ray) -> Optional[RayHit]:
+    c_mesh = _mesh(mesh)
     o0 = _RantRayHit()
-    if not _lib.rant_mesh_raycast(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), _c_Ray(ray), byref(o0)):
+    if not _lib.rant_mesh_raycast(c_mesh, _c_Ray(ray), byref(o0)):
         return None
     return _py_RayHit(o0)
 
-def mesh_bounds(vertices: Sequence[Double3], triangles: Sequence[int]) -> AlignedBox:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_bounds(_mesh(c_vertices, n_vertices, c_triangles, n_triangles))
+def mesh_bounds(mesh: Mesh) -> AlignedBox:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_bounds(c_mesh)
     return _py_AlignedBox(r)
 
-def mesh_area(vertices: Sequence[Double3], triangles: Sequence[int]) -> float:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_area(_mesh(c_vertices, n_vertices, c_triangles, n_triangles))
+def mesh_area(mesh: Mesh) -> float:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_area(c_mesh)
     return r
 
-def mesh_volume(vertices: Sequence[Double3], triangles: Sequence[int]) -> float:
+def mesh_volume(mesh: Mesh) -> float:
     """What a closed mesh holds, from the signed solids its triangles make with one point. The centroid is
     of that volume, or of the surface when the mesh holds none."""
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_volume(_mesh(c_vertices, n_vertices, c_triangles, n_triangles))
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_volume(c_mesh)
     return r
 
-def mesh_centroid(vertices: Sequence[Double3], triangles: Sequence[int]) -> Double3:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_centroid(_mesh(c_vertices, n_vertices, c_triangles, n_triangles))
+def mesh_centroid(mesh: Mesh) -> Double3:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_centroid(c_mesh)
     return _py_Double3(r)
 
-def mesh_inertia(vertices: Sequence[Double3], triangles: Sequence[int], mass: float) -> Inertia:
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    r = _lib.rant_mesh_inertia(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), mass)
+def mesh_inertia(mesh: Mesh, mass: float) -> Inertia:
+    c_mesh = _mesh(mesh)
+    r = _lib.rant_mesh_inertia(c_mesh, mass)
     return _py_Inertia(r)
 
-def mesh_normals(vertices: Sequence[Double3], triangles: Sequence[int]) -> List[Double3]:
+def mesh_normals(mesh: Mesh) -> List[Double3]:
     """The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a vertex in
     none. normals holds vertex_count."""
-    c_vertices, n_vertices, np_vertices = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3)
-    c_triangles, n_triangles, np_triangles = _list_in(triangles, c_uint32, None, 'uint32', 1)
-    o0, p0 = _new_list(_RantDouble3, n_vertices, 'float64', 3, np_vertices or np_triangles)
-    _check(_lib.rant_mesh_normals(_mesh(c_vertices, n_vertices, c_triangles, n_triangles), p0))
+    c_mesh = _mesh(mesh)
+    o0, p0 = _new_list(_RantDouble3, c_mesh.vertex_count, 'float64', 3, False)
+    _check(_lib.rant_mesh_normals(c_mesh, p0))
     return _list_out(o0, _py_Double3, None)
 
 def points_bounds(points: Sequence[Double3]) -> AlignedBox:
@@ -3826,10 +3824,9 @@ def shape_from_polygon(points: Sequence[Double3]) -> Shape:
     c_points, n_points, _np = _list_in(points, _RantDouble3, _c_Double3, 'float64', 3, True)
     return Shape(_lib.rant_shape_from_polygon(_RantPolygonView(c_points, n_points)), c_points)
 
-def shape_from_mesh(vertices: Sequence[Double3], triangles: Sequence[int]) -> Shape:
-    c_v, n_v, _np = _list_in(vertices, _RantDouble3, _c_Double3, 'float64', 3, True)
-    c_t, n_t, _np = _list_in(triangles, c_uint32, None, 'uint32', 1, True)
-    return Shape(_lib.rant_shape_from_mesh(_mesh(c_v, n_v, c_t, n_t)), c_v, c_t)
+def shape_from_mesh(mesh: Mesh) -> Shape:
+    c_mesh = _mesh(mesh)
+    return Shape(_lib.rant_shape_from_mesh(c_mesh), c_mesh)
 
 def shape_distance(s: Shape, point: Double3) -> float:
     """Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the
@@ -3894,18 +3891,21 @@ def shape_sample_surface(s: Shape, seed: int, count: int) -> List[Double3]:
     _check(_lib.rant_shape_sample_surface(byref(c_s), seed, p0, count))
     return _list_out(o0, _py_Double3, None)
 
-def shape_mesh(s: Shape, segments: int, crease: float) -> Tuple[List[Double3], List[Double3], List[int]]:
-    """Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
-    32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says."""
-    c_s = s._raw
-    n0 = c_uint32(0)
-    n2 = c_uint32(0)
-    _room(_lib.rant_shape_mesh(byref(c_s), segments, crease, None, None, byref(n0), None, byref(n2)))
-    o0, p0 = _new_list(_RantDouble3, n0.value, 'float64', 3, False)
-    o1, p1 = _new_list(_RantDouble3, n0.value, 'float64', 3, False)
-    o2, p2 = _new_list(c_uint32, n2.value * 3, 'uint32', 1, False)
-    _check(_lib.rant_shape_mesh(byref(c_s), segments, crease, p0, p1, byref(n0), p2, byref(n2)))
-    return (_list_out(o0, _py_Double3, n0.value * 1), _list_out(o1, _py_Double3, n0.value * 1), _list_out(o2, None, n2.value * 3))
+def shape_mesh(s: Shape, segments: int, crease: float) -> Mesh:
+    """Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
+    at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
+    docs/shapes.md says."""
+    n, t = c_uint32(0), c_uint32(0)
+    _room(_lib.rant_shape_mesh(byref(s._raw), segments, crease, None, byref(n), None, byref(t)))
+    out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(PointCloudLayout.XyzNormal)), [])
+    data = (c_uint8 * (n.value * out.vertices.point_step))()
+    triangles = (c_uint32 * (t.value * 3))()
+    c_out = _cloud(out.vertices)
+    c_out.data, c_out.size = data, len(data)
+    _check(_lib.rant_shape_mesh(byref(s._raw), segments, crease, byref(c_out), byref(n), triangles, byref(t)))
+    out.vertices.data = bytes(data)
+    out.triangles = list(triangles)
+    return out
 
 def shape2d_from_aligned_box2d(b: AlignedBox2D) -> Shape2D:
     return Shape2D(_lib.rant_shape2d_from_aligned_box2d(_c_AlignedBox2D(b)))

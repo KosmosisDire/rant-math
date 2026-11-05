@@ -40,6 +40,7 @@ const list = (t, v) => v.map((x) => make(t, x));
 const prism = (v) => ({ pose: make("RantPose", v.pose), base: { points: list("RantDouble2", v.base.points) }, height: num(v.height) });
 const image = (v) => ({ width: v.width, height: v.height, stride: v.stride, format: IMAGE_FORMATS[v.format], data: unhex(v.data) });
 const cloud = (v) => ({ fields: v.fields.map((f) => ({ ...f, kind: SCALARS[f.kind] })), point_step: v.point_step, data: unhex(v.data) });
+const mesh = (v) => ({ vertices: cloud(v.vertices), triangles: v.triangles });
 const grid = (v) => ({
     origin: { pose: make("RantPose", v.origin) }, resolution: v.resolution, cells_x: v.cells_x, cells_y: v.cells_y, cells_z: v.cells_z,
     fields: v.fields.map((f) => ({ name: f.name, kind: SCALARS[f.kind], data: unhex(f.data) })),
@@ -54,7 +55,7 @@ const SHAPE = {
 function shape(v, two) {
     const { kind, value } = v;
     const build = math[camel((two ? "shape2d_from_" : "shape_from_") + kind)];
-    if (kind === "mesh") return build(list("RantDouble3", value.vertices), value.triangles);
+    if (kind === "mesh") return build(mesh(value));
     if (kind === "prism") return build(prism(value));
     if (kind === "polygon" || kind === "polyline") return build(list("RantDouble3", value));
     if (kind === "polygon2d" || kind === "polyline2d") return build(list("RantDouble2", value));
@@ -89,6 +90,7 @@ function input(kind, v, ctx, typed) {
     case "shape2d": return shape(v, true);
     case "image": case "image_mut": return image(v);
     case "cloud": case "cloud_mut": return cloud(v);
+    case "mesh": return mesh(v);
     case "grid": case "grid_mut": return grid(v);
     case "scan": return { angle_min: v.angle_min, angle_step: v.angle_step, range_min: v.range_min, range_max: v.range_max, echoes: v.echoes, ranges: v.ranges.map(num) };
     case "det2d": return v.map((d) => ({ bounds: make("RantOrientedBox2D", d.bounds), label: d.label, score: d.score }));
@@ -122,6 +124,12 @@ function answer(v) {
     if (v instanceof Uint8Array) return hex(v);
     if (ArrayBuffer.isView(v)) return Array.from(v, answer);
     if (Array.isArray(v)) return v.map(answer);
+    if ("vertices" in v && "triangles" in v) {
+        // its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
+        const [x, y, z] = ["x", "y", "z"].map((a) => Array.from(math.pointCloudReadValues(v.vertices, "normal_" + a)));
+        return { point_step: v.vertices.point_step, points: answer(math.pointCloudReadPoints(v.vertices)),
+                 normals: x.map((n, i) => answer({ x: n, y: y[i], z: z[i] })), triangles: Array.from(v.triangles) };
+    }
     if ("format" in v && "data" in v) return { width: v.width, height: v.height, stride: v.stride, format: enumNumber(IMAGE_FORMATS, v.format), data: hex(v.data) };
     if ("point_step" in v) return { fields: v.fields.map(answer), point_step: v.point_step, data: hex(v.data) };
     if ("offset" in v && "kind" in v) return { name: v.name, offset: v.offset, kind: enumNumber(SCALARS, v.kind), count: v.count };
@@ -255,7 +263,13 @@ function handTests() {
     // mismatches
     throws("Argument", () => math.pointsFitPose([d3(0, 0, 0)], []), "lists that differ");
     throws("Argument", () => math.polynomialAt([], 1), "no coefficients");
-    throws("Argument", () => math.meshArea([d3(0, 0, 0)], [0, 1]), "triangles not in threes");
+    throws("Argument", () => math.meshArea({ vertices: { fields: [], point_step: 24, data: new Uint8Array(0) }, triangles: [0, 1] }), "triangles not in threes");
+
+    // a shape's mesh is a Mesh, and goes back in as one
+    const ball = math.shapeMesh(math.shapeFromSphere({ center: d3(0, 0, 0), radius: 1 }), 8, 0.5);
+    check(ball.vertices.point_step === 24 && ball.triangles.length % 3 === 0 && math.meshNormals(ball).length === ball.vertices.data.length / 24, "a ball as a Mesh");
+    const again = math.shapeFromMesh(ball);
+    check(math.shapeContains(again, d3(0, 0, 0)) && !math.shapeContains(again, d3(0, 0, 1.01)), "a Mesh as a shape");
 
     // a shape holds its own data
     const pts = [d3(0, 0, 0), d3(2, 0, 0)];

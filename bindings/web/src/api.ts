@@ -294,6 +294,9 @@ export interface PrismOut { pose: Pose; base: { points: Double2[] }; height: num
 export interface Image { width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
 export interface PointField { name: string; offset: number; kind: ScalarKind; count: number; }
 export interface PointCloud { origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
+export interface Mesh { vertices: PointCloud; triangles: ArrayLike<number>; }
+/** A mesh a call hands back, its corners x, y, z and a normal as f32. */
+export interface MeshOut { vertices: ReturnType<typeof cloudLike>; triangles: Uint32Array; }
 export interface GridField { name: string; kind: ScalarKind; data: Uint8Array; }
 export interface Grid { origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
 export interface LaserScan { angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
@@ -1094,6 +1097,26 @@ function cloudIn(cloud: PointCloud): number {
     const p = alloc(20);
     w_RantPointCloudView(p, { fields: fieldsIn(cloud.fields), field_count: cloud.fields.length, point_step: cloud.point_step, data, size: cloud.data.length });
     return p;
+}
+
+/** A Mesh's corners read in C from whatever fields they are, as doubles, and how many. */
+function cornersIn(mesh: Mesh): [number, number] {
+    const cloud = cloudIn(mesh.vertices);
+    const n = alloc(4);
+    U32[n >> 2] = 0;
+    room(wasm._rm_point_cloud_read_points(cloud, 0, n));
+    refresh();
+    const out = alloc(24 * U32[n >> 2]);
+    check(wasm._rm_point_cloud_read_points(cloud, out, n));
+    refresh();
+    return [out, U32[n >> 2]];
+}
+
+/** A Mesh as the C view, and how many corners it has. */
+function meshViewIn(mesh: Mesh): [number, number] {
+    if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
+    const [points, count] = cornersIn(mesh);
+    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles)), count];
 }
 
 function cloudDone(cloud: PointCloud, p: number): void {
@@ -4765,117 +4788,106 @@ export function polygonEdges(points: readonly Double3[] | Float64Array): Segment
 }
 
 /** Fails when an index runs past the vertices. Every other mesh call skips such a triangle. */
-export function meshCheck(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): void {
+export function meshCheck(mesh: Mesh): void {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
-    check(wasm._rm_mesh_check(meshIn(c_vertices, n_vertices, c_triangles, n_triangles)));
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
+    check(wasm._rm_mesh_check(c_mesh));
     refresh();
 }
 
-export function meshDistance(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>, point: Double3): number {
+export function meshDistance(mesh: Mesh, point: Double3): number {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const c_point = alloc(24); w_RantDouble3(c_point, point);
-    const r = wasm._rm_mesh_distance(meshIn(c_vertices, n_vertices, c_triangles, n_triangles), c_point);
+    const r = wasm._rm_mesh_distance(c_mesh, c_point);
     refresh();
     return r;
 }
 
-export function meshClosest(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>, point: Double3): SurfacePoint {
+export function meshClosest(mesh: Mesh, point: Double3): SurfacePoint {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const c_point = alloc(24); w_RantDouble3(c_point, point);
     const ret = alloc(48);
-    wasm._rm_mesh_closest(ret, meshIn(c_vertices, n_vertices, c_triangles, n_triangles), c_point);
+    wasm._rm_mesh_closest(ret, c_mesh, c_point);
     refresh();
     return r_RantSurfacePoint(ret);
 }
 
 /** 1 when the triangles of a closed mesh wind round the point, which puts it inside. */
-export function meshContains(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>, point: Double3): boolean {
+export function meshContains(mesh: Mesh, point: Double3): boolean {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const c_point = alloc(24); w_RantDouble3(c_point, point);
-    const r = wasm._rm_mesh_contains(meshIn(c_vertices, n_vertices, c_triangles, n_triangles), c_point) !== 0;
+    const r = wasm._rm_mesh_contains(c_mesh, c_point) !== 0;
     refresh();
     return r;
 }
 
-export function meshRaycast(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>, ray: Ray): RayHit | null {
+export function meshRaycast(mesh: Mesh, ray: Ray): RayHit | null {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const c_ray = alloc(48); w_RantRay(c_ray, ray);
     const o0 = alloc(56);
-    if (!wasm._rm_mesh_raycast(meshIn(c_vertices, n_vertices, c_triangles, n_triangles), c_ray, o0)) { refresh(); return null; }
+    if (!wasm._rm_mesh_raycast(c_mesh, c_ray, o0)) { refresh(); return null; }
     refresh();
     return r_RantRayHit(o0);
 }
 
-export function meshBounds(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): AlignedBox {
+export function meshBounds(mesh: Mesh): AlignedBox {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const ret = alloc(48);
-    wasm._rm_mesh_bounds(ret, meshIn(c_vertices, n_vertices, c_triangles, n_triangles));
+    wasm._rm_mesh_bounds(ret, c_mesh);
     refresh();
     return r_RantAlignedBox(ret);
 }
 
-export function meshArea(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): number {
+export function meshArea(mesh: Mesh): number {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
-    const r = wasm._rm_mesh_area(meshIn(c_vertices, n_vertices, c_triangles, n_triangles));
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
+    const r = wasm._rm_mesh_area(c_mesh);
     refresh();
     return r;
 }
 
 /** What a closed mesh holds, from the signed solids its triangles make with one point. The centroid is
  * of that volume, or of the surface when the mesh holds none. */
-export function meshVolume(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): number {
+export function meshVolume(mesh: Mesh): number {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
-    const r = wasm._rm_mesh_volume(meshIn(c_vertices, n_vertices, c_triangles, n_triangles));
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
+    const r = wasm._rm_mesh_volume(c_mesh);
     refresh();
     return r;
 }
 
-export function meshCentroid(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): Double3 {
+export function meshCentroid(mesh: Mesh): Double3 {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const ret = alloc(24);
-    wasm._rm_mesh_centroid(ret, meshIn(c_vertices, n_vertices, c_triangles, n_triangles));
+    wasm._rm_mesh_centroid(ret, c_mesh);
     refresh();
     return r_RantDouble3(ret);
 }
 
-export function meshInertia(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>, mass: number): Inertia {
+export function meshInertia(mesh: Mesh, mass: number): Inertia {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
     const ret = alloc(80);
-    wasm._rm_mesh_inertia(ret, meshIn(c_vertices, n_vertices, c_triangles, n_triangles), mass);
+    wasm._rm_mesh_inertia(ret, c_mesh, mass);
     refresh();
     return r_RantInertia(ret);
 }
 
 /** The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a vertex in
  * none. normals holds vertex_count. */
-export function meshNormals(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): Double3[] | Float64Array {
+export function meshNormals(mesh: Mesh): Double3[] {
     begin();
-    const n_vertices = countOf(vertices, 3); const c_vertices = listIn(vertices, n_vertices, 24, w_RantDouble3);
-    const n_triangles = lengthOf(triangles); const c_triangles = numbersIn(triangles, 4, Uint32Array);
-    const s0 = n_vertices; const o0 = alloc(24 * s0);
-    check(wasm._rm_mesh_normals(meshIn(c_vertices, n_vertices, c_triangles, n_triangles), o0));
+    const [c_mesh, n_mesh] = meshViewIn(mesh);
+    const s0 = n_mesh; const o0 = alloc(24 * s0);
+    check(wasm._rm_mesh_normals(c_mesh, o0));
     refresh();
-    return listOut(o0, s0, 24, r_RantDouble3, 3, vertices instanceof Float64Array);
+    return listOut(o0, s0, 24, r_RantDouble3, 3, false);
 }
 
 export function pointsBounds(points: readonly Double3[] | Float64Array): AlignedBox {
@@ -5016,9 +5028,11 @@ export function shapeFromPolygon(points: readonly Double3[] | Float64Array): Sha
     return { kind: "polygon", value: flatCopy(points, 3) };
 }
 
-export function shapeFromMesh(vertices: readonly Double3[] | Float64Array, triangles: ArrayLike<number>): Shape {
-    if (lengthOf(triangles) % 3) throw new MathError(-1);
-    return { kind: "mesh", value: { vertices: flatCopy(vertices, 3), triangles: Uint32Array.from(triangles) } };
+export function shapeFromMesh(mesh: Mesh): Shape {
+    if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
+    begin();
+    const [points, count] = cornersIn(mesh);
+    return { kind: "mesh", value: { vertices: numbersOut(points, 3 * count, Float64Array), triangles: Uint32Array.from(mesh.triangles) } };
 }
 
 /** Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the
@@ -5121,21 +5135,28 @@ export function shapeSampleSurface(s: Shape, seed: number, count: number): Doubl
     return listOut(o0, s0, 24, r_RantDouble3, 3, false);
 }
 
-/** Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
- * 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says. */
-export function shapeMesh(s: Shape, segments: number, crease: number): [Double3[], Double3[], Uint32Array] {
+/** Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
+ * at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
+ * docs/shapes.md says. */
+export function shapeMesh(s: Shape, segments: number, crease: number): MeshOut {
     begin();
     const c_s = shapeIn(s);
-    const n0 = alloc(4); U32[n0 >> 2] = 0;
-    const n2 = alloc(4); U32[n2 >> 2] = 0;
-    room(wasm._rm_shape_mesh(c_s, segments, crease, 0, 0, n0, 0, n2));
+    const n = alloc(4), t = alloc(4);
+    U32[n >> 2] = 0; U32[t >> 2] = 0;
+    room(wasm._rm_shape_mesh(c_s, segments, crease, 0, n, 0, t));
     refresh();
-    const o0 = alloc(24 * U32[n0 >> 2] * 1);
-    const o1 = alloc(24 * U32[n0 >> 2] * 1);
-    const o2 = alloc(4 * U32[n2 >> 2] * 3);
-    check(wasm._rm_shape_mesh(c_s, segments, crease, o0, o1, n0, o2, n2));
+    const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, "XyzNormal"));
     refresh();
-    return [listOut(o0, U32[n0 >> 2], 24, r_RantDouble3, 3, false), listOut(o1, U32[n0 >> 2], 24, r_RantDouble3, 3, false), numbersOut(o2, U32[n2 >> 2] * 3, Uint32Array)];
+    const out: MeshOut = { vertices: cloudLike(cloud), triangles: new Uint32Array(0) };
+    const bytes = U32[n >> 2] * out.vertices.point_step, count = U32[t >> 2] * 3;
+    const v = cloudIn({ ...out.vertices, data: new Uint8Array(bytes) });
+    const o = alloc(4 * count);
+    check(wasm._rm_shape_mesh(c_s, segments, crease, v, n, o, t));
+    refresh();
+    const view = r_RantPointCloudView(v);
+    out.vertices.data = U8.slice(view.data, view.data + bytes);
+    out.triangles = numbersOut(o, count, Uint32Array) as Uint32Array;
+    return out;
 }
 
 export function shape2dFromAlignedBox2d(b: AlignedBox2D): Shape2D {

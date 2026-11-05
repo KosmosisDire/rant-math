@@ -367,6 +367,23 @@ fn cloud_in<'js>(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<PointCloud> {
     })
 }
 
+fn mesh_in<'js>(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Mesh> {
+    let o = v.as_object().ok_or_else(|| Exception::throw_type(ctx, "a mesh"))?;
+    Ok(Mesh { vertices: cloud_in(ctx, &o.get::<_, Value>("vertices")?)?, triangles: numbers(ctx, &o.get::<_, Value>("triangles")?)? })
+}
+
+impl<'js> Js<'js> for Mesh {
+    fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Mesh> {
+        mesh_in(ctx, v)
+    }
+    fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
+        let o = Object::new(ctx.clone())?;
+        o.set("vertices", self.vertices.put(ctx)?)?;
+        o.set("triangles", numbers_out(ctx, &self.triangles)?)?;
+        Ok(o.into_value())
+    }
+}
+
 fn cloud_back<'js>(v: &Value<'js>, cloud: &PointCloud) -> JsResult<()> {
     bytes_back(&v.as_object().expect("a cloud").get::<_, Value>("data")?, &cloud.data)
 }
@@ -503,21 +520,20 @@ struct ShapeHold<'js> {
     value: Value<'js>,
     prism: Option<Prism>,
     points: Vec<Double3>,
-    triangles: Vec<u32>,
+    mesh: Mesh,
 }
 
 impl<'js> ShapeHold<'js> {
-    fn new(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> {
+    fn new(ctx: &Ctx<'js>, fail: &Function<'js>, v: &Value<'js>) -> JsResult<Self> {
         let o = v.as_object().ok_or_else(|| Exception::throw_type(ctx, "a shape"))?;
         let kind = text(ctx, &o.get::<_, Value>("kind")?)?;
         let value: Value = o.get("value")?;
-        let mut hold = ShapeHold { kind, value: value.clone(), prism: None, points: vec![], triangles: vec![] };
+        let mut hold = ShapeHold { kind, value: value.clone(), prism: None, points: vec![], mesh: Mesh::default() };
         match hold.kind.as_str() {
             "polyline" | "polygon" => hold.points = list(ctx, &value, 3)?.0,
             "mesh" => {
-                let m = value.as_object().ok_or_else(|| Exception::throw_type(ctx, "a mesh"))?;
-                hold.points = list(ctx, &m.get::<_, Value>("vertices")?, 3)?.0;
-                hold.triangles = numbers(ctx, &m.get::<_, Value>("triangles")?)?;
+                hold.mesh = mesh_in(ctx, &value)?;
+                crate::MeshRaw::new(&hold.mesh).map_err(|e| math_error(ctx, fail, e))?;
             }
             "prism" => {
                 let p = value.as_object().ok_or_else(|| Exception::throw_type(ctx, "a prism"))?;
@@ -540,7 +556,7 @@ impl<'js> ShapeHold<'js> {
             "segment" => shape_from_segment(Js::get(ctx, v)?),
             "polyline" => shape_from_polyline(&self.points),
             "polygon" => shape_from_polygon(&self.points),
-            "mesh" => shape_from_mesh(&self.points, &self.triangles),
+            "mesh" => shape_from_mesh(&self.mesh),
             "prism" => shape_from_prism(self.prism.as_ref().expect("read in new")),
             _ => return Err(fail_argument(ctx)),
         })

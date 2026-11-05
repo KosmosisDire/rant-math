@@ -896,17 +896,17 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "polygon_area" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::polygon_area(&x0).put();  let _ = &mut out; Ok(out) }
         "polygon_perimeter" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::polygon_perimeter(&x0).put();  let _ = &mut out; Ok(out) }
         "polygon_edges" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::polygon_edges(&x0)?.put();  let _ = &mut out; Ok(out) }
-        "mesh_check" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); rant_math::mesh_check(&x0, &x1)?; let mut out = Value::Null;  let _ = &mut out; Ok(out) }
-        "mesh_distance" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let x2: Double3 = Json::get(&a[2]); let mut out = rant_math::mesh_distance(&x0, &x1, x2).put();  let _ = &mut out; Ok(out) }
-        "mesh_closest" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let x2: Double3 = Json::get(&a[2]); let mut out = rant_math::mesh_closest(&x0, &x1, x2).put();  let _ = &mut out; Ok(out) }
-        "mesh_contains" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let x2: Double3 = Json::get(&a[2]); let mut out = rant_math::mesh_contains(&x0, &x1, x2).put();  let _ = &mut out; Ok(out) }
-        "mesh_raycast" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let x2: Ray = Json::get(&a[2]); let mut out = rant_math::mesh_raycast(&x0, &x1, x2).put();  let _ = &mut out; Ok(out) }
-        "mesh_bounds" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let mut out = rant_math::mesh_bounds(&x0, &x1).put();  let _ = &mut out; Ok(out) }
-        "mesh_area" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let mut out = rant_math::mesh_area(&x0, &x1).put();  let _ = &mut out; Ok(out) }
-        "mesh_volume" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let mut out = rant_math::mesh_volume(&x0, &x1).put();  let _ = &mut out; Ok(out) }
-        "mesh_centroid" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let mut out = rant_math::mesh_centroid(&x0, &x1).put();  let _ = &mut out; Ok(out) }
-        "mesh_inertia" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::mesh_inertia(&x0, &x1, x2).put();  let _ = &mut out; Ok(out) }
-        "mesh_normals" => { let x0: Vec<Double3> = Json::get(&a[0]); let x1: Vec<u32> = Json::get(&a[1]); let mut out = rant_math::mesh_normals(&x0, &x1)?.put();  let _ = &mut out; Ok(out) }
+        "mesh_check" => { let x0 = get_mesh(&a[0]); rant_math::mesh_check(&x0)?; let mut out = Value::Null;  let _ = &mut out; Ok(out) }
+        "mesh_distance" => { let x0 = get_mesh(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::mesh_distance(&x0, x1).put();  let _ = &mut out; Ok(out) }
+        "mesh_closest" => { let x0 = get_mesh(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::mesh_closest(&x0, x1).put();  let _ = &mut out; Ok(out) }
+        "mesh_contains" => { let x0 = get_mesh(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::mesh_contains(&x0, x1).put();  let _ = &mut out; Ok(out) }
+        "mesh_raycast" => { let x0 = get_mesh(&a[0]); let x1: Ray = Json::get(&a[1]); let mut out = rant_math::mesh_raycast(&x0, x1).put();  let _ = &mut out; Ok(out) }
+        "mesh_bounds" => { let x0 = get_mesh(&a[0]); let mut out = rant_math::mesh_bounds(&x0).put();  let _ = &mut out; Ok(out) }
+        "mesh_area" => { let x0 = get_mesh(&a[0]); let mut out = rant_math::mesh_area(&x0).put();  let _ = &mut out; Ok(out) }
+        "mesh_volume" => { let x0 = get_mesh(&a[0]); let mut out = rant_math::mesh_volume(&x0).put();  let _ = &mut out; Ok(out) }
+        "mesh_centroid" => { let x0 = get_mesh(&a[0]); let mut out = rant_math::mesh_centroid(&x0).put();  let _ = &mut out; Ok(out) }
+        "mesh_inertia" => { let x0 = get_mesh(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::mesh_inertia(&x0, x1).put();  let _ = &mut out; Ok(out) }
+        "mesh_normals" => { let x0 = get_mesh(&a[0]); let mut out = rant_math::mesh_normals(&x0)?.put();  let _ = &mut out; Ok(out) }
         "points_bounds" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::points_bounds(&x0)?.put();  let _ = &mut out; Ok(out) }
         "points_mean" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::points_mean(&x0)?.put();  let _ = &mut out; Ok(out) }
         "points_covariance" => { let x0: Vec<Double3> = Json::get(&a[0]); let mut out = rant_math::points_covariance(&x0)?.put();  let _ = &mut out; Ok(out) }

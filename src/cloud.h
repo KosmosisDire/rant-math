@@ -10,24 +10,6 @@
 extern "C" {
 #endif
 
-/* count numbers of kind, offset bytes into each point. name has name_len bytes and needs no NUL. */
-typedef struct {
-    const char *name;
-    size_t name_len;
-    uint32_t offset;
-    RantScalarKind kind;
-    uint32_t count;
-} RantPointFieldView;
-
-/* size / point_step points, little endian, data holding a whole number of them. */
-typedef struct {
-    const RantPointFieldView *fields;
-    uint32_t field_count;
-    uint32_t point_step;
-    uint8_t *data;
-    size_t size;                 /* the bytes data holds */
-} RantPointCloudView;
-
 typedef enum {
     RANT_POINT_CLOUD_XYZ,            /* x, y and z as f32 */
     RANT_POINT_CLOUD_XYZ_INTENSITY,  /* then intensity as f32 */
