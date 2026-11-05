@@ -276,7 +276,7 @@ RantMathResult rant_points_downsample(const RantDouble3 *points, uint32_t count,
         RantDouble3 first = points[c[lo].i], sum = rant_double3(0.0, 0.0, 0.0), mean;
         double best = HUGE_VAL;
         uint32_t pick = c[lo].i;
-        for (hi = lo; hi < n && !memcmp(c[hi].key, c[lo].key, sizeof c[lo].key); hi++)
+        for (hi = lo; hi < n && c[hi].key[0] == c[lo].key[0] && c[hi].key[1] == c[lo].key[1] && c[hi].key[2] == c[lo].key[2]; hi++)
             sum = rant_double3_add(sum, rant_double3_subtract(points[c[hi].i], first));
         /* summed from the first point, so a cloud far from the origin keeps its digits */
         mean = rant_double3_add(first, rant_double3_scale(sum, 1.0 / (hi - lo)));

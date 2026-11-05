@@ -151,6 +151,12 @@ static void filters(void){
     CHECK(wrong == 0, "NaN points change nothing and are never kept");
     CHECK(rant_points_downsample(p, n, 0.0, keep) == RANT_MATH_ERR_ARGUMENT, "a voxel of 0");
     CHECK(rant_points_downsample(p, n, HUGE_VAL, keep) == RANT_MATH_ERR_ARGUMENT, "an endless voxel");
+    {   /* -0 and 0 are one place, so one voxel keeps one point */
+        RantDouble3 q[3];
+        q[0] = rant_double3(-0.0, 0.1, 0.1); q[1] = rant_double3(0.0, 0.2, 0.2); q[2] = rant_double3(-0.0, 0.3, 0.3);
+        rant_points_downsample(q, 3, 1.0, keep);
+        CHECK(keep[0] + keep[1] + keep[2] == 1, "a voxel at -0 and 0 keeps %d points", keep[0] + keep[1] + keep[2]);
+    }
 
     CHECK(rant_points_remove_outliers(ref_cloud(), REF_CLOUD_POINTS, REF_OUTLIER_K, 1.0, keep) == RANT_MATH_OK, "removes outliers");
     for (i = 0, wrong = 0; i < REF_CLOUD_POINTS; i++) wrong += keep[i] != REF_OUTLIERS[i];
