@@ -119,6 +119,40 @@ static void covariance_and_inertia(void){
         for (i = 0; i < 3; i++){ trace += c6.m[i][i]; trace_r += r6.m[i][i]; }
         CHECK(near(trace, trace_r, 1e-13), "a rotated position covariance keeps its trace");
     }
+    {   /* spreads of 9, 4 and 1 turned at random come back as their axes, longest first, at two deviations */
+        RantCovariance3 d, turned;
+        RantQuaternion t, found;
+        RantDouble3 radii;
+        memset(&d, 0, sizeof d);
+        d.m[0][0] = 1.0; d.m[1][1] = 9.0; d.m[2][2] = 4.0;
+        CHECK(rant_covariance3_ellipsoid(&d, 2.0, &t, &radii) == RANT_MATH_OK && near3(radii, rant_double3(6, 4, 2), 1e-12)
+              && near3(rant_quaternion_rotate(t, rant_double3(1, 0, 0)), rant_double3(0, 1, 0), 1e-12)
+              && near3(rant_quaternion_rotate(t, rant_double3(0, 1, 0)), rant_double3(0, 0, 1), 1e-12)
+              && near3(rant_quaternion_rotate(t, rant_double3(0, 0, 1)), rant_double3(1, 0, 0), 1e-12), "a diagonal one");
+        for (i = 0, ok = 1; i < 20; i++){
+            RantDouble3 x;
+            q = random_quaternion();
+            memset(&d, 0, sizeof d);
+            d.m[0][0] = 9.0; d.m[1][1] = 4.0; d.m[2][2] = 1.0;
+            rant_covariance3_rotate(q, &d, &turned);
+            if (rant_covariance3_ellipsoid(&turned, 1.0, &found, &radii) != RANT_MATH_OK || !near3(radii, rant_double3(3, 2, 1), 1e-9)) ok = 0;
+            for (j = 0; j < 3; j++){
+                x = rant_quaternion_rotate(found, rant_double3(j == 0, j == 1, j == 2));
+                if (!near(fabs(rant_double3_dot(x, rant_quaternion_rotate(q, rant_double3(j == 0, j == 1, j == 2)))), 1.0, 1e-9)) ok = 0;
+            }
+        }
+        CHECK(ok, "a turned one finds its own axes");
+        memset(&d, 0, sizeof d);
+        d.m[0][0] = 2.0; d.m[1][1] = 1.0; d.m[0][1] = d.m[1][0] = 0.5;
+        CHECK(rant_covariance3_ellipsoid(&d, 1.0, &t, &radii) == RANT_MATH_OK && radii.z == 0.0 &&
+              near(fabs(rant_quaternion_rotate(t, rant_double3(0, 0, 1)).z), 1.0, 1e-12), "a flat one keeps its plane, its last radius 0");
+        d.m[2][2] = -1.0;
+        CHECK(rant_covariance3_ellipsoid(&d, 1.0, &t, &radii) == RANT_MATH_ERR_ARGUMENT, "a spread below 0 is refused");
+        d.m[2][2] = NAN;
+        CHECK(rant_covariance3_ellipsoid(&d, 1.0, &t, &radii) == RANT_MATH_ERR_ARGUMENT, "as is NaN");
+        d.m[2][2] = 1.0;
+        CHECK(rant_covariance3_ellipsoid(&d, -1.0, &t, &radii) == RANT_MATH_ERR_ARGUMENT, "and deviations below 0");
+    }
 
     {   /* two unit point masses on x at -1 and +1 */
         RantInertia a, b, s;

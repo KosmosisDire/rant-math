@@ -750,6 +750,15 @@ pub fn covariance6_rotate(q: Quaternion, points: &Covariance6) -> Covariance6 {
     o0
 }
 
+/// The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes,
+/// longest first, and radii holds its half lengths along them.
+pub fn covariance3_ellipsoid(c: &Covariance3, deviations: f64) -> Result<(Quaternion, Double3), MathError> {
+    let mut o0 = Quaternion::default();
+    let mut o1 = Double3::default();
+    check(unsafe { ffi::rant_covariance3_ellipsoid(c, deviations, &mut o0, &mut o1) })?;
+    Ok((o0, o1))
+}
+
 /// The body measured in p's parent: its center moved and its tensor turned.
 pub fn inertia_transform(i: Inertia, p: Pose) -> Inertia {
     let r = unsafe { ffi::rant_inertia_transform(i, p) };

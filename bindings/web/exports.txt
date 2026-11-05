@@ -126,6 +126,7 @@ _rm_pose2d_integrate
 _rm_twist2d_between
 _rm_covariance3_rotate
 _rm_covariance6_rotate
+_rm_covariance3_ellipsoid
 _rm_inertia_transform
 _rm_inertia_add
 _rm_axes_of

@@ -8,7 +8,7 @@ Where things are and how they move.
 | `rotation.h` | quaternions, Euler angles, axis and angle, rotation vectors, 2D angles |
 | `matrix.h` | Matrix3x3, Matrix4x4 and any dense matrix: solve, SVD, eigen, Cholesky |
 | `pose.h` | poses in 3D and 2D: compose, invert, apply, interpolate, teach from points |
-| `motion.h` | twists, wrenches, covariances and inertia moved between frames |
+| `motion.h` | twists, wrenches, covariances and inertia moved between frames, a covariance's ellipsoid |
 | `axes.h` | other tools' axes: Unity, Unreal, Godot, glTF, Blender, OpenCV, NED |
 | `geo.h` | latitude, longitude and altitude to and from ECEF and local east north up |
 
@@ -41,6 +41,20 @@ RantDouble3 seen = rant_pose_apply_inverse(camera_in_world, target);
 
 - A twist is the velocity of the point at its frame's origin and the angular velocity, both in that frame's axes.
 - `rant_pose_integrate` follows the exact arc a constant twist traces, as Odometry gives it.
+
+## Uncertainty
+
+```c
+RantQuaternion axes;
+RantDouble3 radii;
+rant_covariance3_ellipsoid(&fix.covariance, 2.0, &axes, &radii);   /* two standard deviations */
+```
+
+- `axes` takes x, y and z onto the ellipsoid's axes, longest first, and `radii` holds its half lengths.
+- A Covariance6's position part is its top left 3 by 3.
+- A Gaussian error lies inside 1 standard deviation 20% of the time in 3D, 39% in 2D, 68% in 1D. 95% needs
+  2.80 in 3D, 2.45 in 2D and 1.96 in 1D.
+- A flat covariance, with no spread along z, gives a last radius of 0 and keeps its plane.
 
 ## Other tools' axes
 

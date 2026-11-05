@@ -30,6 +30,10 @@ RANT_MATH_API RantMathResult rant_twist2d_between(RantPose2D a, RantPose2D b, do
  * a pose or twist. out may be in. */
 RANT_MATH_API void rant_covariance3_rotate(RantQuaternion q, const RantCovariance3 *in, RantCovariance3 *out);
 RANT_MATH_API void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *in, RantCovariance6 *out);
+/* The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes, longest first, and
+ * radii holds its half lengths along them. ERR_ARGUMENT for a negative spread, as the -1 of a value not measured. */
+RANT_MATH_API RantMathResult rant_covariance3_ellipsoid(const RantCovariance3 *c, double deviations, RantQuaternion *turn,
+                                                        RantDouble3 *radii);
 
 /* The body measured in p's parent: its center moved and its tensor turned. */
 RANT_MATH_API RantInertia rant_inertia_transform(RantInertia i, RantPose p);

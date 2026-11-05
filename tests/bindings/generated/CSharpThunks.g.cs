@@ -134,6 +134,7 @@ static partial class Thunks
         ["twist2d_between"] = a => { var x0 = J.To<Pose2D>(a[0]); var x1 = J.To<Pose2D>(a[1]); var x2 = J.To<double>(a[2]); var answer = new Answer(RantMath.Twist2DBetween(x0, x1, x2)); return answer; },
         ["covariance3_rotate"] = a => { var x0 = J.To<Quaternion>(a[0]); var x1 = J.To<double[][]>(a[1].GetProperty("m")); var answer = new Answer(new Dictionary<string, object> { ["m"] = RantMath.Covariance3Rotate(x0, x1) }); return answer; },
         ["covariance6_rotate"] = a => { var x0 = J.To<Quaternion>(a[0]); var x1 = J.To<double[][]>(a[1].GetProperty("m")); var answer = new Answer(new Dictionary<string, object> { ["m"] = RantMath.Covariance6Rotate(x0, x1) }); return answer; },
+        ["covariance3_ellipsoid"] = a => { var x0 = J.To<double[][]>(a[0].GetProperty("m")); var x1 = J.To<double>(a[1]); var answer = new Answer(RantMath.Covariance3Ellipsoid(x0, x1)); return answer; },
         ["inertia_transform"] = a => { var x0 = J.To<Inertia>(a[0]); var x1 = J.To<Pose>(a[1]); var answer = new Answer(RantMath.InertiaTransform(x0, x1)); return answer; },
         ["inertia_add"] = a => { var x0 = J.To<Inertia>(a[0]); var x1 = J.To<Inertia>(a[1]); var answer = new Answer(RantMath.InertiaAdd(x0, x1)); return answer; },
         ["axes_of"] = a => { var x0 = (AxesPreset)J.To<int>(a[0]); var answer = new Answer(RantMath.AxesOf(x0)); return answer; },

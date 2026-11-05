@@ -1670,6 +1670,13 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::covariance6_rotate(x0, x1));
         return out;
     }},
+    {"covariance3_ellipsoid", [](const std::vector<J> &a) {
+        (void)a;
+        Covariance3 x0 = get<Covariance3>(a[0]);
+        double x1 = get<double>(a[1]);
+        J out = put(rant::math::covariance3_ellipsoid(x0, x1));
+        return out;
+    }},
     {"inertia_transform", [](const std::vector<J> &a) {
         (void)a;
         Inertia x0 = get<Inertia>(a[0]);

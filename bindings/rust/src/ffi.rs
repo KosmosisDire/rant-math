@@ -317,6 +317,7 @@ unsafe extern "C" {
     pub fn rant_twist2d_between(a: Pose2D, b: Pose2D, dt: f64, out: *mut Twist2D) -> c_int;
     pub fn rant_covariance3_rotate(q: Quaternion, r#in: *const Covariance3, out: *mut Covariance3);
     pub fn rant_covariance6_rotate(q: Quaternion, r#in: *const Covariance6, out: *mut Covariance6);
+    pub fn rant_covariance3_ellipsoid(c: *const Covariance3, deviations: f64, turn: *mut Quaternion, radii: *mut Double3) -> c_int;
     pub fn rant_inertia_transform(i: Inertia, p: Pose) -> Inertia;
     pub fn rant_inertia_add(a: Inertia, b: Inertia) -> Inertia;
     pub fn rant_axes_of(preset: c_int) -> Axes;

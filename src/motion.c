@@ -146,6 +146,41 @@ void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *in, RantCo
     *out = t;
 }
 
+RantMathResult rant_covariance3_ellipsoid(const RantCovariance3 *c, double deviations, RantQuaternion *turn,
+                                         RantDouble3 *radii){
+    i_MathMat3 a, v, r;
+    double values[3], scale = 0.0, len[3];
+    int order[3] = { 2, 1, 0 }, i, j, k;
+    if (!c || !turn || !radii || !(deviations >= 0.0) || !i_math_finite(deviations)) return RANT_MATH_ERR_ARGUMENT;
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++){
+            a.m[i][j] = 0.5 * (c->m[i][j] + c->m[j][i]);
+            if (!i_math_finite(a.m[i][j])) return RANT_MATH_ERR_ARGUMENT;
+            scale = i_math_max(scale, fabs(a.m[i][j]));
+        }
+    i_math_mat3_eigen(&a, values, &v);
+    if (values[0] < -1e-12 * scale) return RANT_MATH_ERR_ARGUMENT;
+    /* longest first, equal spreads in their own order, so a diagonal one keeps its axes */
+    for (i = 0; i < 2; i++)
+        for (j = i + 1; j < 3; j++)
+            if (values[order[j]] > values[order[i]] || (values[order[j]] == values[order[i]] && order[j] < order[i])){
+                k = order[i]; order[i] = order[j]; order[j] = k;
+            }
+    for (i = 0; i < 3; i++){
+        int big = 0;
+        for (j = 1; j < 3; j++) if (fabs(v.m[j][order[i]]) > fabs(v.m[big][order[i]])) big = j;
+        /* each axis points the way its largest part does, so every solver gives one answer */
+        for (j = 0; j < 3; j++) r.m[j][i] = v.m[big][order[i]] < 0.0 ? -v.m[j][order[i]] : v.m[j][order[i]];
+        len[i] = deviations * sqrt(i_math_max(0.0, values[order[i]]));
+    }
+    if (r.m[0][0] * (r.m[1][1] * r.m[2][2] - r.m[2][1] * r.m[1][2]) - r.m[0][1] * (r.m[1][0] * r.m[2][2] - r.m[2][0] * r.m[1][2]) +
+        r.m[0][2] * (r.m[1][0] * r.m[2][1] - r.m[2][0] * r.m[1][1]) < 0.0)
+        for (j = 0; j < 3; j++) r.m[j][2] = -r.m[j][2];
+    *turn = i_math_quaternion_from_mat3(&r);
+    *radii = rant_double3(len[0], len[1], len[2]);
+    return RANT_MATH_OK;
+}
+
 static i_MathMat3 i_inertia_tensor(RantInertia i){
     i_MathMat3 t;
     t.m[0][0] = i.ixx; t.m[0][1] = i.ixy; t.m[0][2] = i.ixz;

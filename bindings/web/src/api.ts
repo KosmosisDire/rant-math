@@ -2516,6 +2516,18 @@ export function covariance6Rotate(q: Quaternion, points: Covariance6): Float64Ar
     return r_RantCovariance6(o0);
 }
 
+/** The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes,
+ * longest first, and radii holds its half lengths along them. */
+export function covariance3Ellipsoid(c: Covariance3, deviations: number): [Quaternion, Double3] {
+    begin();
+    const c_c = alloc(72); w_RantCovariance3(c_c, c);
+    const o0 = alloc(32);
+    const o1 = alloc(24);
+    check(wasm._rm_covariance3_ellipsoid(c_c, deviations, o0, o1));
+    refresh();
+    return [r_RantQuaternion(o0), r_RantDouble3(o1)];
+}
+
 /** The body measured in p's parent: its center moved and its tensor turned. */
 export function inertiaTransform(i: Inertia, p: Pose): Inertia {
     begin();

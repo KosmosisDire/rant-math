@@ -538,6 +538,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_twist2d_between(Pose2D a, Pose2D b, double dt, Twist2D* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance3_rotate(Quaternion q, RawCovariance3* @in, RawCovariance3* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance6_rotate(Quaternion q, RawCovariance6* @in, RawCovariance6* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_covariance3_ellipsoid(RawCovariance3* c, double deviations, Quaternion* turn, Double3* radii);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_transform(Inertia i, Pose p);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_add(Inertia a, Inertia b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Axes rant_axes_of(int preset);
@@ -1788,6 +1789,17 @@ namespace Rant.Math
             RawCovariance6 o0 = default;
             Native.rant_covariance6_rotate(q, &c_points, &o0);
             return o0.To();
+        }
+
+        /// <summary>The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes,
+        /// longest first, and radii holds its half lengths along them.</summary>
+        public static unsafe (Quaternion Turn, Double3 Radii) Covariance3Ellipsoid(double[][] c, double deviations)
+        {
+            var c_c = RawCovariance3.From(c);
+            Quaternion o0 = default;
+            Double3 o1 = default;
+            Impl.Check(Native.rant_covariance3_ellipsoid(&c_c, deviations, &o0, &o1));
+            return (o0, o1);
         }
 
         /// <summary>The body measured in p's parent: its center moved and its tensor turned.</summary>

@@ -126,6 +126,7 @@ export const NAMES = [
   {"name": "twist2dBetween", "takes": ["a", "b", "dt"], "words": "twist2d between"},
   {"name": "covariance3Rotate", "takes": ["q", "points"], "words": "A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of a pose or twist"},
   {"name": "covariance6Rotate", "takes": ["q", "points"], "words": "covariance6 rotate"},
+  {"name": "covariance3Ellipsoid", "takes": ["c", "deviations"], "words": "The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes, longest first, and radii holds its half lengths along them"},
   {"name": "inertiaTransform", "takes": ["i", "p"], "words": "The body measured in p's parent: its center moved and its tensor turned"},
   {"name": "inertiaAdd", "takes": ["a", "b"], "words": "Two bodies in one frame joined into one, about their shared center of mass"},
   {"name": "axesOf", "takes": ["preset"], "words": "axes of"},

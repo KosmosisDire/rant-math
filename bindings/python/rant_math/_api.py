@@ -854,6 +854,8 @@ _lib.rant_covariance3_rotate.argtypes = [_RantQuaternion, POINTER(_RantCovarianc
 _lib.rant_covariance3_rotate.restype = None
 _lib.rant_covariance6_rotate.argtypes = [_RantQuaternion, POINTER(_RantCovariance6), POINTER(_RantCovariance6)]
 _lib.rant_covariance6_rotate.restype = None
+_lib.rant_covariance3_ellipsoid.argtypes = [POINTER(_RantCovariance3), c_double, POINTER(_RantQuaternion), POINTER(_RantDouble3)]
+_lib.rant_covariance3_ellipsoid.restype = c_int
 _lib.rant_inertia_transform.argtypes = [_RantInertia, _RantPose]
 _lib.rant_inertia_transform.restype = _RantInertia
 _lib.rant_inertia_add.argtypes = [_RantInertia, _RantInertia]
@@ -2503,6 +2505,15 @@ def covariance6_rotate(q: Quaternion, points: Covariance6) -> Covariance6:
     o0 = _RantCovariance6()
     _lib.rant_covariance6_rotate(_c_Quaternion(q), byref(c_points), byref(o0))
     return _py_Covariance6(o0)
+
+def covariance3_ellipsoid(c: Covariance3, deviations: float) -> Tuple[Quaternion, Double3]:
+    """The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes,
+    longest first, and radii holds its half lengths along them."""
+    c_c = _c_Covariance3(c)
+    o0 = _RantQuaternion()
+    o1 = _RantDouble3()
+    _check(_lib.rant_covariance3_ellipsoid(byref(c_c), deviations, byref(o0), byref(o1)))
+    return (_py_Quaternion(o0), _py_Double3(o1))
 
 def inertia_transform(i: Inertia, p: Pose) -> Inertia:
     """The body measured in p's parent: its center moved and its tensor turned."""
@@ -4585,6 +4596,7 @@ __all__ = [
     "cone_raycast",
     "cone_transform",
     "cone_volume",
+    "covariance3_ellipsoid",
     "covariance3_rotate",
     "covariance6_rotate",
     "cylinder_area",

@@ -660,6 +660,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "twist2d_between" => { let x0: Pose2D = Json::get(&a[0]); let x1: Pose2D = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::twist2d_between(x0, x1, x2)?.put();  let _ = &mut out; Ok(out) }
         "covariance3_rotate" => { let x0: Quaternion = Json::get(&a[0]); let x1: Covariance3 = Json::get(&a[1]); let mut out = rant_math::covariance3_rotate(x0, &x1).put();  let _ = &mut out; Ok(out) }
         "covariance6_rotate" => { let x0: Quaternion = Json::get(&a[0]); let x1: Covariance6 = Json::get(&a[1]); let mut out = rant_math::covariance6_rotate(x0, &x1).put();  let _ = &mut out; Ok(out) }
+        "covariance3_ellipsoid" => { let x0: Covariance3 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::covariance3_ellipsoid(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
         "inertia_transform" => { let x0: Inertia = Json::get(&a[0]); let x1: Pose = Json::get(&a[1]); let mut out = rant_math::inertia_transform(x0, x1).put();  let _ = &mut out; Ok(out) }
         "inertia_add" => { let x0: Inertia = Json::get(&a[0]); let x1: Inertia = Json::get(&a[1]); let mut out = rant_math::inertia_add(x0, x1).put();  let _ = &mut out; Ok(out) }
         "axes_of" => { let x0: AxesPreset = Json::get(&a[0]); let mut out = rant_math::axes_of(x0).put();  let _ = &mut out; Ok(out) }

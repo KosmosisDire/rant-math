@@ -804,6 +804,15 @@ inline Covariance6 covariance6_rotate(Quaternion q, const Covariance6 &points) {
     return o0;
 }
 
+/* The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes, */
+/* longest first, and radii holds its half lengths along them. */
+inline std::tuple<Quaternion, Double3> covariance3_ellipsoid(const Covariance3 &c, double deviations) {
+    Quaternion o0{};
+    Double3 o1{};
+    impl::check(detail::rant_covariance3_ellipsoid(impl::mut<const detail::RantCovariance3>(&c), deviations, impl::mut<detail::RantQuaternion>(&o0), impl::mut<detail::RantDouble3>(&o1)));
+    return std::tuple<Quaternion, Double3>{ o0, o1 };
+}
+
 /* The body measured in p's parent: its center moved and its tensor turned. */
 inline Inertia inertia_transform(Inertia i, Pose p) {
     auto r = detail::rant_inertia_transform(impl::bits<detail::RantInertia>(i), impl::bits<detail::RantPose>(p));
