@@ -11,7 +11,7 @@ static const RantPointFieldView I_RGB[] = {
 static const RantPointFieldView I_NORMAL[] = {
     { "x", 1, 0, RANT_SCALAR_KIND_F32, 1 }, { "y", 1, 4, RANT_SCALAR_KIND_F32, 1 }, { "z", 1, 8, RANT_SCALAR_KIND_F32, 1 },
     { "normal_x", 8, 12, RANT_SCALAR_KIND_F32, 1 }, { "normal_y", 8, 16, RANT_SCALAR_KIND_F32, 1 },
-    { "normal_z", 8, 20, RANT_SCALAR_KIND_F32, 1 }
+    { "normal_z", 8, 20, RANT_SCALAR_KIND_F32, 1 }, { "rgba", 4, 24, RANT_SCALAR_KIND_U32, 1 }
 };
 
 RantPointCloudView rant_point_cloud_layout(RantPointCloudLayout layout){
@@ -22,6 +22,7 @@ RantPointCloudView rant_point_cloud_layout(RantPointCloudLayout layout){
     case RANT_POINT_CLOUD_XYZ_INTENSITY: v.fields = I_XYZ; v.field_count = 4; break;
     case RANT_POINT_CLOUD_XYZ_RGB: v.fields = I_RGB; v.field_count = 4; break;
     case RANT_POINT_CLOUD_XYZ_NORMAL: v.fields = I_NORMAL; v.field_count = 6; break;
+    case RANT_POINT_CLOUD_XYZ_NORMAL_RGBA: v.fields = I_NORMAL; v.field_count = 7; break;
     default: return v;
     }
     v.point_step = 4 * v.field_count;

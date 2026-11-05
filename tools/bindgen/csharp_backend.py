@@ -459,7 +459,8 @@ class Writer:
         if f.c == "rant_shape_mesh":
             return ["uint n = 0, t = 0;", "fixed (RawShape* c = &s.Raw)", "{",
                     "    Impl.Room(Native.rant_shape_mesh(c, segments, crease, null, &n, null, &t));",
-                    "    var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)Rant.Math.PointCloudLayout.XyzNormal)), Triangles = new uint[(int)t * 3] };",
+                    "    var layout = s.Colored ? Rant.Math.PointCloudLayout.XyzNormalRgba : Rant.Math.PointCloudLayout.XyzNormal;",
+                    "    var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)layout)), Triangles = new uint[(int)t * 3] };",
                     "    mesh.Vertices.Data = new byte[(int)n * (int)mesh.Vertices.PointStep];",
                     "    using (var p = new CloudPin(mesh.Vertices))", "    fixed (uint* tp = mesh.Triangles)", "    {", "        var v = p.Raw;",
                     "        Impl.Check(Native.rant_shape_mesh(c, segments, crease, &v, &n, tp, &t));", "    }", "    return mesh;", "}"]
@@ -554,7 +555,7 @@ class Writer:
             return [f"var block = Impl.Copy({n});",
                     f"return new {cls}(Native.{f.c}(new {view} {{ points = ({el}*)block, count = (uint){n}.Length }}), block);"]
         if word == "mesh":
-            return ["var p = new MeshPin(mesh);", "return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release());"]
+            return ["var p = new MeshPin(mesh);", "return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release()) { Colored = p.Raw.colors != null };"]
         if word == "prism":
             return ["var b = Impl.Copy<Double2>(prism.Base.Points);",
                     "var c = Impl.Prism(prism, (Double2*)b);",

@@ -71,6 +71,7 @@ namespace Rant.Math
         XyzIntensity = 1,
         XyzRgb = 2,
         XyzNormal = 3,
+        XyzNormalRgba = 4,
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -344,6 +345,7 @@ namespace Rant.Math
         public uint vertex_count;
         public uint* triangles;
         public uint triangle_count;
+        public Color* colors;
     }
 
     internal unsafe struct RawPath2DView
@@ -896,6 +898,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_center(RawGridView* grid, Int3 cell, Double3* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_read_value(RawGridView* grid, byte* field, Int3 cell, double* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_read_values(RawGridView* grid, byte* field, double* @out, uint* count);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_read_colors(RawGridView* grid, Color* @out, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_write_value(RawGridView* grid, byte* field, Int3 cell, double value);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_geo_point_to_ecef(GeoPoint point);
         [DllImport(LIB, CallingConvention = CC)] internal static extern GeoPoint rant_geo_point_from_ecef(Double3 ecef);
@@ -3950,7 +3953,7 @@ namespace Rant.Math
         public static unsafe Shape ShapeFromMesh(Mesh mesh)
         {
             var p = new MeshPin(mesh);
-            return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release());
+            return new Shape(Native.rant_shape_from_mesh(p.Raw), p.Release()) { Colored = p.Raw.colors != null };
         }
 
         /// <summary>Signed for a solid, never negative for a curve or surface. A curve's closest normal points to
@@ -4060,15 +4063,16 @@ namespace Rant.Math
         }
 
         /// <summary>Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces
-        /// meet at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z,
-        /// as docs/shapes.md says.</summary>
+        /// meet at over crease radians or colors differ. Corners fill x, y and z, normal_x, y and z, and
+        /// rgba or rgb, as docs/shapes.md says.</summary>
         public static unsafe Mesh ShapeMesh(Shape s, uint segments, double crease)
         {
             uint n = 0, t = 0;
             fixed (RawShape* c = &s.Raw)
             {
                 Impl.Room(Native.rant_shape_mesh(c, segments, crease, null, &n, null, &t));
-                var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)Rant.Math.PointCloudLayout.XyzNormal)), Triangles = new uint[(int)t * 3] };
+                var layout = s.Colored ? Rant.Math.PointCloudLayout.XyzNormalRgba : Rant.Math.PointCloudLayout.XyzNormal;
+                var mesh = new Mesh { Vertices = Impl.CloudLike(Native.rant_point_cloud_layout((int)layout)), Triangles = new uint[(int)t * 3] };
                 mesh.Vertices.Data = new byte[(int)n * (int)mesh.Vertices.PointStep];
                 using (var p = new CloudPin(mesh.Vertices))
                 fixed (uint* tp = mesh.Triangles)
@@ -4966,6 +4970,23 @@ namespace Rant.Math
                 fixed (double* p0 = o0)
                 {
                     Impl.Check(Native.rant_grid_read_values(&c_grid, c_field, p0, &n0));
+                    Array.Resize(ref o0, (int)n0);
+                    return o0;
+                }
+            }
+        }
+
+        public static unsafe Color[] GridReadColors(Grid grid)
+        {
+            using (var c_grid_p = new GridPin(grid))
+            {
+                var c_grid = c_grid_p.Raw;
+                uint n0 = 0;
+                Impl.Room(Native.rant_grid_read_colors(&c_grid, null, &n0));
+                var o0 = new Color[(int)n0];
+                fixed (Color* p0 = o0)
+                {
+                    Impl.Check(Native.rant_grid_read_colors(&c_grid, p0, &n0));
                     Array.Resize(ref o0, (int)n0);
                     return o0;
                 }

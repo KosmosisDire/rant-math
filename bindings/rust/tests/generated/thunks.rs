@@ -523,7 +523,7 @@ impl Json for ImageFilter {
 }
 
 impl Json for PointCloudLayout {
-    fn get(v: &Value) -> Self { match v.as_i64().unwrap() { 0 => PointCloudLayout::Xyz, 1 => PointCloudLayout::XyzIntensity, 2 => PointCloudLayout::XyzRgb, 3 => PointCloudLayout::XyzNormal, x => panic!("no PointCloudLayout {x}") } }
+    fn get(v: &Value) -> Self { match v.as_i64().unwrap() { 0 => PointCloudLayout::Xyz, 1 => PointCloudLayout::XyzIntensity, 2 => PointCloudLayout::XyzRgb, 3 => PointCloudLayout::XyzNormal, 4 => PointCloudLayout::XyzNormalRgba, x => panic!("no PointCloudLayout {x}") } }
     fn put(&self) -> Value { Value::from(*self as i64) }
 }
 
@@ -999,6 +999,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "grid_center" => { let x0 = get_grid(&a[0]); let x1: Int3 = Json::get(&a[1]); let mut out = rant_math::grid_center(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
         "grid_read_value" => { let x0 = get_grid(&a[0]); let x1 = &a[1].as_str().unwrap().to_string(); let x2: Int3 = Json::get(&a[2]); let mut out = rant_math::grid_read_value(&x0, &x1, x2)?.put();  let _ = &mut out; Ok(out) }
         "grid_read_values" => { let x0 = get_grid(&a[0]); let x1 = &a[1].as_str().unwrap().to_string(); let mut out = rant_math::grid_read_values(&x0, &x1)?.put();  let _ = &mut out; Ok(out) }
+        "grid_read_colors" => { let x0 = get_grid(&a[0]); let mut out = rant_math::grid_read_colors(&x0)?.put();  let _ = &mut out; Ok(out) }
         "grid_write_value" => { let mut x0 = get_grid(&a[0]); let x1 = &a[1].as_str().unwrap().to_string(); let x2: Int3 = Json::get(&a[2]); let x3: f64 = Json::get(&a[3]); rant_math::grid_write_value(&mut x0, &x1, x2, x3)?; let mut out = x0.put();  let _ = &mut out; Ok(out) }
         "geo_point_to_ecef" => { let x0: GeoPoint = Json::get(&a[0]); let mut out = rant_math::geo_point_to_ecef(x0).put();  let _ = &mut out; Ok(out) }
         "geo_point_from_ecef" => { let x0: Double3 = Json::get(&a[0]); let mut out = rant_math::geo_point_from_ecef(x0).put();  let _ = &mut out; Ok(out) }

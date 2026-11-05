@@ -55,6 +55,7 @@ typedef struct {
 typedef struct {
     const RantDouble3 *vertices; uint32_t vertex_count;
     const uint32_t *triangles; uint32_t triangle_count;
+    const RantColor *colors;     /* one per vertex, or NULL when it has none */
 } RantMeshView;
 
 #ifdef __cplusplus

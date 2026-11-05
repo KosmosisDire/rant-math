@@ -127,8 +127,14 @@ function answer(v) {
     if ("vertices" in v && "triangles" in v) {
         // its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
         const [x, y, z] = ["x", "y", "z"].map((a) => Array.from(math.pointCloudReadValues(v.vertices, "normal_" + a)));
-        return { point_step: v.vertices.point_step, points: answer(math.pointCloudReadPoints(v.vertices)),
-                 normals: x.map((n, i) => answer({ x: n, y: y[i], z: z[i] })), triangles: Array.from(v.triangles) };
+        const out = { point_step: v.vertices.point_step, points: answer(math.pointCloudReadPoints(v.vertices)),
+                      normals: x.map((n, i) => answer({ x: n, y: y[i], z: z[i] })), triangles: Array.from(v.triangles) };
+        try {
+            out.colors = answer(math.pointCloudReadColors(v.vertices));
+        } catch (e) {
+            if (!(e instanceof MathError)) throw e;
+        }
+        return out;
     }
     if ("format" in v && "data" in v) return { width: v.width, height: v.height, stride: v.stride, format: enumNumber(IMAGE_FORMATS, v.format), data: hex(v.data) };
     if ("point_step" in v) return { fields: v.fields.map(answer), point_step: v.point_step, data: hex(v.data) };

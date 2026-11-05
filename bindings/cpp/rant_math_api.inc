@@ -58,7 +58,8 @@ enum class PointCloudLayout : int {
     Xyz = 0,
     XyzIntensity = 1,
     XyzRgb = 2,
-    XyzNormal = 3
+    XyzNormal = 3,
+    XyzNormalRgba = 4
 };
 
 struct Axes {
@@ -2383,13 +2384,15 @@ inline std::vector<Double3> shape_sample_surface(const Shape &s, uint64_t seed, 
 }
 
 /* Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet */
-/* at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as */
-/* docs/shapes.md says. */
+/* at over crease radians or colors differ. Corners fill x, y and z, normal_x, y and z, and rgba or */
+/* rgb, as docs/shapes.md says. */
 inline Mesh shape_mesh(const Shape &s, uint32_t segments, double crease) {
     uint32_t n = 0, t = 0;
     impl::room(detail::rant_shape_mesh(s.raw(), segments, crease, nullptr, &n, nullptr, &t));
     Mesh out;
-    out.vertices = impl::cloud_like(detail::rant_point_cloud_layout(detail::RANT_POINT_CLOUD_XYZ_NORMAL));
+    const bool colored = s.raw()->kind == detail::RANT_SHAPE_MESH && s.raw()->as.mesh.colors;
+    out.vertices = impl::cloud_like(detail::rant_point_cloud_layout(colored ? detail::RANT_POINT_CLOUD_XYZ_NORMAL_RGBA
+                                                                           : detail::RANT_POINT_CLOUD_XYZ_NORMAL));
     out.vertices.data.resize(size_t(n) * out.vertices.point_step);
     out.triangles.resize(size_t(t) * 3);
     MutablePointCloudView v(out.vertices);
@@ -2941,6 +2944,16 @@ inline std::vector<double> grid_read_values(const Grid &grid, const char *field)
     impl::room(detail::rant_grid_read_values(&c_grid.raw, field, nullptr, &n0));
     std::vector<double> o0(n0);
     impl::check(detail::rant_grid_read_values(&c_grid.raw, field, o0.data(), &n0));
+    o0.resize(n0);
+    return o0;
+}
+
+inline std::vector<Color> grid_read_colors(const Grid &grid) {
+    impl::GridRef c_grid(grid);
+    uint32_t n0 = 0;
+    impl::room(detail::rant_grid_read_colors(&c_grid.raw, nullptr, &n0));
+    std::vector<Color> o0(n0);
+    impl::check(detail::rant_grid_read_colors(&c_grid.raw, impl::mut<detail::RantColor>(o0.data()), &n0));
     o0.resize(n0);
     return o0;
 }

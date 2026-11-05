@@ -163,11 +163,12 @@ _Static_assert(sizeof(RantMatrixView) == 12, "RantMatrixView");
 _Static_assert(offsetof(RantMatrixView, data) == 0, "RantMatrixView.data");
 _Static_assert(offsetof(RantMatrixView, rows) == 4, "RantMatrixView.rows");
 _Static_assert(offsetof(RantMatrixView, cols) == 8, "RantMatrixView.cols");
-_Static_assert(sizeof(RantMeshView) == 16, "RantMeshView");
+_Static_assert(sizeof(RantMeshView) == 20, "RantMeshView");
 _Static_assert(offsetof(RantMeshView, vertices) == 0, "RantMeshView.vertices");
 _Static_assert(offsetof(RantMeshView, vertex_count) == 4, "RantMeshView.vertex_count");
 _Static_assert(offsetof(RantMeshView, triangles) == 8, "RantMeshView.triangles");
 _Static_assert(offsetof(RantMeshView, triangle_count) == 12, "RantMeshView.triangle_count");
+_Static_assert(offsetof(RantMeshView, colors) == 16, "RantMeshView.colors");
 _Static_assert(sizeof(RantOrientedBox) == 80, "RantOrientedBox");
 _Static_assert(offsetof(RantOrientedBox, pose) == 0, "RantOrientedBox.pose");
 _Static_assert(offsetof(RantOrientedBox, size) == 56, "RantOrientedBox.size");
@@ -751,6 +752,7 @@ EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_cell(const RantGridView *grid, const
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_center(const RantGridView *grid, const RantInt3 *cell, RantDouble3 *out) { return rant_grid_center(grid, *cell, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_read_value(const RantGridView *grid, const char *field, const RantInt3 *cell, double *out) { return rant_grid_read_value(grid, field, *cell, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_read_values(const RantGridView *grid, const char *field, double *out, uint32_t *count) { return rant_grid_read_values(grid, field, out, count); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_read_colors(const RantGridView *grid, RantColor *out, uint32_t *count) { return rant_grid_read_colors(grid, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_write_value(RantGridView *grid, const char *field, const RantInt3 *cell, double value) { return rant_grid_write_value(grid, field, *cell, value); }
 EMSCRIPTEN_KEEPALIVE void rm_geo_point_to_ecef(RantDouble3 *ret, const RantGeoPoint *point) { *ret = rant_geo_point_to_ecef(*point); }
 EMSCRIPTEN_KEEPALIVE void rm_geo_point_from_ecef(RantGeoPoint *ret, const RantDouble3 *ecef) { *ret = rant_geo_point_from_ecef(*ecef); }

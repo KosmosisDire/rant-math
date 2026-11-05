@@ -14,7 +14,8 @@ typedef enum {
     RANT_POINT_CLOUD_XYZ,            /* x, y and z as f32 */
     RANT_POINT_CLOUD_XYZ_INTENSITY,  /* then intensity as f32 */
     RANT_POINT_CLOUD_XYZ_RGB,        /* then rgb packed into 4 bytes as PCL packs it */
-    RANT_POINT_CLOUD_XYZ_NORMAL      /* then normal_x, normal_y and normal_z as f32 */
+    RANT_POINT_CLOUD_XYZ_NORMAL,     /* then normal_x, normal_y and normal_z as f32 */
+    RANT_POINT_CLOUD_XYZ_NORMAL_RGBA /* then rgba packed into 4 bytes as PCL packs it */
 } RantPointCloudLayout;
 
 /* The fields and point_step of a common layout, with no data yet. Point data at count * point_step bytes. */

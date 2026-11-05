@@ -89,7 +89,7 @@ static RantShape random_shape(RantShapeKind kind, Store *st, RantDouble3 at){
         b.pose = pose;
         b.size = rant_double3(random_range(0.3, 2), random_range(0.3, 2), random_range(0.3, 2));
         rant_oriented_box_corners(b, st->corners);
-        m.vertices = st->corners; m.vertex_count = 8; m.triangles = box_triangles; m.triangle_count = 12;
+        m.vertices = st->corners; m.vertex_count = 8; m.triangles = box_triangles; m.triangle_count = 12; m.colors = NULL;
         return rant_shape_from_mesh(m);
     }
     }
@@ -279,7 +279,7 @@ static void sampling(void){
         RantAlignedBox b;
         b.min = rant_double3(0, 0, 0); b.max = rant_double3(1, 1, 1);
         rant_aligned_box_corners(b, v);
-        m.vertices = v; m.vertex_count = 8; m.triangles = box_triangles; m.triangle_count = 2;
+        m.vertices = v; m.vertex_count = 8; m.triangles = box_triangles; m.triangle_count = 2; m.colors = NULL;
         s = rant_shape_from_mesh(m);
         CHECK(rant_shape_sample_inside(&s, 1, p, 100) == RANT_MATH_ERR_DEGENERATE, "one face of a box has no inside to find");
     }
@@ -460,7 +460,7 @@ static void meshes(void){
             nv = 0; nt = 0;
             CHECK(mesh_of(&s[k], segments, SMOOTH, NULL, NULL, &nv, NULL, &nt) == RANT_MATH_ERR_SPACE && nv && nt, "shape %u: asks its room", k);
             CHECK(mesh_of(&s[k], segments, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_OK, "shape %u: meshes", k);
-            m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt;
+            m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt; m.colors = NULL;
             CHECK(rant_mesh_check(m) == RANT_MATH_OK, "shape %u: every index is a vertex", k);
             for (i = 0, bad = 0; i < nv; i++) bad += !(fabs(rant_shape_distance(&s[k], v[i])) < 1e-9);
             CHECK(bad == 0, "shape %u: %d vertices off the surface", k, bad);
@@ -487,7 +487,7 @@ static void meshes(void){
     nv = 4; nt = 100; t[0] = 77;
     CHECK(mesh_of(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt) == RANT_MATH_ERR_SPACE && nv == 8 && nt == 12 && t[0] == 77,
           "room for one list but not the other writes neither");
-    mv.vertices = v; mv.vertex_count = 8; mv.triangles = t; mv.triangle_count = 12;
+    mv.vertices = v; mv.vertex_count = 8; mv.triangles = t; mv.triangle_count = 12; mv.colors = NULL;
     nv = 8; nt = 12;
     mesh_of(&s[0], 0, SMOOTH, v, NULL, &nv, t, &nt);
     s[8] = rant_shape_from_mesh(mv);
@@ -609,7 +609,7 @@ static void creases(void){
         RantMeshView mv;
         sq[0] = rant_double3(0, 0, 0); sq[1] = rant_double3(1, 0, 0); sq[2] = rant_double3(1, 1, 0);
         sq[3] = rant_double3(0, 0, 0); sq[4] = rant_double3(1, 1, 0); sq[5] = rant_double3(0, 1, 0);
-        mv.vertices = sq; mv.vertex_count = 6; mv.triangles = st; mv.triangle_count = 2;
+        mv.vertices = sq; mv.vertex_count = 6; mv.triangles = st; mv.triangle_count = 2; mv.colors = NULL;
         s = rant_shape_from_mesh(mv);
         nv = 6; nt = 3;
         CHECK(mesh_of(&s, 0, 0.0, sv, sn, &nv, out, &nt) == RANT_MATH_OK && nv == 4 && nt == 2 &&
@@ -627,6 +627,40 @@ static void creases(void){
               "a face with no area and one past the vertices drop out, and so do vertices no face keeps");
         CHECK(mesh_of(&s, 0, -0.1, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "no crease below 0");
         CHECK(mesh_of(&s, 0, NAN, sv, sn, &nv, out, &nt) == RANT_MATH_ERR_ARGUMENT, "nor NaN");
+    }
+    {   /* the flat square again, its two triangles red and blue, into a cloud that holds colors */
+        static uint8_t data[28 * 6];
+        RantDouble3 sq[6], got[6];
+        RantColor hue[6], back[6];
+        uint32_t st[6] = { 0, 1, 2, 3, 4, 5 }, out[6], m = 6, mt = 2, k = 6, joined;
+        RantPointCloudView c = rant_point_cloud_layout(RANT_POINT_CLOUD_XYZ_NORMAL_RGBA);
+        RantMeshView mv;
+        sq[0] = rant_double3(0, 0, 0); sq[1] = rant_double3(1, 0, 0); sq[2] = rant_double3(1, 1, 0);
+        sq[3] = rant_double3(0, 0, 0); sq[4] = rant_double3(1, 1, 0); sq[5] = rant_double3(0, 1, 0);
+        for (i = 0; i < 6; i++) hue[i] = i < 3 ? rant_color(255, 0, 0, 255) : rant_color(0, 0, 255, 128);
+        mv.vertices = sq; mv.vertex_count = 6; mv.triangles = st; mv.triangle_count = 2; mv.colors = hue;
+        s = rant_shape_from_mesh(mv);
+        c.data = data;
+        c.size = sizeof data;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &c, &m, out, &mt) == RANT_MATH_OK && m == 6, "corners of two colors at one point keep apart");
+        c.size = (size_t)m * c.point_step;
+        CHECK(rant_point_cloud_read_colors(&c, back, &k) == RANT_MATH_OK && k == 6, "and fill rgba");
+        for (i = 0, bad = 0; i < 6; i++) bad += back[out[i]].r != (i < 3 ? 255 : 0) || back[out[i]].a != (i < 3 ? 255 : 128);
+        CHECK(bad == 0, "%d corners off their own triangle's color", bad);
+        CHECK(rant_point_cloud_read_points(&c, got, &k) == RANT_MATH_OK && near3(got[out[3]], sq[3], 1e-6), "at their own points");
+        hue[3] = hue[4] = hue[5] = hue[0];
+        m = 6; c.size = sizeof data;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &c, &m, out, &mt) == RANT_MATH_OK && m == 4, "one color joins them as with none");
+        joined = m;
+        mv.colors = NULL;
+        s = rant_shape_from_mesh(mv);
+        m = 6;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, &c, &m, out, &mt) == RANT_MATH_OK && m == joined, "no colors join them alike");
+        hue[4] = rant_color(0, 255, 0, 255);
+        mv.colors = hue;
+        s = rant_shape_from_mesh(mv);
+        m = 6;
+        CHECK(rant_shape_mesh(&s, 0, 0.5, NULL, &m, NULL, &mt) == RANT_MATH_ERR_SPACE && m == 5, "a corner alone in its color asks for a vertex");
     }
     {   /* into the floats a GPU reads, which hold what the doubles do, and into a cloud with no z */
         static uint8_t data[24 * 30];

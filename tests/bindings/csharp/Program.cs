@@ -232,8 +232,12 @@ static class J
                          z = RantMath.PointCloudReadValues(m.Vertices, "normal_z");
                 var normals = new Double3[x.Length];
                 for (int i = 0; i < x.Length; i++) normals[i] = new Double3 { X = x[i], Y = y[i], Z = z[i] };
+                Color[] colors = null;
+                try { colors = RantMath.PointCloudReadColors(m.Vertices); } catch (MathException) { }
+                bool hued = want.TryGetProperty("colors", out var hues);
                 return Same(want.GetProperty("point_step"), m.Vertices.PointStep, tol) && Same(want.GetProperty("points"), RantMath.PointCloudReadPoints(m.Vertices), tol) &&
-                       Same(want.GetProperty("normals"), normals, tol) && Same(want.GetProperty("triangles"), m.Triangles, tol);
+                       Same(want.GetProperty("normals"), normals, tol) && Same(want.GetProperty("triangles"), m.Triangles, tol) &&
+                       hued == (colors != null) && (!hued || Same(hues, colors, tol));
             }
             case Prism p:
                 return Same(want.GetProperty("pose"), p.Pose, tol) && Same(want.GetProperty("base").GetProperty("points"), p.Base.Points, tol) &&

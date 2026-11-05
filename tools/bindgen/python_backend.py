@@ -432,7 +432,9 @@ class Writer:
         if f.c == "rant_shape_mesh":
             self.emit("n, t = c_uint32(0), c_uint32(0)")
             self.emit("_room(_lib.rant_shape_mesh(byref(s._raw), segments, crease, None, byref(n), None, byref(t)))")
-            self.emit("out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(PointCloudLayout.XyzNormal)), [])")
+            self.emit("colored = s._raw.kind == _RANT_SHAPE_MESH and bool(s._raw.as_.mesh.colors)")
+            self.emit("layout = PointCloudLayout.XyzNormalRgba if colored else PointCloudLayout.XyzNormal")
+            self.emit("out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(layout)), [])")
             self.emit("data = (c_uint8 * (n.value * out.vertices.point_step))()")
             self.emit("triangles = (c_uint32 * (t.value * 3))()")
             self.emit("c_out = _cloud(out.vertices)")
@@ -608,6 +610,7 @@ def api(m):
                                                ("capsule", "_RantCapsule"), ("cylinder", "_RantCylinder"), ("cone", "_RantCone"), ("prism", "_RantPrismView"),
                                                ("segment", "_RantSegment"), ("polyline", "_RantPolylineView"), ("polygon", "_RantPolygonView"), ("mesh", "_RantMeshView")]) + "]\n",
              'class _RantShape(Structure):\n    _fields_ = [("kind", c_int), ("as_", _RantShapeAs)]\n',
+             f'_RANT_SHAPE_MESH = {dict(m.enums["RantShapeKind"].options)["RANT_SHAPE_MESH"]}\n',
              "class _RantShape2DAs(Union):\n    _fields_ = [" + ", ".join(
                  f'("{n}", {c})' for n, c in [("aligned_box", "_RantAlignedBox2D"), ("oriented_box", "_RantOrientedBox2D"), ("circle", "_RantCircle"),
                                                ("capsule", "_RantCapsule2D"), ("polygon", "_RantPolygon2DView"), ("segment", "_RantSegment2D"), ("polyline", "_RantPolyline2DView")]) + "]\n",
@@ -691,17 +694,25 @@ def _mask_out(buffer, size):
 
 
 def _mesh(mesh):
-    """A Mesh as the C view: its corners read once in C from whatever fields they are, its triangles as they are."""
+    """A Mesh as the C view: its corners read once in C from whatever fields they are, its colors from rgba or rgb
+    when it has one, its triangles as they are."""
     cloud = _cloud(mesh.vertices)
     n = c_uint32(0)
     _room(_lib.rant_point_cloud_read_points(byref(cloud), None, byref(n)))
     points = (_RantDouble3 * n.value)()
     _check(_lib.rant_point_cloud_read_points(byref(cloud), points, byref(n)))
+    k = c_uint32(0)
+    held = _lib.rant_point_cloud_read_colors(byref(cloud), None, byref(k))
+    colors = None
+    if held != ErrorKind.Format:
+        _room(held)
+        colors = (_RantColor * k.value)()
+        _check(_lib.rant_point_cloud_read_colors(byref(cloud), colors, byref(k)))
     triangles, count, _np = _list_in(mesh.triangles, c_uint32, None, "uint32", 1, True)
     if count % 3:
         raise MathError(ErrorKind.Argument)
-    view = _RantMeshView(points, n.value, triangles, count // 3)
-    view._keep = (points, triangles)
+    view = _RantMeshView(points, n.value, triangles, count // 3, colors if k.value else None)
+    view._keep = (points, triangles, colors)
     return view
 
 

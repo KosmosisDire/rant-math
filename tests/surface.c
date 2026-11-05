@@ -12,7 +12,7 @@ static RantMeshView box_mesh(RantDouble3 v[8], RantAlignedBox b){
     RantMeshView m;
     rant_aligned_box_corners(b, v);
     m.vertices = v; m.vertex_count = 8;
-    m.triangles = box_triangles; m.triangle_count = 12;
+    m.triangles = box_triangles; m.triangle_count = 12; m.colors = NULL;
     return m;
 }
 
@@ -113,7 +113,7 @@ static void meshes(void){
                 tri[nt * 3] = p; tri[nt * 3 + 1] = t; tri[nt * 3 + 2] = q; nt++;
             }
         }
-        bm.vertices = ball; bm.vertex_count = 2 + (rings - 1) * around; bm.triangles = tri; bm.triangle_count = nt;
+        bm.vertices = ball; bm.vertex_count = 2 + (rings - 1) * around; bm.triangles = tri; bm.triangle_count = nt; bm.colors = NULL;
         CHECK(rant_mesh_check(bm) == RANT_MATH_OK, "the ball mesh checks out");
         CHECK(near(rant_mesh_volume(bm), 4.0 / 3.0 * PI, 0.02) && near(rant_mesh_area(bm), 4.0 * PI, 0.03), "a ball mesh holds a ball");
         CHECK(near(rant_mesh_inertia(bm, 1.0).izz, 0.4, 0.01) && near3(rant_mesh_centroid(bm), rant_double3(0, 0, 0), 1e-12),
@@ -199,7 +199,7 @@ static void vertex_normals(void){
     ball.radius = 2.0;
     s = rant_shape_from_sphere(ball);
     mesh_of(&s, 48, SMOOTH, v, NULL, &nv, t, &nt);
-    m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt;
+    m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt; m.colors = NULL;
     CHECK(rant_mesh_normals(m, n) == RANT_MATH_OK, "a ball's normals");
     {   /* the sum of each triangle's twice area normal, by its definition */
         static RantDouble3 sum[2000];
@@ -221,7 +221,7 @@ static void vertex_normals(void){
         uint32_t tri[9] = { 0, 1, 2, 0, 2, 3, 0, 9, 1 };
         sq[0] = rant_double3(0, 0, 1); sq[1] = rant_double3(1, 0, 1); sq[2] = rant_double3(1, 1, 1); sq[3] = rant_double3(0, 1, 1);
         sq[4] = rant_double3(5, 5, 5);
-        m.vertices = sq; m.vertex_count = 5; m.triangles = tri; m.triangle_count = 3;
+        m.vertices = sq; m.vertex_count = 5; m.triangles = tri; m.triangle_count = 3; m.colors = NULL;
         CHECK(rant_mesh_normals(m, out) == RANT_MATH_OK, "a square");
         CHECK(near3(out[0], rant_double3(0, 0, 1), 1e-15) && near3(out[3], rant_double3(0, 0, 1), 1e-15), "faces +z, the bad triangle skipped");
         CHECK(out[4].x != out[4].x, "a vertex no triangle uses is NaN");

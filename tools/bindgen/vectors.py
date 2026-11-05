@@ -367,11 +367,15 @@ CLOUD_BAD = cloud(XYZ, 12, "0102")
 CLOUDS = [CLOUD_XYZ, CLOUD_I, CLOUD_RGB, CLOUD_N, CLOUD_NONE, CLOUD_BAD]
 
 
-def mesh(vertices, triangles):
-    """A Mesh whose corners are doubles, so a binding reads back exactly what C was given."""
+def mesh(vertices, triangles, colors=None, packed="rgba"):
+    """A Mesh whose corners are doubles, so a binding reads back exactly what C was given, and a color each in a
+    packed field when colors are given."""
     fields = [("x", 0, 8, 1), ("y", 8, 8, 1), ("z", 16, 8, 1)]
-    data = struct.pack("<%dd" % (3 * len(vertices)), *[p[a] for p in vertices for a in "xyz"]).hex()
-    return {"vertices": cloud(fields, 24, data), "triangles": triangles}
+    if colors is None:
+        data = struct.pack("<%dd" % (3 * len(vertices)), *[p[a] for p in vertices for a in "xyz"]).hex()
+        return {"vertices": cloud(fields, 24, data), "triangles": triangles}
+    data = "".join(struct.pack("<3d4B", p["x"], p["y"], p["z"], c["b"], c["g"], c["r"], c["a"]).hex() for p, c in zip(vertices, colors))
+    return {"vertices": cloud(fields + [(packed, 24, 6, 1)], 28, data), "triangles": triangles}
 
 
 def mesh_points(v):
@@ -386,18 +390,42 @@ def mesh_points(v):
     return out
 
 
+def mesh_colors(v):
+    """A Mesh's colors by its rgba, or rgb with alpha 255, as a binding reads them, None when it has neither."""
+    c = v["vertices"]
+    at = {f["name"]: f for f in c["fields"]}
+    f = at.get("rgba") or at.get("rgb")
+    if f is None:
+        return None
+    data = bytes.fromhex(c["data"])
+    out = []
+    for k in range(len(data) // c["point_step"]):
+        b, g, r, a = data[k * c["point_step"] + f["offset"]:k * c["point_step"] + f["offset"] + 4]
+        out.append({"r": r, "g": g, "b": b, "a": a if f["name"] == "rgba" else 255})
+    return out
+
+
 MESHES = [
     mesh(CUBE_V, CUBE_T),
     mesh(TETRA_V, TETRA_T),
     mesh(TRIANGLE3, [0, 1, 2]),
     mesh(TETRA_V, [0, 1, 9]),
 ]
+RED, BLUE = {"r": 255, "g": 0, "b": 0, "a": 255}, {"r": 0, "g": 0, "b": 255, "a": 128}
+# a square of two triangles of their own colors, and a cube a color each corner as rgb
+PAINTED = [mesh([d3(0.0, 0.0, 0.0), d3(1.0, 0.0, 0.0), d3(1.0, 1.0, 0.0), d3(0.0, 0.0, 0.0), d3(1.0, 1.0, 0.0), d3(0.0, 1.0, 0.0)],
+                [0, 1, 2, 3, 4, 5], [RED] * 3 + [BLUE] * 3),
+           mesh(CUBE_V, CUBE_T, [{"r": 30 * i, "g": 255 - 30 * i, "b": 7, "a": 0} for i in range(8)], "rgb")]
 
 GRID_A = {"origin": POSES[0], "resolution": 0.5, "cells_x": 3, "cells_y": 2, "cells_z": 1,
           "fields": [{"name": "occupancy", "kind": 2, "data": hexof([0, 10, 20, 30, 40, 50])},
                      {"name": "height", "kind": 7, "data": floats([0.5, 1.0, 1.5, 2.0, 2.5, 3.0])}]}
 GRID_B = {"origin": POSES[1], "resolution": 1.0, "cells_x": 2, "cells_y": 2, "cells_z": 2,
           "fields": [{"name": "cost", "kind": 8, "data": struct.pack("<8d", *[float(i) / 4 for i in range(8)]).hex()}]}
+GRID_RGBA = {"origin": POSES[0], "resolution": 0.5, "cells_x": 2, "cells_y": 2, "cells_z": 1,
+             "fields": [{"name": "rgb", "kind": 7, "data": hexof(range(100, 116))},
+                        {"name": "rgba", "kind": 6, "data": hexof([10 * i for i in range(16)])}]}
+GRID_RGB = {**GRID_RGBA, "fields": GRID_RGBA["fields"][:1]}
 
 SCANS = [
     {"angle_min": -1.5, "angle_step": 0.5, "range_min": 0.25, "range_max": 10.0, "echoes": 1,
@@ -524,7 +552,7 @@ EXPLICIT = {
         [image(8, 6, 3, rgb(8, 6, 4)), {"kind": "polygon2d", "value": [d2(1.0, 1.0), d2(6.0, 1.0), d2(3.0, 5.0)]}, POOLS["RantColor"][1], 0.0],
         [MONO16, {"kind": "circle", "value": {"center": d2(1.0, 1.0), "radius": 1.0}}, POOLS["RantColor"][0], 0.0],
     ],
-    "point_cloud_layout": [[0], [1], [2], [3]],
+    "point_cloud_layout": [[0], [1], [2], [3], [4]],
     "point_cloud_check": [[c] for c in [CLOUD_XYZ, CLOUD_BAD, cloud([("x", 20, 7, 1)], 12, "00" * 12)]],
     "point_cloud_field": [[CLOUD_I, "intensity"], [CLOUD_XYZ, "z"], [CLOUD_XYZ, "missing"]],
     "point_cloud_read_points": [[c] for c in [CLOUD_XYZ, CLOUD_N, CLOUD_NONE, CLOUD_BAD]],
@@ -584,6 +612,7 @@ EXPLICIT = {
     "grid_center": [[GRID_A, d3(1, 1, 0)], [GRID_B, d3(0, 0, 1)], [GRID_A, d3(9, 9, 9)]],
     "grid_read_value": [[GRID_A, "occupancy", d3(2, 1, 0)], [GRID_A, "height", d3(1, 0, 0)], [GRID_A, "missing", d3(0, 0, 0)], [GRID_A, "height", d3(9, 0, 0)], [GRID_B, "cost", d3(1, 1, 1)]],
     "grid_read_values": [[GRID_A, "occupancy"], [GRID_A, "height"], [GRID_A, "missing"], [GRID_B, "cost"]],
+    "grid_read_colors": [[GRID_RGBA], [GRID_RGB], [GRID_A]],
     "grid_write_value": [[GRID_A, "occupancy", d3(2, 1, 0), 300.0], [GRID_A, "height", d3(0, 0, 0), 0.25], [GRID_A, "missing", d3(0, 0, 0), 1.0], [GRID_B, "cost", d3(9, 9, 9), 1.0]],
     "detections2d_suppress": [[DETS2[0], 0.5], [DETS2[0], 0.95], [DETS2[1], 0.5], [DETS2[2], 0.5]],
     "detections3d_suppress": [[DETS3[0], 0.5], [DETS3[0], 0.95], [DETS3[1], 0.5], [DETS3[2], 0.5]],
@@ -592,7 +621,7 @@ EXPLICIT = {
     "inertia_box": [[POOLS["RantInertia"][0]], [POOLS["RantInertia"][1]], [POOLS["RantInertia"][2]], [{**POOLS["RantInertia"][0], "mass": 0.0}]],
     "shape_mesh": [[s, seg, crease] for s, seg, crease in zip(SHAPES, [0, 8, 8, 8, 6, 6, 0, 0, 0, 0, 0, 0, 0],
                                                               [0.5, 0.0, 0.5, 4.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 4.0, 0.5])]
-                  + [[SHAPES[2], 2, 0.5], [SHAPES[0], 0, -1.0]],
+                  + [[SHAPES[2], 2, 0.5], [SHAPES[0], 0, -1.0]] + [[{"kind": "mesh", "value": m}, 0, 0.5] for m in PAINTED],
     "shape_gap": [[SHAPES[i], SHAPES[j]] for i, j in [(0, 2), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (0, 0), (12, 0)]],
     "shape2d_gap": [[SHAPES2[i], SHAPES2[j]] for i, j in [(0, 2), (2, 3), (4, 5), (6, 0), (1, 1), (7, 0)]],
     "shape_overlaps": [[SHAPES[i], SHAPES[j]] for i, j in [(0, 2), (2, 3), (0, 0), (4, 10)]],
@@ -1048,9 +1077,13 @@ class CCase:
         if kind == "mesh":
             l1, n1 = c_array(w, name + "v", "RantDouble3", mesh_points(value))
             l2, n2 = c_array(w, name + "t", "uint32_t", value["triangles"])
+            hues = mesh_colors(value)
             self.decl(l1)
             self.decl(l2)
-            self.decl(f"RantMeshView {name}m; {name}m.vertices = {name}v; {name}m.vertex_count = {n1}; {name}m.triangles = {name}t; {name}m.triangle_count = {n2} / 3;")
+            if hues:
+                self.decl(c_array(w, name + "c", "RantColor", hues)[0])
+            self.decl(f"RantMeshView {name}m; {name}m.vertices = {name}v; {name}m.vertex_count = {n1}; {name}m.triangles = {name}t; {name}m.triangle_count = {n2} / 3;"
+                      f" {name}m.colors = {name + 'c' if hues else 'NULL'};")
             self.decl(f"{t} {name} = {prefix}mesh({name}m);")
         elif kind == "prism":
             l1, n1 = c_array(w, name + "b", "RantDouble2", value["base"]["points"])
@@ -1070,7 +1103,7 @@ class CCase:
                   "oriented_box2d": "RantOrientedBox2D", "circle": "RantCircle", "capsule2d": "RantCapsule2D", "segment2d": "RantSegment2D"}[kind]
             self.decl(f"{ct} {name}m = {w.literal(ct, value)};")
             self.decl(f"{t} {name} = {prefix}{kind}({name}m);")
-        return {"ref": "&" + name}
+        return {"ref": "&" + name, "colored": kind == "mesh" and mesh_colors(value) is not None}
 
     def size_of(self, out):
         """A C expression for how many items an output holds."""
@@ -1226,7 +1259,8 @@ class CCase:
         elif k == "cloud_select":
             self.decl(f"uint8_t *o{j} = NULL; uint32_t n{j} = 0;")
         elif k == "mesh_new":
-            self.decl(f"RantPointCloudView o{j} = rant_point_cloud_layout(RANT_POINT_CLOUD_XYZ_NORMAL); uint32_t *o{j}t = NULL; uint32_t n{j} = 0, m{j} = 0;")
+            layout = "XYZ_NORMAL_RGBA" if by_name["s"]["colored"] else "XYZ_NORMAL"
+            self.decl(f"RantPointCloudView o{j} = rant_point_cloud_layout(RANT_POINT_CLOUD_{layout}); uint32_t *o{j}t = NULL; uint32_t n{j} = 0, m{j} = 0;")
         else:
             raise KeyError(k)
 
@@ -1384,6 +1418,11 @@ class CCase:
             lines += self.print_list("RantDouble3", "nn", f"n{j}")
             lines.append('fputs(",\\"triangles\\":", o);')
             lines += self.print_list("uint32_t", f"o{j}t", f"(size_t)m{j} * 3")
+            # and its colors when it holds them
+            lines.append(f"{{ RantColor *cc = (RantColor *)room(sizeof(RantColor) * (n{j} ? n{j} : 1)); c = n{j};")
+            lines.append(f"if (rant_point_cloud_read_colors(&o{j}, cc, &c) == RANT_MATH_OK) {{ fputs(\",\\\"colors\\\":\", o);")
+            lines += self.print_list("RantColor", "cc", f"n{j}")
+            lines.append("} }")
             lines.append("fputc('}', o); }")
             return lines
         if k == "prism":
@@ -1420,7 +1459,7 @@ def write_record_program(model, cases):
     }.items():
         head.append(f"static {view} rv_{view}(const {el} *p, uint32_t n){{ {view} v; v.{word} = p; v.count = n; return v; }}\n")
     head.append("static RantMeshView rv_mesh(const RantDouble3 *v, uint32_t nv, const uint32_t *t, uint32_t nt){ "
-                "RantMeshView m; m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt / 3; return m; }\n")
+                "RantMeshView m; m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt / 3; m.colors = NULL; return m; }\n")
     tail = ["int main(int argc, char **argv){", "    (void)argc;", '    o = fopen(argv[1], "w");', "    if (!o) return 1;"]
     for i in range(len(cases)):
         tail.append(f"    case_{i}();")

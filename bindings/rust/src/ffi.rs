@@ -118,6 +118,7 @@ pub struct RawMeshView {
     pub vertex_count: u32,
     pub triangles: *const u32,
     pub triangle_count: u32,
+    pub colors: *const Color,
 }
 
 #[repr(C)]
@@ -676,6 +677,7 @@ unsafe extern "C" {
     pub fn rant_grid_center(grid: *const RawGridView, cell: Int3, out: *mut Double3) -> c_int;
     pub fn rant_grid_read_value(grid: *const RawGridView, field: *const c_char, cell: Int3, out: *mut f64) -> c_int;
     pub fn rant_grid_read_values(grid: *const RawGridView, field: *const c_char, out: *mut f64, count: *mut u32) -> c_int;
+    pub fn rant_grid_read_colors(grid: *const RawGridView, out: *mut Color, count: *mut u32) -> c_int;
     pub fn rant_grid_write_value(grid: *mut RawGridView, field: *const c_char, cell: Int3, value: f64) -> c_int;
     pub fn rant_geo_point_to_ecef(point: GeoPoint) -> Double3;
     pub fn rant_geo_point_from_ecef(ecef: Double3) -> GeoPoint;

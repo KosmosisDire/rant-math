@@ -114,6 +114,7 @@ namespace Rant.Math
     public sealed class Shape
     {
         internal RawShape Raw;
+        internal bool Colored;   // a mesh with colors, which ShapeMesh keeps
         private readonly IntPtr[] blocks;
         internal Shape(RawShape raw, params IntPtr[] blocks) { Raw = raw; this.blocks = blocks; }
         /// <summary>Frees the shape's lists.</summary>
@@ -324,7 +325,7 @@ namespace Rant.Math
     internal sealed unsafe class MeshPin : IDisposable
     {
         internal RawMeshView Raw;
-        private IntPtr points, triangles;
+        private IntPtr points, triangles, colors;
         internal MeshPin(Mesh mesh)
         {
             uint[] t = mesh.Triangles ?? Array.Empty<uint>();
@@ -337,21 +338,34 @@ namespace Rant.Math
                 points = Marshal.AllocHGlobal(sizeof(Double3) * (int)n + 1);
                 triangles = Impl.Copy<uint>(t);
                 Impl.Check(Native.rant_point_cloud_read_points(&c, (Double3*)points, &n));
-                Raw = new RawMeshView { vertices = (Double3*)points, vertex_count = n, triangles = (uint*)triangles, triangle_count = (uint)(t.Length / 3) };
+                uint k = 0;
+                int held = Native.rant_point_cloud_read_colors(&c, null, &k);
+                if (held != (int)ErrorKind.Format)
+                {
+                    Impl.Room(held);
+                    colors = Marshal.AllocHGlobal(sizeof(Color) * (int)k + 1);
+                    Impl.Check(Native.rant_point_cloud_read_colors(&c, (Color*)colors, &k));
+                }
+                Raw = new RawMeshView
+                {
+                    vertices = (Double3*)points, vertex_count = n, triangles = (uint*)triangles, triangle_count = (uint)(t.Length / 3),
+                    colors = k > 0 ? (Color*)colors : null,
+                };
             }
         }
-        // Hands both blocks to a Shape, which frees them.
+        // Hands the blocks to a Shape, which frees them.
         internal IntPtr[] Release()
         {
-            var blocks = new[] { points, triangles };
-            points = triangles = IntPtr.Zero;
+            var blocks = new[] { points, triangles, colors };
+            points = triangles = colors = IntPtr.Zero;
             return blocks;
         }
         public void Dispose()
         {
             if (points != IntPtr.Zero) Marshal.FreeHGlobal(points);
             if (triangles != IntPtr.Zero) Marshal.FreeHGlobal(triangles);
-            points = triangles = IntPtr.Zero;
+            if (colors != IntPtr.Zero) Marshal.FreeHGlobal(colors);
+            points = triangles = colors = IntPtr.Zero;
         }
     }
 

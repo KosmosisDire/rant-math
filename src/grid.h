@@ -35,6 +35,8 @@ RANT_MATH_API RantMathResult rant_grid_center(const RantGridView *grid, RantInt3
 RANT_MATH_API RantMathResult rant_grid_read_value(const RantGridView *grid, const char *field, RantInt3 cell, double *out);
 /* Every cell's number in the field of this name, x fastest, then y, then z, by the count rule. */
 RANT_MATH_API RantMathResult rant_grid_read_values(const RantGridView *grid, const char *field, double *out, uint32_t *count);
+/* Every cell's color from the field rgba, or rgb with alpha 255, packed as a point cloud's, by the count rule. */
+RANT_MATH_API RantMathResult rant_grid_read_colors(const RantGridView *grid, RantColor *out, uint32_t *count);
 /* Whole kinds are rounded and clamped, NaN to 0. */
 RANT_MATH_API RantMathResult rant_grid_write_value(RantGridView *grid, const char *field, RantInt3 cell, double value);
 

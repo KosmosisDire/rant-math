@@ -335,9 +335,11 @@ inline PointCloud cloud_like(const detail::RantPointCloudView &v) {
     return out;
 }
 
-/* The C view of a Mesh: its corners read once in C from whatever fields they are, its triangles as they are. */
+/* The C view of a Mesh: its corners read once in C from whatever fields they are, its colors from rgba or rgb when
+ * it has one, its triangles as they are. */
 struct MeshRef {
     std::vector<detail::RantDouble3> points;
+    std::vector<detail::RantColor> colors;
     detail::RantMeshView raw;
 
     explicit MeshRef(const Mesh &m) {
@@ -353,10 +355,18 @@ struct MeshRef {
         room(detail::rant_point_cloud_read_points(&cloud, nullptr, &n));
         points.resize(n);
         check(detail::rant_point_cloud_read_points(&cloud, points.data(), &n));
+        uint32_t k = 0;
+        const detail::RantMathResult held = detail::rant_point_cloud_read_colors(&cloud, nullptr, &k);
+        if (held != detail::RANT_MATH_ERR_FORMAT) {
+            room(held);
+            colors.resize(k);
+            check(detail::rant_point_cloud_read_colors(&cloud, colors.data(), &k));
+        }
         raw.vertices = points.data();
         raw.vertex_count = n;
         raw.triangles = m.triangles.data();
         raw.triangle_count = count(m.triangles.size() / 3);
+        raw.colors = colors.empty() ? nullptr : colors.data();
     }
 };
 
@@ -518,9 +528,13 @@ private:
 class Shape {
 public:
     Shape() noexcept { std::memset(static_cast<void *>(&raw_), 0, sizeof raw_); }
-    Shape(const Shape &other) : raw_(other.raw_), points_(other.points_), flat_(other.flat_), triangles_(other.triangles_) { aim(); }
+    Shape(const Shape &other)
+        : raw_(other.raw_), points_(other.points_), flat_(other.flat_), triangles_(other.triangles_), colors_(other.colors_) {
+        aim();
+    }
     Shape(Shape &&other) noexcept
-        : raw_(other.raw_), points_(std::move(other.points_)), flat_(std::move(other.flat_)), triangles_(std::move(other.triangles_)) {
+        : raw_(other.raw_), points_(std::move(other.points_)), flat_(std::move(other.flat_)), triangles_(std::move(other.triangles_)),
+          colors_(std::move(other.colors_)) {
         std::memset(static_cast<void *>(&other.raw_), 0, sizeof other.raw_);
     }
     Shape &operator=(Shape other) noexcept {
@@ -528,6 +542,7 @@ public:
         points_ = std::move(other.points_);
         flat_ = std::move(other.flat_);
         triangles_ = std::move(other.triangles_);
+        colors_ = std::move(other.colors_);
         return *this;
     }
     const detail::RantShape *raw() const noexcept { return &raw_; }
@@ -551,6 +566,7 @@ public:
         s.points_.resize(c.points.size());
         std::memcpy(static_cast<void *>(s.points_.data()), c.points.data(), sizeof(Double3) * c.points.size());
         s.triangles_ = m.triangles;
+        s.colors_ = std::move(c.colors);
         s.aim();
         return s;
     }
@@ -576,6 +592,7 @@ private:
             raw_.as.mesh.vertex_count = n;
             raw_.as.mesh.triangles = triangles_.data();
             raw_.as.mesh.triangle_count = static_cast<uint32_t>(triangles_.size() / 3);
+            raw_.as.mesh.colors = colors_.empty() ? nullptr : colors_.data();
             break;
         case detail::RANT_SHAPE_PRISM:
             raw_.as.prism.base.points = reinterpret_cast<const detail::RantDouble2 *>(flat_.data());
@@ -588,6 +605,7 @@ private:
     std::vector<Double3> points_;
     std::vector<Double2> flat_;
     std::vector<uint32_t> triangles_;
+    std::vector<detail::RantColor> colors_;
 };
 
 /* The same in 2D. */

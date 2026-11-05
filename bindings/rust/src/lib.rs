@@ -234,10 +234,17 @@ pub(crate) fn cloud_like(v: &ffi::RawPointCloudView) -> PointCloud {
     PointCloud { fields: fields.iter().map(field_of).collect(), point_step: v.point_step, ..PointCloud::default() }
 }
 
-// The C view of a Mesh: its corners read once in C from whatever fields they are, its triangles as they are.
+// A Mesh's corners as C reads them, and their colors, none when it has no rgba or rgb.
+pub(crate) struct Corners {
+    pub points: Vec<Double3>,
+    pub colors: Vec<Color>,
+}
+
+// The C view of a Mesh: its corners read once in C from whatever fields they are, its colors from rgba or rgb when
+// it has one, its triangles as they are.
 pub(crate) struct MeshRaw {
     pub raw: ffi::RawMeshView,
-    pub points: std::sync::Arc<Vec<Double3>>,
+    pub corners: std::sync::Arc<Corners>,
 }
 
 impl MeshRaw {
@@ -250,14 +257,23 @@ impl MeshRaw {
         room(unsafe { ffi::rant_point_cloud_read_points(&cloud.raw, std::ptr::null_mut(), &mut n) })?;
         let mut points = vec![Double3::default(); n as usize];
         check(unsafe { ffi::rant_point_cloud_read_points(&cloud.raw, points.as_mut_ptr(), &mut n) })?;
-        let points = std::sync::Arc::new(points);
+        let mut k = 0u32;
+        let held = unsafe { ffi::rant_point_cloud_read_colors(&cloud.raw, std::ptr::null_mut(), &mut k) };
+        let mut colors = Vec::new();
+        if held != MathError::Format.code() {
+            room(held)?;
+            colors = vec![Color::default(); k as usize];
+            check(unsafe { ffi::rant_point_cloud_read_colors(&cloud.raw, colors.as_mut_ptr(), &mut k) })?;
+        }
+        let corners = std::sync::Arc::new(Corners { points, colors });
         let raw = ffi::RawMeshView {
-            vertices: points.as_ptr(),
+            vertices: corners.points.as_ptr(),
             vertex_count: n,
             triangles: mesh.triangles.as_ptr(),
             triangle_count: len32(mesh.triangles.len() / 3),
+            colors: if corners.colors.is_empty() { std::ptr::null() } else { corners.colors.as_ptr() },
         };
-        Ok(MeshRaw { raw, points })
+        Ok(MeshRaw { raw, corners })
     }
 
     // A call that answers with no error panics on a Mesh it cannot read, as on triangles not in threes.
@@ -434,7 +450,7 @@ impl Drop for KdTree {
 pub struct Shape<'a> {
     pub(crate) raw: ffi::RawShape,
     pub(crate) data: PhantomData<&'a ()>,
-    pub(crate) _corners: Option<std::sync::Arc<Vec<Double3>>>,   // a Mesh's corners, read once
+    pub(crate) _corners: Option<std::sync::Arc<Corners>>,   // a Mesh's corners and colors, read once
 }
 
 /// The same in 2D.

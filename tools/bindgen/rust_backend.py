@@ -412,7 +412,9 @@ class Writer:
         if f.c == "rant_shape_mesh":
             self.emit("let (mut n, mut t) = (0u32, 0u32);")
             self.emit("room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), &mut n, std::ptr::null_mut(), &mut t) })?;")
-            self.emit("let layout = unsafe { ffi::rant_point_cloud_layout(PointCloudLayout::XyzNormal as i32) };")
+            self.emit("let colored = s._corners.as_ref().is_some_and(|c| !c.colors.is_empty());")
+            self.emit("let kind = if colored { PointCloudLayout::XyzNormalRgba } else { PointCloudLayout::XyzNormal };")
+            self.emit("let layout = unsafe { ffi::rant_point_cloud_layout(kind as i32) };")
             self.emit("let mut out = Mesh { vertices: cloud_like(&layout), triangles: vec![0u32; t as usize * 3] };")
             self.emit("out.vertices.data = vec![0u8; n as usize * out.vertices.point_step as usize];")
             self.emit("let mut c = CloudRaw::new_mut(&mut out.vertices);")
@@ -494,7 +496,7 @@ class Writer:
             self.emit(f"{cls} {{ raw: unsafe {{ ffi::{f.c}(ffi::{view} {{ points: {n}.as_ptr(), count: len32({n}.len()) }}) }}, data: PhantomData{own} }}")
         elif word == "mesh":
             self.emit("let c = MeshRaw::sure(mesh);")
-            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.points) }")
+            self.emit("Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.corners) }")
         elif word == "prism":
             self.emit("Shape { raw: unsafe { ffi::rant_shape_from_prism(prism_raw(prism)) }, data: PhantomData, _corners: None }")
         else:

@@ -173,7 +173,7 @@ class _RantPrismView(Structure):
     _fields_ = [("pose", _RantPose), ("base", _RantPolygon2DView), ("height", c_double)]
 
 class _RantMeshView(Structure):
-    _fields_ = [("vertices", POINTER(_RantDouble3)), ("vertex_count", c_uint32), ("triangles", POINTER(c_uint32)), ("triangle_count", c_uint32)]
+    _fields_ = [("vertices", POINTER(_RantDouble3)), ("vertex_count", c_uint32), ("triangles", POINTER(c_uint32)), ("triangle_count", c_uint32), ("colors", POINTER(_RantColor))]
 
 class _RantMatrixView(Structure):
     _fields_ = [("data", POINTER(c_double)), ("rows", c_uint32), ("cols", c_uint32)]
@@ -213,6 +213,8 @@ class _RantShapeAs(Union):
 
 class _RantShape(Structure):
     _fields_ = [("kind", c_int), ("as_", _RantShapeAs)]
+
+_RANT_SHAPE_MESH = 10
 
 class _RantShape2DAs(Union):
     _fields_ = [("aligned_box", _RantAlignedBox2D), ("oriented_box", _RantOrientedBox2D), ("circle", _RantCircle), ("capsule", _RantCapsule2D), ("polygon", _RantPolygon2DView), ("segment", _RantSegment2D), ("polyline", _RantPolyline2DView)]
@@ -275,6 +277,7 @@ class PointCloudLayout(IntEnum):
     XyzIntensity = 1
     XyzRgb = 2
     XyzNormal = 3
+    XyzNormalRgba = 4
 
 @dataclass
 class Axes:
@@ -1570,6 +1573,8 @@ _lib.rant_grid_read_value.argtypes = [POINTER(_RantGridView), c_char_p, _RantInt
 _lib.rant_grid_read_value.restype = c_int
 _lib.rant_grid_read_values.argtypes = [POINTER(_RantGridView), c_char_p, POINTER(c_double), POINTER(c_uint32)]
 _lib.rant_grid_read_values.restype = c_int
+_lib.rant_grid_read_colors.argtypes = [POINTER(_RantGridView), POINTER(_RantColor), POINTER(c_uint32)]
+_lib.rant_grid_read_colors.restype = c_int
 _lib.rant_grid_write_value.argtypes = [POINTER(_RantGridView), c_char_p, _RantInt3, c_double]
 _lib.rant_grid_write_value.restype = c_int
 _lib.rant_geo_point_to_ecef.argtypes = [_RantGeoPoint]
@@ -1639,17 +1644,25 @@ def _mask_out(buffer, size):
 
 
 def _mesh(mesh):
-    """A Mesh as the C view: its corners read once in C from whatever fields they are, its triangles as they are."""
+    """A Mesh as the C view: its corners read once in C from whatever fields they are, its colors from rgba or rgb
+    when it has one, its triangles as they are."""
     cloud = _cloud(mesh.vertices)
     n = c_uint32(0)
     _room(_lib.rant_point_cloud_read_points(byref(cloud), None, byref(n)))
     points = (_RantDouble3 * n.value)()
     _check(_lib.rant_point_cloud_read_points(byref(cloud), points, byref(n)))
+    k = c_uint32(0)
+    held = _lib.rant_point_cloud_read_colors(byref(cloud), None, byref(k))
+    colors = None
+    if held != ErrorKind.Format:
+        _room(held)
+        colors = (_RantColor * k.value)()
+        _check(_lib.rant_point_cloud_read_colors(byref(cloud), colors, byref(k)))
     triangles, count, _np = _list_in(mesh.triangles, c_uint32, None, "uint32", 1, True)
     if count % 3:
         raise MathError(ErrorKind.Argument)
-    view = _RantMeshView(points, n.value, triangles, count // 3)
-    view._keep = (points, triangles)
+    view = _RantMeshView(points, n.value, triangles, count // 3, colors if k.value else None)
+    view._keep = (points, triangles, colors)
     return view
 
 
@@ -3915,11 +3928,13 @@ def shape_sample_surface(s: Shape, seed: int, count: int) -> List[Double3]:
 
 def shape_mesh(s: Shape, segments: int, crease: float) -> Mesh:
     """Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
-    at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
-    docs/shapes.md says."""
+    at over crease radians or colors differ. Corners fill x, y and z, normal_x, y and z, and rgba or
+    rgb, as docs/shapes.md says."""
     n, t = c_uint32(0), c_uint32(0)
     _room(_lib.rant_shape_mesh(byref(s._raw), segments, crease, None, byref(n), None, byref(t)))
-    out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(PointCloudLayout.XyzNormal)), [])
+    colored = s._raw.kind == _RANT_SHAPE_MESH and bool(s._raw.as_.mesh.colors)
+    layout = PointCloudLayout.XyzNormalRgba if colored else PointCloudLayout.XyzNormal
+    out = Mesh(_cloud_like(_lib.rant_point_cloud_layout(layout)), [])
     data = (c_uint8 * (n.value * out.vertices.point_step))()
     triangles = (c_uint32 * (t.value * 3))()
     c_out = _cloud(out.vertices)
@@ -4455,6 +4470,14 @@ def grid_read_values(grid: Grid, field: str) -> List[float]:
     _check(_lib.rant_grid_read_values(byref(c_grid), field.encode(), p0, byref(n0)))
     return _list_out(o0, None, n0.value * 1)
 
+def grid_read_colors(grid: Grid) -> List[Color]:
+    c_grid = _grid(grid)
+    n0 = c_uint32(0)
+    _room(_lib.rant_grid_read_colors(byref(c_grid), None, byref(n0)))
+    o0, p0 = _new_list(_RantColor, n0.value, 'uint8', 4, False)
+    _check(_lib.rant_grid_read_colors(byref(c_grid), p0, byref(n0)))
+    return _list_out(o0, _py_Color, n0.value * 1)
+
 def grid_write_value(grid: Grid, field: str, cell: Int3, value: float) -> None:
     """Whole kinds are rounded and clamped, NaN to 0."""
     c_grid = _grid(grid, True)
@@ -4688,6 +4711,7 @@ __all__ = [
     "geo_point_to_enu",
     "grid_cell",
     "grid_center",
+    "grid_read_colors",
     "grid_read_value",
     "grid_read_values",
     "grid_write_value",

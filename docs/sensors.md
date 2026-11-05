@@ -59,6 +59,8 @@ rant_kdtree_destroy(tree);
 - Cell 0 sits at the grid's origin, and cells run along its +x, +y and +z.
 - A field's values run x fastest, then y, then z. A grid one cell high is flat.
 - `rant_grid_read_values` gives a whole field in that order, `rant_grid_read_value` one cell.
+- A field named rgba, or rgb with alpha 255, holds a color per cell packed as a point cloud's.
+  `rant_grid_read_colors` reads it.
 
 ## Detections
 

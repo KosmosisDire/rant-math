@@ -63,7 +63,10 @@ rant_shape_mesh(&zone, 0, 0.5, &corners, &vertex_count, triangles, &triangle_cou
 - 0 makes every face flat. Pi or more splits no edge, so a solid stays closed by index.
 - Vertices at one point count as one, so a mesh sent with a vertex per corner still smooths.
 - A face with no area is left out.
-- Every binding's mesh calls take a Mesh, its corners read in C from whatever fields they are. For many
+- A mesh's view may hold a color for each vertex. Corners of one point keep apart where their colors differ,
+  and fill the cloud's rgba or rgb when it has one.
+- Every binding's mesh calls take a Mesh, its corners read in C from whatever fields they are, and its colors
+  from its rgba or rgb. A Mesh with colors comes back laid out as `RANT_POINT_CLOUD_XYZ_NORMAL_RGBA`. For many
   questions of one mesh, make it a shape once with `shape_from_mesh`, which reads them once.
 
 ## Lines and planes

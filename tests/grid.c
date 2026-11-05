@@ -116,7 +116,35 @@ static void values(void){
     CHECK(rant_grid_read_values(&g, "occ", all, &n) == RANT_MATH_ERR_FORMAT, "too large to read whole");
 }
 
+static void colors(void){
+    static uint8_t rgba[16], rgb[16], half[8];
+    RantGridFieldView f[2];
+    RantGridView g = grid(rant_pose_identity(), 0.5, 2, 2, 1);
+    RantColor out[4];
+    uint32_t n = 0, i;
+    for (i = 0; i < 16; i++){ rgba[i] = (uint8_t)(10 * i); rgb[i] = (uint8_t)(200 - i); }
+    f[0] = field("rgb", RANT_SCALAR_KIND_F32, rgb, sizeof rgb);
+    f[1] = field("rgba", RANT_SCALAR_KIND_U32, rgba, sizeof rgba);
+    g.fields = f;
+    g.field_count = 1;
+    CHECK(rant_grid_read_colors(&g, NULL, &n) == RANT_MATH_ERR_SPACE && n == 4, "a color per cell");
+    CHECK(rant_grid_read_colors(&g, out, &n) == RANT_MATH_OK && out[1].b == 196 && out[1].g == 195 && out[1].r == 194 &&
+          out[1].a == 255, "rgb as blue, green, red and a byte left over, opaque");
+    g.field_count = 2;
+    CHECK(rant_grid_read_colors(&g, out, &n) == RANT_MATH_OK && out[3].b == 120 && out[3].r == 140 && out[3].a == 150,
+          "rgba before rgb, with its alpha");
+    f[1] = field("rgba", RANT_SCALAR_KIND_U16, half, sizeof half);
+    CHECK(rant_grid_read_colors(&g, out, &n) == RANT_MATH_ERR_FORMAT, "an rgba of 2 bytes, even beside an rgb");
+    f[0] = field("cost", RANT_SCALAR_KIND_F32, rgb, sizeof rgb);
+    g.field_count = 1;
+    CHECK(rant_grid_read_colors(&g, out, &n) == RANT_MATH_ERR_FORMAT, "no color field");
+    f[0] = field("rgb", RANT_SCALAR_KIND_U32, rgb, 15);
+    CHECK(rant_grid_read_colors(&g, out, &n) == RANT_MATH_ERR_FORMAT, "a field short of a cell");
+    CHECK(rant_grid_read_colors(&g, out, NULL) == RANT_MATH_ERR_ARGUMENT, "no count");
+}
+
 void test_grid(void){
+    colors();
     cells();
     edges();
     values();

@@ -76,13 +76,13 @@ impl<'js> Js<'js> for ImageFilter {
 impl<'js> Js<'js> for PointCloudLayout {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> {
         if let Some(n) = v.as_number() {
-            return match n as i64 { 0 => Ok(PointCloudLayout::Xyz), 1 => Ok(PointCloudLayout::XyzIntensity), 2 => Ok(PointCloudLayout::XyzRgb), 3 => Ok(PointCloudLayout::XyzNormal), _ => Err(fail_argument(ctx)) };
+            return match n as i64 { 0 => Ok(PointCloudLayout::Xyz), 1 => Ok(PointCloudLayout::XyzIntensity), 2 => Ok(PointCloudLayout::XyzRgb), 3 => Ok(PointCloudLayout::XyzNormal), 4 => Ok(PointCloudLayout::XyzNormalRgba), _ => Err(fail_argument(ctx)) };
         }
         let text = v.as_string().map(|s| s.to_string()).transpose()?.unwrap_or_default();
-        match text.as_str() { "Xyz" => Ok(PointCloudLayout::Xyz), "XyzIntensity" => Ok(PointCloudLayout::XyzIntensity), "XyzRgb" => Ok(PointCloudLayout::XyzRgb), "XyzNormal" => Ok(PointCloudLayout::XyzNormal), _ => Err(fail_argument(ctx)) }
+        match text.as_str() { "Xyz" => Ok(PointCloudLayout::Xyz), "XyzIntensity" => Ok(PointCloudLayout::XyzIntensity), "XyzRgb" => Ok(PointCloudLayout::XyzRgb), "XyzNormal" => Ok(PointCloudLayout::XyzNormal), "XyzNormalRgba" => Ok(PointCloudLayout::XyzNormalRgba), _ => Err(fail_argument(ctx)) }
     }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let name = match self { PointCloudLayout::Xyz => "Xyz", PointCloudLayout::XyzIntensity => "XyzIntensity", PointCloudLayout::XyzRgb => "XyzRgb", PointCloudLayout::XyzNormal => "XyzNormal" };
+        let name = match self { PointCloudLayout::Xyz => "Xyz", PointCloudLayout::XyzIntensity => "XyzIntensity", PointCloudLayout::XyzRgb => "XyzRgb", PointCloudLayout::XyzNormal => "XyzNormal", PointCloudLayout::XyzNormalRgba => "XyzNormalRgba" };
         Ok(rquickjs::String::from_str(ctx.clone(), name)?.into_value())
     }
 }
@@ -1064,13 +1064,14 @@ pub(super) fn dispatch<'js>(ctx: &Ctx<'js>, fail: &Function<'js>, trees: &Trees,
         462 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Int3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_center(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
         463 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let r = crate::grid_read_value(&x0, &x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
         464 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::grid_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        465 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        466 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
-        467 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
-        468 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
-        469 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
-        470 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        471 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        465 => { let x0 = grid_in(ctx, &at(args, 0))?; let r = crate::grid_read_colors(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
+        466 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        467 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
+        468 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
+        469 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
+        470 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
+        471 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        472 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
         _ => Err(fail_argument(ctx)),
     }
 }

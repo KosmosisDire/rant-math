@@ -21,9 +21,9 @@ export type ImageFilter = "Nearest" | "Linear";
 const ImageFilterValues: Record<string, number> = { Nearest: 0, Linear: 1 };
 const ImageFilterNames: Record<number, ImageFilter> = { 0: "Nearest", 1: "Linear" };
 
-export type PointCloudLayout = "Xyz" | "XyzIntensity" | "XyzRgb" | "XyzNormal";
-const PointCloudLayoutValues: Record<string, number> = { Xyz: 0, XyzIntensity: 1, XyzRgb: 2, XyzNormal: 3 };
-const PointCloudLayoutNames: Record<number, PointCloudLayout> = { 0: "Xyz", 1: "XyzIntensity", 2: "XyzRgb", 3: "XyzNormal" };
+export type PointCloudLayout = "Xyz" | "XyzIntensity" | "XyzRgb" | "XyzNormal" | "XyzNormalRgba";
+const PointCloudLayoutValues: Record<string, number> = { Xyz: 0, XyzIntensity: 1, XyzRgb: 2, XyzNormal: 3, XyzNormalRgba: 4 };
+const PointCloudLayoutNames: Record<number, PointCloudLayout> = { 0: "Xyz", 1: "XyzIntensity", 2: "XyzRgb", 3: "XyzNormal", 4: "XyzNormalRgba" };
 
 export type DistortionModel = "None" | "BrownConrady" | "Fisheye" | "Rational";
 const DistortionModelValues: Record<string, number> = { None: 0, BrownConrady: 1, Fisheye: 2, Rational: 3 };
@@ -875,10 +875,11 @@ function w_RantMeshView(p: number, v: any): void {
     U32[(p + 4) >> 2] = v.vertex_count;
     U32[(p + 8) >> 2] = v.triangles;
     U32[(p + 12) >> 2] = v.triangle_count;
+    U32[(p + 16) >> 2] = v.colors;
 }
 
 function r_RantMeshView(p: number): any {
-    return { vertices: U32[(p + 0) >> 2], vertex_count: U32[(p + 4) >> 2], triangles: U32[(p + 8) >> 2], triangle_count: U32[(p + 12) >> 2] };
+    return { vertices: U32[(p + 0) >> 2], vertex_count: U32[(p + 4) >> 2], triangles: U32[(p + 8) >> 2], triangle_count: U32[(p + 12) >> 2], colors: U32[(p + 16) >> 2] };
 }
 
 function w_RantMatrixView(p: number, v: any): void {
@@ -1017,10 +1018,10 @@ function r_RantAlignOptions(p: number): any {
 }
 
 
-function meshIn(vertices: number, vertexCount: number, triangles: number, triangleCount: number): number {
+function meshIn(vertices: number, vertexCount: number, triangles: number, triangleCount: number, colors: number): number {
     if (triangleCount % 3) throw new MathError(-1);
-    const p = alloc(16);
-    w_RantMeshView(p, { vertices, vertex_count: vertexCount, triangles, triangle_count: triangleCount / 3 });
+    const p = alloc(20);
+    w_RantMeshView(p, { vertices, vertex_count: vertexCount, triangles, triangle_count: triangleCount / 3, colors });
     return p;
 }
 
@@ -1099,8 +1100,9 @@ function cloudIn(cloud: PointCloud): number {
     return p;
 }
 
-/** A Mesh's corners read in C from whatever fields they are, as doubles, and how many. */
-function cornersIn(mesh: Mesh): [number, number] {
+/** A Mesh's corners read in C from whatever fields they are, as doubles, how many, and their colors from rgba or
+ * rgb, 0 when it has none. */
+function cornersIn(mesh: Mesh): [number, number, number] {
     const cloud = cloudIn(mesh.vertices);
     const n = alloc(4);
     U32[n >> 2] = 0;
@@ -1109,14 +1111,22 @@ function cornersIn(mesh: Mesh): [number, number] {
     const out = alloc(24 * U32[n >> 2]);
     check(wasm._rm_point_cloud_read_points(cloud, out, n));
     refresh();
-    return [out, U32[n >> 2]];
+    const count = U32[n >> 2];
+    const held = wasm._rm_point_cloud_read_colors(cloud, 0, n);
+    refresh();
+    if (held === -4 || !count) return [out, count, 0];
+    room(held);
+    const colors = alloc(4 * count);
+    check(wasm._rm_point_cloud_read_colors(cloud, colors, n));
+    refresh();
+    return [out, count, colors];
 }
 
 /** A Mesh as the C view, and how many corners it has. */
 function meshViewIn(mesh: Mesh): [number, number] {
     if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
-    const [points, count] = cornersIn(mesh);
-    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles)), count];
+    const [points, count, colors] = cornersIn(mesh);
+    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles), colors), count];
 }
 
 function cloudDone(cloud: PointCloud, p: number): void {
@@ -1268,7 +1278,8 @@ function shapeIn(shape: Shape): number {
     case "polyline": wasm._rm_shape_from_polyline(ret, viewIn(numbersIn(v, 8, Float64Array), v.length / 3)); break;
     case "polygon": wasm._rm_shape_from_polygon(ret, viewIn(numbersIn(v, 8, Float64Array), v.length / 3)); break;
     case "mesh":
-        wasm._rm_shape_from_mesh(ret, meshIn(numbersIn(v.vertices, 8, Float64Array), v.vertices.length / 3, numbersIn(v.triangles, 4, Uint32Array), v.triangles.length));
+        wasm._rm_shape_from_mesh(ret, meshIn(numbersIn(v.vertices, 8, Float64Array), v.vertices.length / 3, numbersIn(v.triangles, 4, Uint32Array), v.triangles.length,
+                                             v.colors ? numbersIn(v.colors, 1, Uint8Array) : 0));
         break;
     default: throw new MathError(-1);
     }
@@ -5054,8 +5065,9 @@ export function shapeFromPolygon(points: readonly Double3[] | Float64Array): Sha
 export function shapeFromMesh(mesh: Mesh): Shape {
     if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
     begin();
-    const [points, count] = cornersIn(mesh);
-    return { kind: "mesh", value: { vertices: numbersOut(points, 3 * count, Float64Array), triangles: Uint32Array.from(mesh.triangles) } };
+    const [points, count, colors] = cornersIn(mesh);
+    const vertices = numbersOut(points, 3 * count, Float64Array), triangles = Uint32Array.from(mesh.triangles);
+    return { kind: "mesh", value: colors ? { vertices, triangles, colors: U8.slice(colors, colors + 4 * count) } : { vertices, triangles } };
 }
 
 /** Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the
@@ -5159,8 +5171,8 @@ export function shapeSampleSurface(s: Shape, seed: number, count: number): Doubl
 }
 
 /** Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
- * at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
- * docs/shapes.md says. */
+ * at over crease radians or colors differ. Corners fill x, y and z, normal_x, y and z, and rgba or
+ * rgb, as docs/shapes.md says. */
 export function shapeMesh(s: Shape, segments: number, crease: number): MeshOut {
     begin();
     const c_s = shapeIn(s);
@@ -5168,7 +5180,8 @@ export function shapeMesh(s: Shape, segments: number, crease: number): MeshOut {
     U32[n >> 2] = 0; U32[t >> 2] = 0;
     room(wasm._rm_shape_mesh(c_s, segments, crease, 0, n, 0, t));
     refresh();
-    const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, "XyzNormal"));
+    const layout = s.kind === "mesh" && s.value.colors ? "XyzNormalRgba" : "XyzNormal";
+    const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, layout));
     refresh();
     const out: MeshOut = { vertices: cloudLike(cloud), triangles: new Uint32Array(0) };
     const bytes = U32[n >> 2] * out.vertices.point_step, count = U32[t >> 2] * 3;
@@ -5968,6 +5981,18 @@ export function gridReadValues(grid: Grid, field: string): Float64Array {
     check(wasm._rm_grid_read_values(c_grid, c_field, o0, n0));
     refresh();
     return numbersOut(o0, U32[n0 >> 2], Float64Array);
+}
+
+export function gridReadColors(grid: Grid): Color[] {
+    begin();
+    const c_grid = gridIn(grid);
+    const n0 = alloc(4); U32[n0 >> 2] = 0;
+    room(wasm._rm_grid_read_colors(c_grid, 0, n0));
+    refresh();
+    const o0 = alloc(4 * U32[n0 >> 2] * 1);
+    check(wasm._rm_grid_read_colors(c_grid, o0, n0));
+    refresh();
+    return listOut(o0, U32[n0 >> 2], 4, r_RantColor, 0, false);
 }
 
 /** Whole kinds are rounded and clamped, NaN to 0. */

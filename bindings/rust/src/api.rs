@@ -2281,7 +2281,7 @@ pub fn shape_from_polygon<'a>(points: &'a [Double3]) -> Shape<'a> {
 
 pub fn shape_from_mesh<'a>(mesh: &'a Mesh) -> Shape<'a> {
     let c = MeshRaw::sure(mesh);
-    Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.points) }
+    Shape { raw: unsafe { ffi::rant_shape_from_mesh(c.raw) }, data: PhantomData, _corners: Some(c.corners) }
 }
 
 /// Signed for a solid, never negative for a curve or surface. A curve's closest normal points to the
@@ -2344,12 +2344,14 @@ pub fn shape_sample_surface(s: &Shape, seed: u64, count: u32) -> Result<Vec<Doub
 }
 
 /// Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet
-/// at over crease radians. Corners fill vertices' x, y and z, normals its normal_x, y and z, as
-/// docs/shapes.md says.
+/// at over crease radians or colors differ. Corners fill x, y and z, normal_x, y and z, and rgba or
+/// rgb, as docs/shapes.md says.
 pub fn shape_mesh(s: &Shape, segments: u32, crease: f64) -> Result<Mesh, MathError> {
     let (mut n, mut t) = (0u32, 0u32);
     room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), &mut n, std::ptr::null_mut(), &mut t) })?;
-    let layout = unsafe { ffi::rant_point_cloud_layout(PointCloudLayout::XyzNormal as i32) };
+    let colored = s._corners.as_ref().is_some_and(|c| !c.colors.is_empty());
+    let kind = if colored { PointCloudLayout::XyzNormalRgba } else { PointCloudLayout::XyzNormal };
+    let layout = unsafe { ffi::rant_point_cloud_layout(kind as i32) };
     let mut out = Mesh { vertices: cloud_like(&layout), triangles: vec![0u32; t as usize * 3] };
     out.vertices.data = vec![0u8; n as usize * out.vertices.point_step as usize];
     let mut c = CloudRaw::new_mut(&mut out.vertices);
@@ -2935,6 +2937,16 @@ pub fn grid_read_values(grid: &Grid, field: &str) -> Result<Vec<f64>, MathError>
     room(unsafe { ffi::rant_grid_read_values(&c_grid.raw, c_field.as_ptr(), std::ptr::null_mut(), &mut n0) })?;
     let mut o0 = vec![f64::default(); n0 as usize];
     check(unsafe { ffi::rant_grid_read_values(&c_grid.raw, c_field.as_ptr(), o0.as_mut_ptr(), &mut n0) })?;
+    o0.truncate(n0 as usize);
+    Ok(o0)
+}
+
+pub fn grid_read_colors(grid: &Grid) -> Result<Vec<Color>, MathError> {
+    let c_grid = GridRaw::new(grid);
+    let mut n0 = 0u32;
+    room(unsafe { ffi::rant_grid_read_colors(&c_grid.raw, std::ptr::null_mut(), &mut n0) })?;
+    let mut o0 = vec![Color::default(); n0 as usize];
+    check(unsafe { ffi::rant_grid_read_colors(&c_grid.raw, o0.as_mut_ptr(), &mut n0) })?;
     o0.truncate(n0 as usize);
     Ok(o0)
 }

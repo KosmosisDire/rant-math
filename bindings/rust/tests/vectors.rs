@@ -259,6 +259,9 @@ impl Json for Mesh {
         m.insert("points".into(), point_cloud_read_points(&self.vertices).unwrap().put());
         m.insert("normals".into(), normals.put());
         m.insert("triangles".into(), self.triangles.put());
+        if let Ok(colors) = point_cloud_read_colors(&self.vertices) {
+            m.insert("colors".into(), colors.put());
+        }
         Value::Object(m)
     }
 }

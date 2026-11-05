@@ -202,8 +202,13 @@ def to_json(v, top=True):
     if isinstance(v, rant_math.Mesh):
         # its points and normals as numbers, since their f32 bytes differ by a last digit between libraries
         n = [rant_math.point_cloud_read_values(v.vertices, "normal_" + a) for a in "xyz"]
-        return {"point_step": v.vertices.point_step, "points": to_json(rant_math.point_cloud_read_points(v.vertices)),
-                "normals": [to_json(rant_math.Double3(float(x), float(y), float(z))) for x, y, z in zip(*n)], "triangles": [int(x) for x in v.triangles]}
+        out = {"point_step": v.vertices.point_step, "points": to_json(rant_math.point_cloud_read_points(v.vertices)),
+               "normals": [to_json(rant_math.Double3(float(x), float(y), float(z))) for x, y, z in zip(*n)], "triangles": [int(x) for x in v.triangles]}
+        try:
+            out["colors"] = to_json(rant_math.point_cloud_read_colors(v.vertices))
+        except MathError:
+            pass
+        return out
     if isinstance(v, rant_math.PointCloud):
         return {"fields": [to_json(f) for f in v.fields], "point_step": v.point_step, "data": bytes(v.data).hex()}
     if isinstance(v, rant_math.PointField):

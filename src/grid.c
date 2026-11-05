@@ -98,6 +98,27 @@ RantMathResult rant_grid_read_values(const RantGridView *grid, const char *field
     return RANT_MATH_OK;
 }
 
+RantMathResult rant_grid_read_colors(const RantGridView *grid, RantColor *out, uint32_t *count){
+    const RantGridFieldView *f = NULL;
+    uint64_t cells;
+    uint32_t i;
+    int alpha = 1;
+    RantMathResult r;
+    if (!count) return RANT_MATH_ERR_ARGUMENT;
+    if ((r = i_grid_field(grid, "rgba", &f, &cells)) == RANT_MATH_ERR_FORMAT && !f){
+        alpha = 0;
+        r = i_grid_field(grid, "rgb", &f, &cells);
+    }
+    if (r != RANT_MATH_OK) return r;
+    if (i_math_scalar_bytes(f->kind) != 4 || cells > UINT32_MAX) return RANT_MATH_ERR_FORMAT;
+    if ((r = i_math_room(count, (uint32_t)cells, out)) != RANT_MATH_OK) return r;
+    for (i = 0; i < (uint32_t)cells; i++){
+        const uint8_t *p = f->data + (size_t)i * 4;
+        out[i] = rant_color(p[2], p[1], p[0], alpha ? p[3] : 255);
+    }
+    return RANT_MATH_OK;
+}
+
 RantMathResult rant_grid_write_value(RantGridView *grid, const char *field, RantInt3 cell, double value){
     const RantGridFieldView *f;
     size_t at;

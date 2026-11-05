@@ -473,6 +473,7 @@ static partial class Thunks
         ["grid_center"] = a => { var x0 = J.ToGrid(a[0]); var x1 = J.To<Int3>(a[1]); var answer = new Answer(RantMath.GridCenter(x0, x1)); return answer; },
         ["grid_read_value"] = a => { var x0 = J.ToGrid(a[0]); var x1 = a[1].GetString(); var x2 = J.To<Int3>(a[2]); var answer = new Answer(RantMath.GridReadValue(x0, x1, x2)); return answer; },
         ["grid_read_values"] = a => { var x0 = J.ToGrid(a[0]); var x1 = a[1].GetString(); var answer = new Answer(RantMath.GridReadValues(x0, x1)); return answer; },
+        ["grid_read_colors"] = a => { var x0 = J.ToGrid(a[0]); var answer = new Answer(RantMath.GridReadColors(x0)); return answer; },
         ["grid_write_value"] = a => { var x0 = J.ToGrid(a[0]); var x1 = a[1].GetString(); var x2 = J.To<Int3>(a[2]); var x3 = J.To<double>(a[3]); RantMath.GridWriteValue(x0, x1, x2, x3); var answer = new Answer(x0); return answer; },
         ["geo_point_to_ecef"] = a => { var x0 = J.To<GeoPoint>(a[0]); var answer = new Answer(RantMath.GeoPointToEcef(x0)); return answer; },
         ["geo_point_from_ecef"] = a => { var x0 = J.To<Double3>(a[0]); var answer = new Answer(RantMath.GeoPointFromEcef(x0)); return answer; },

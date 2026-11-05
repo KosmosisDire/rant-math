@@ -274,6 +274,10 @@ static J put(const Mesh &m) {
     o.add("points", put(point_cloud_read_points(m.vertices)));
     o.add("normals", put(normals));
     o.add("triangles", put(m.triangles));
+    try {
+        o.add("colors", put(point_cloud_read_colors(m.vertices)));
+    } catch (const MathError &) {
+    }
     return o;
 }
 static J put(const GridField &f) {

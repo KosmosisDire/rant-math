@@ -535,7 +535,8 @@ class Writer:
             self.emit("U32[n >> 2] = 0; U32[t >> 2] = 0;")
             self.emit("room(wasm._rm_shape_mesh(c_s, segments, crease, 0, n, 0, t));")
             self.emit("refresh();")
-            self.emit('const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, "XyzNormal"));')
+            self.emit('const layout = s.kind === "mesh" && s.value.colors ? "XyzNormalRgba" : "XyzNormal";')
+            self.emit("const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, layout));")
             self.emit("refresh();")
             self.emit("const out: MeshOut = { vertices: cloudLike(cloud), triangles: new Uint32Array(0) };")
             self.emit("const bytes = U32[n >> 2] * out.vertices.point_step, count = U32[t >> 2] * 3;")
@@ -637,8 +638,9 @@ class Writer:
         elif word == "mesh":
             self.emit('if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);')
             self.emit("begin();")
-            self.emit("const [points, count] = cornersIn(mesh);")
-            self.emit('return { kind: "mesh", value: { vertices: numbersOut(points, 3 * count, Float64Array), triangles: Uint32Array.from(mesh.triangles) } };')
+            self.emit("const [points, count, colors] = cornersIn(mesh);")
+            self.emit("const vertices = numbersOut(points, 3 * count, Float64Array), triangles = Uint32Array.from(mesh.triangles);")
+            self.emit('return { kind: "mesh", value: colors ? { vertices, triangles, colors: U8.slice(colors, colors + 4 * count) } : { vertices, triangles } };')
         elif word == "prism":
             self.emit(f'return {{ kind: "prism", value: {{ pose: {n}.pose, base: flatCopy({n}.base.points, 2), height: {n}.height }} }};')
         else:
@@ -772,10 +774,10 @@ export interface AlignOptions {
 """
 
 HAND_HELPERS = r"""
-function meshIn(vertices: number, vertexCount: number, triangles: number, triangleCount: number): number {
+function meshIn(vertices: number, vertexCount: number, triangles: number, triangleCount: number, colors: number): number {
     if (triangleCount % 3) throw new MathError(-1);
-    const p = alloc(16);
-    w_RantMeshView(p, { vertices, vertex_count: vertexCount, triangles, triangle_count: triangleCount / 3 });
+    const p = alloc(20);
+    w_RantMeshView(p, { vertices, vertex_count: vertexCount, triangles, triangle_count: triangleCount / 3, colors });
     return p;
 }
 
@@ -854,8 +856,9 @@ function cloudIn(cloud: PointCloud): number {
     return p;
 }
 
-/** A Mesh's corners read in C from whatever fields they are, as doubles, and how many. */
-function cornersIn(mesh: Mesh): [number, number] {
+/** A Mesh's corners read in C from whatever fields they are, as doubles, how many, and their colors from rgba or
+ * rgb, 0 when it has none. */
+function cornersIn(mesh: Mesh): [number, number, number] {
     const cloud = cloudIn(mesh.vertices);
     const n = alloc(4);
     U32[n >> 2] = 0;
@@ -864,14 +867,22 @@ function cornersIn(mesh: Mesh): [number, number] {
     const out = alloc(24 * U32[n >> 2]);
     check(wasm._rm_point_cloud_read_points(cloud, out, n));
     refresh();
-    return [out, U32[n >> 2]];
+    const count = U32[n >> 2];
+    const held = wasm._rm_point_cloud_read_colors(cloud, 0, n);
+    refresh();
+    if (held === -4 || !count) return [out, count, 0];
+    room(held);
+    const colors = alloc(4 * count);
+    check(wasm._rm_point_cloud_read_colors(cloud, colors, n));
+    refresh();
+    return [out, count, colors];
 }
 
 /** A Mesh as the C view, and how many corners it has. */
 function meshViewIn(mesh: Mesh): [number, number] {
     if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);
-    const [points, count] = cornersIn(mesh);
-    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles)), count];
+    const [points, count, colors] = cornersIn(mesh);
+    return [meshIn(points, count, numbersIn(mesh.triangles, 4, Uint32Array), lengthOf(mesh.triangles), colors), count];
 }
 
 function cloudDone(cloud: PointCloud, p: number): void {
@@ -1023,7 +1034,8 @@ function shapeIn(shape: Shape): number {
     case "polyline": wasm._rm_shape_from_polyline(ret, viewIn(numbersIn(v, 8, Float64Array), v.length / 3)); break;
     case "polygon": wasm._rm_shape_from_polygon(ret, viewIn(numbersIn(v, 8, Float64Array), v.length / 3)); break;
     case "mesh":
-        wasm._rm_shape_from_mesh(ret, meshIn(numbersIn(v.vertices, 8, Float64Array), v.vertices.length / 3, numbersIn(v.triangles, 4, Uint32Array), v.triangles.length));
+        wasm._rm_shape_from_mesh(ret, meshIn(numbersIn(v.vertices, 8, Float64Array), v.vertices.length / 3, numbersIn(v.triangles, 4, Uint32Array), v.triangles.length,
+                                             v.colors ? numbersIn(v.colors, 1, Uint8Array) : 0));
         break;
     default: throw new MathError(-1);
     }

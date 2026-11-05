@@ -23,20 +23,21 @@ static RantPointCloudView view(const RantPointFieldView *fields, uint32_t field_
 }
 
 static void layouts(void){
-    static const char *names[4][6] = {
+    static const char *names[5][7] = {
         { "x", "y", "z" }, { "x", "y", "z", "intensity" }, { "x", "y", "z", "rgb" },
-        { "x", "y", "z", "normal_x", "normal_y", "normal_z" } };
-    static const uint32_t fields[4] = { 3, 4, 4, 6 };
-    uint8_t data[24 * 5];
+        { "x", "y", "z", "normal_x", "normal_y", "normal_z" }, { "x", "y", "z", "normal_x", "normal_y", "normal_z", "rgba" } };
+    static const uint32_t fields[5] = { 3, 4, 4, 6, 7 };
+    uint8_t data[28 * 5];
     int l;
     uint32_t k;
-    for (l = 0; l < 4; l++){
+    for (l = 0; l < 5; l++){
         RantPointCloudView v = rant_point_cloud_layout((RantPointCloudLayout)l);
         int ok = v.field_count == fields[l] && v.point_step == 4 * fields[l] && !v.data && !v.size;
         for (k = 0; ok && k < v.field_count; k++)
-            ok = v.fields[k].offset == 4 * k && v.fields[k].kind == RANT_SCALAR_KIND_F32 && v.fields[k].count == 1
+            ok = v.fields[k].offset == 4 * k && v.fields[k].count == 1 &&
+                 v.fields[k].kind == (strcmp(names[l][k], "rgba") ? RANT_SCALAR_KIND_F32 : RANT_SCALAR_KIND_U32)
                 && v.fields[k].name_len == strlen(names[l][k]) && !memcmp(v.fields[k].name, names[l][k], v.fields[k].name_len);
-        CHECK(ok, "layout %d: its fields, packed as f32", l);
+        CHECK(ok, "layout %d: its fields, packed as f32 but rgba", l);
         v.data = data;
         v.size = 5 * (size_t)v.point_step;
         CHECK(rant_point_cloud_check(&v) == RANT_MATH_OK, "layout %d: a cloud of 5", l);

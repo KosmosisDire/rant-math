@@ -76,6 +76,7 @@ pub enum PointCloudLayout {
     XyzIntensity = 1,
     XyzRgb = 2,
     XyzNormal = 3,
+    XyzNormalRgba = 4,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

@@ -29,7 +29,8 @@ C `rant_pose_inverse` is:
 - A call that can miss, such as a raycast, gives an optional, `None` or `null`.
 - A list comes back as a list. No binding needs a count or room.
 - A view of a list in C is the list: `polyline_length(points)`. A mesh is the standard Mesh: `mesh_area(mesh)`,
-  and `shape_mesh(shape, segments, crease)` returns one, its corners x, y, z and a normal as f32.
+  and `shape_mesh(shape, segments, crease)` returns one, its corners x, y, z and a normal as f32, plus rgba when
+  the mesh has colors in rgba or rgb.
 
 ```python
 import rant_math as m
@@ -54,7 +55,7 @@ Double3 back = pose_inverse(pose) * Double3{ 1, 2, 3 };
 | Mixed kinds of shape | `shape_from_sphere` and its kin, then `shape_distance` |
 | Fit to points | `points_fit_plane`, `points_fit_line`, `points_fit_pose`; `FitOptions.tolerance` for RANSAC |
 | Point clouds | `point_cloud_read_points`, `points_downsample`, `points_normals`, `points_clusters`, `points_align` |
-| Grids and maps | `grid_read_values`, `grid_cell`, `grid_center` |
+| Grids and maps | `grid_read_values`, `grid_read_colors`, `grid_cell`, `grid_center` |
 | Near points | `kdtree_create`, `kdtree_nearest`, `kdtree_within` |
 | Cameras | `camera_project`, `camera_ray`, `camera_unproject`, `image_depth_points` |
 | Images | `image_convert`, `image_resize`, `image_rotate`, `image_colorize`, `image_undistort`, `image_draw` |
