@@ -1063,13 +1063,14 @@ pub(super) fn dispatch<'js>(ctx: &Ctx<'js>, fail: &Function<'js>, trees: &Trees,
         461 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_cell(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
         462 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Int3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_center(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
         463 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let r = crate::grid_read_value(&x0, &x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        464 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        465 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
-        466 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
-        467 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
-        468 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
-        469 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        470 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        464 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::grid_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        465 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        466 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
+        467 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
+        468 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
+        469 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
+        470 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        471 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
         _ => Err(fail_argument(ctx)),
     }
 }

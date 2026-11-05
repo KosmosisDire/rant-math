@@ -895,6 +895,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_cell(RawGridView* grid, Double3 point, Int3* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_center(RawGridView* grid, Int3 cell, Double3* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_read_value(RawGridView* grid, byte* field, Int3 cell, double* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_read_values(RawGridView* grid, byte* field, double* @out, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_grid_write_value(RawGridView* grid, byte* field, Int3 cell, double value);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_geo_point_to_ecef(GeoPoint point);
         [DllImport(LIB, CallingConvention = CC)] internal static extern GeoPoint rant_geo_point_from_ecef(Double3 ecef);
@@ -4950,6 +4951,24 @@ namespace Rant.Math
                 var c_grid = c_grid_p.Raw;
                 Impl.Check(Native.rant_grid_read_value(&c_grid, c_field, cell, &o0));
                 return o0;
+            }
+        }
+
+        public static unsafe double[] GridReadValues(Grid grid, string field)
+        {
+            using (var c_grid_p = new GridPin(grid))
+            fixed (byte* c_field = Impl.Utf8(field))
+            {
+                var c_grid = c_grid_p.Raw;
+                uint n0 = 0;
+                Impl.Room(Native.rant_grid_read_values(&c_grid, c_field, null, &n0));
+                var o0 = new double[(int)n0];
+                fixed (double* p0 = o0)
+                {
+                    Impl.Check(Native.rant_grid_read_values(&c_grid, c_field, p0, &n0));
+                    Array.Resize(ref o0, (int)n0);
+                    return o0;
+                }
             }
         }
 

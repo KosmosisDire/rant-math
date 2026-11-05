@@ -1568,6 +1568,8 @@ _lib.rant_grid_center.argtypes = [POINTER(_RantGridView), _RantInt3, POINTER(_Ra
 _lib.rant_grid_center.restype = c_int
 _lib.rant_grid_read_value.argtypes = [POINTER(_RantGridView), c_char_p, _RantInt3, POINTER(c_double)]
 _lib.rant_grid_read_value.restype = c_int
+_lib.rant_grid_read_values.argtypes = [POINTER(_RantGridView), c_char_p, POINTER(c_double), POINTER(c_uint32)]
+_lib.rant_grid_read_values.restype = c_int
 _lib.rant_grid_write_value.argtypes = [POINTER(_RantGridView), c_char_p, _RantInt3, c_double]
 _lib.rant_grid_write_value.restype = c_int
 _lib.rant_geo_point_to_ecef.argtypes = [_RantGeoPoint]
@@ -4445,6 +4447,14 @@ def grid_read_value(grid: Grid, field: str, cell: Int3) -> float:
     _check(_lib.rant_grid_read_value(byref(c_grid), field.encode(), _c_Int3(cell), byref(o0)))
     return o0.value
 
+def grid_read_values(grid: Grid, field: str) -> List[float]:
+    c_grid = _grid(grid)
+    n0 = c_uint32(0)
+    _room(_lib.rant_grid_read_values(byref(c_grid), field.encode(), None, byref(n0)))
+    o0, p0 = _new_list(c_double, n0.value, 'float64', 1, False)
+    _check(_lib.rant_grid_read_values(byref(c_grid), field.encode(), p0, byref(n0)))
+    return _list_out(o0, None, n0.value * 1)
+
 def grid_write_value(grid: Grid, field: str, cell: Int3, value: float) -> None:
     """Whole kinds are rounded and clamped, NaN to 0."""
     c_grid = _grid(grid, True)
@@ -4679,6 +4689,7 @@ __all__ = [
     "grid_cell",
     "grid_center",
     "grid_read_value",
+    "grid_read_values",
     "grid_write_value",
     "image_bytes",
     "image_check",

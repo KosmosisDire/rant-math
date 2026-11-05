@@ -483,6 +483,7 @@ export const NAMES = [
   {"name": "gridCell", "takes": ["grid", "point"], "words": "A flat grid takes any z"},
   {"name": "gridCenter", "takes": ["grid", "cell"], "words": "The middle of a cell in the parent frame, on the xy plane of a flat grid"},
   {"name": "gridReadValue", "takes": ["grid", "field", "cell"], "words": "A cell's number in the field of this name, a NUL ended string"},
+  {"name": "gridReadValues", "takes": ["grid", "field"], "words": "grid read values"},
   {"name": "gridWriteValue", "takes": ["grid", "field", "cell", "value"], "words": "Whole kinds are rounded and clamped, NaN to 0"},
   {"name": "geoPointToEcef", "takes": ["point"], "words": "Meters from the Earth's center, x toward latitude 0 and longitude 0, z toward the north pole"},
   {"name": "geoPointFromEcef", "takes": ["ecef"], "words": "geo point from ecef"},

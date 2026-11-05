@@ -5957,6 +5957,19 @@ export function gridReadValue(grid: Grid, field: string, cell: Int3): number {
     return F64[(o0) >> 3];
 }
 
+export function gridReadValues(grid: Grid, field: string): Float64Array {
+    begin();
+    const c_grid = gridIn(grid);
+    const c_field = stringIn(field);
+    const n0 = alloc(4); U32[n0 >> 2] = 0;
+    room(wasm._rm_grid_read_values(c_grid, c_field, 0, n0));
+    refresh();
+    const o0 = alloc(8 * U32[n0 >> 2] * 1);
+    check(wasm._rm_grid_read_values(c_grid, c_field, o0, n0));
+    refresh();
+    return numbersOut(o0, U32[n0 >> 2], Float64Array);
+}
+
 /** Whole kinds are rounded and clamped, NaN to 0. */
 export function gridWriteValue(grid: Grid, field: string, cell: Int3, value: number): void {
     begin();

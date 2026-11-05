@@ -583,6 +583,7 @@ EXPLICIT = {
     "grid_cell": [[GRID_A, d3(1.75, 2.25, 3.0)], [GRID_A, d3(90.0, 0.0, 0.0)], [GRID_B, d3(1.5, 2.5, 3.5)]],
     "grid_center": [[GRID_A, d3(1, 1, 0)], [GRID_B, d3(0, 0, 1)], [GRID_A, d3(9, 9, 9)]],
     "grid_read_value": [[GRID_A, "occupancy", d3(2, 1, 0)], [GRID_A, "height", d3(1, 0, 0)], [GRID_A, "missing", d3(0, 0, 0)], [GRID_A, "height", d3(9, 0, 0)], [GRID_B, "cost", d3(1, 1, 1)]],
+    "grid_read_values": [[GRID_A, "occupancy"], [GRID_A, "height"], [GRID_A, "missing"], [GRID_B, "cost"]],
     "grid_write_value": [[GRID_A, "occupancy", d3(2, 1, 0), 300.0], [GRID_A, "height", d3(0, 0, 0), 0.25], [GRID_A, "missing", d3(0, 0, 0), 1.0], [GRID_B, "cost", d3(9, 9, 9), 1.0]],
     "detections2d_suppress": [[DETS2[0], 0.5], [DETS2[0], 0.95], [DETS2[1], 0.5], [DETS2[2], 0.5]],
     "detections3d_suppress": [[DETS3[0], 0.5], [DETS3[0], 0.95], [DETS3[1], 0.5], [DETS3[2], 0.5]],

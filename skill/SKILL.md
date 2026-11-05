@@ -54,6 +54,7 @@ Double3 back = pose_inverse(pose) * Double3{ 1, 2, 3 };
 | Mixed kinds of shape | `shape_from_sphere` and its kin, then `shape_distance` |
 | Fit to points | `points_fit_plane`, `points_fit_line`, `points_fit_pose`; `FitOptions.tolerance` for RANSAC |
 | Point clouds | `point_cloud_read_points`, `points_downsample`, `points_normals`, `points_clusters`, `points_align` |
+| Grids and maps | `grid_read_values`, `grid_cell`, `grid_center` |
 | Near points | `kdtree_create`, `kdtree_nearest`, `kdtree_within` |
 | Cameras | `camera_project`, `camera_ray`, `camera_unproject`, `image_depth_points` |
 | Images | `image_convert`, `image_resize`, `image_rotate`, `image_colorize`, `image_undistort`, `image_draw` |

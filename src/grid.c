@@ -36,11 +36,9 @@ RantMathResult rant_grid_center(const RantGridView *grid, RantInt3 cell, RantDou
     return RANT_MATH_OK;
 }
 
-/* The checked field of this name and the byte offset of a cell in it. */
-static RantMathResult i_slot(const RantGridView *g, const char *name, RantInt3 cell, const RantGridFieldView **f,
-                             size_t *at){
+/* The checked field of this name, holding a number for each of the grid's cells. */
+static RantMathResult i_grid_field(const RantGridView *g, const char *name, const RantGridFieldView **f, uint64_t *cells){
     RantMathResult r;
-    uint64_t cells, bytes;
     size_t len;
     uint32_t i;
     int b;
@@ -53,10 +51,21 @@ static RantMathResult i_slot(const RantGridView *g, const char *name, RantInt3 c
             *f = &g->fields[i];
     if (!*f) return RANT_MATH_ERR_FORMAT;
     b = i_math_scalar_bytes((*f)->kind);
-    cells = (uint64_t)g->cells_x * g->cells_y * g->cells_z;
+    *cells = (uint64_t)g->cells_x * g->cells_y * g->cells_z;
     /* a grid whose cell count overflows 64 bits holds more than any data can */
-    if (!b || !(*f)->data || (uint64_t)g->cells_y * g->cells_z > UINT64_MAX / g->cells_x || cells > UINT64_MAX / 8
-        || cells * b > (*f)->size) return RANT_MATH_ERR_FORMAT;
+    if (!b || !(*f)->data || (uint64_t)g->cells_y * g->cells_z > UINT64_MAX / g->cells_x || *cells > UINT64_MAX / 8
+        || *cells * b > (*f)->size) return RANT_MATH_ERR_FORMAT;
+    return RANT_MATH_OK;
+}
+
+/* The checked field of this name and the byte offset of a cell in it. */
+static RantMathResult i_slot(const RantGridView *g, const char *name, RantInt3 cell, const RantGridFieldView **f,
+                             size_t *at){
+    RantMathResult r;
+    uint64_t cells, bytes;
+    int b;
+    if ((r = i_grid_field(g, name, f, &cells)) != RANT_MATH_OK) return r;
+    b = i_math_scalar_bytes((*f)->kind);
     if (cell.x < 0 || cell.y < 0 || cell.z < 0 || (uint32_t)cell.x >= g->cells_x || (uint32_t)cell.y >= g->cells_y
         || (uint32_t)cell.z >= g->cells_z) return RANT_MATH_ERR_OUTSIDE;
     bytes = ((uint64_t)cell.x + (uint64_t)g->cells_x * ((uint64_t)cell.y + (uint64_t)g->cells_y * (uint64_t)cell.z)) * b;
@@ -71,6 +80,21 @@ RantMathResult rant_grid_read_value(const RantGridView *grid, const char *field,
     if (!out) return RANT_MATH_ERR_ARGUMENT;
     if ((r = i_slot(grid, field, cell, &f, &at)) != RANT_MATH_OK) return r;
     *out = i_math_scalar_get(f->kind, f->data + at);
+    return RANT_MATH_OK;
+}
+
+RantMathResult rant_grid_read_values(const RantGridView *grid, const char *field, double *out, uint32_t *count){
+    const RantGridFieldView *f;
+    uint64_t cells;
+    uint32_t i;
+    RantMathResult r;
+    int b;
+    if (!count) return RANT_MATH_ERR_ARGUMENT;
+    if ((r = i_grid_field(grid, field, &f, &cells)) != RANT_MATH_OK) return r;
+    if (cells > UINT32_MAX) return RANT_MATH_ERR_FORMAT;
+    if ((r = i_math_room(count, (uint32_t)cells, out)) != RANT_MATH_OK) return r;
+    b = i_math_scalar_bytes(f->kind);
+    for (i = 0; i < (uint32_t)cells; i++) out[i] = i_math_scalar_get(f->kind, f->data + (size_t)i * b);
     return RANT_MATH_OK;
 }
 

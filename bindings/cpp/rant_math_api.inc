@@ -2935,6 +2935,16 @@ inline double grid_read_value(const Grid &grid, const char *field, Int3 cell) {
     return o0;
 }
 
+inline std::vector<double> grid_read_values(const Grid &grid, const char *field) {
+    impl::GridRef c_grid(grid);
+    uint32_t n0 = 0;
+    impl::room(detail::rant_grid_read_values(&c_grid.raw, field, nullptr, &n0));
+    std::vector<double> o0(n0);
+    impl::check(detail::rant_grid_read_values(&c_grid.raw, field, o0.data(), &n0));
+    o0.resize(n0);
+    return o0;
+}
+
 /* Whole kinds are rounded and clamped, NaN to 0. */
 inline void grid_write_value(Grid &grid, const char *field, Int3 cell, double value) {
     impl::GridRef c_grid(grid);

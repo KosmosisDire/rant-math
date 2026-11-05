@@ -33,6 +33,8 @@ RANT_MATH_API RantMathResult rant_grid_cell(const RantGridView *grid, RantDouble
 RANT_MATH_API RantMathResult rant_grid_center(const RantGridView *grid, RantInt3 cell, RantDouble3 *out);
 /* A cell's number in the field of this name, a NUL ended string. ERR_OUTSIDE for a cell past the grid. */
 RANT_MATH_API RantMathResult rant_grid_read_value(const RantGridView *grid, const char *field, RantInt3 cell, double *out);
+/* Every cell's number in the field of this name, x fastest, then y, then z, by the count rule. */
+RANT_MATH_API RantMathResult rant_grid_read_values(const RantGridView *grid, const char *field, double *out, uint32_t *count);
 /* Whole kinds are rounded and clamped, NaN to 0. */
 RANT_MATH_API RantMathResult rant_grid_write_value(RantGridView *grid, const char *field, RantInt3 cell, double value);
 

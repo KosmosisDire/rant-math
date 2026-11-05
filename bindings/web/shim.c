@@ -750,6 +750,7 @@ EMSCRIPTEN_KEEPALIVE RantMathResult rm_points_align(const RantDouble3 *source, u
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_cell(const RantGridView *grid, const RantDouble3 *point, RantInt3 *out) { return rant_grid_cell(grid, *point, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_center(const RantGridView *grid, const RantInt3 *cell, RantDouble3 *out) { return rant_grid_center(grid, *cell, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_read_value(const RantGridView *grid, const char *field, const RantInt3 *cell, double *out) { return rant_grid_read_value(grid, field, *cell, out); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_read_values(const RantGridView *grid, const char *field, double *out, uint32_t *count) { return rant_grid_read_values(grid, field, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_grid_write_value(RantGridView *grid, const char *field, const RantInt3 *cell, double value) { return rant_grid_write_value(grid, field, *cell, value); }
 EMSCRIPTEN_KEEPALIVE void rm_geo_point_to_ecef(RantDouble3 *ret, const RantGeoPoint *point) { *ret = rant_geo_point_to_ecef(*point); }
 EMSCRIPTEN_KEEPALIVE void rm_geo_point_from_ecef(RantGeoPoint *ret, const RantDouble3 *ecef) { *ret = rant_geo_point_from_ecef(*ecef); }

@@ -3982,6 +3982,13 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::grid_read_value(x0, x1, x2));
         return out;
     }},
+    {"grid_read_values", [](const std::vector<J> &a) {
+        (void)a;
+        Grid x0 = get_grid(a[0]);
+        std::string x1s = a[1].str; const char *x1 = x1s.c_str();
+        J out = put(rant::math::grid_read_values(x0, x1));
+        return out;
+    }},
     {"grid_write_value", [](const std::vector<J> &a) {
         (void)a;
         Grid x0 = get_grid(a[0]);

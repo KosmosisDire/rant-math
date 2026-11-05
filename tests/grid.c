@@ -69,9 +69,11 @@ static void edges(void){
 
 static void values(void){
     static uint8_t occupancy[60], height[240], cost[120];
+    static double all[60];
     RantGridFieldView f[3];
     RantGridView g = grid(rant_pose_identity(), 0.1, 5, 4, 3);
     double v;
+    uint32_t n = 0;
     int16_t s;
     float h;
     f[0] = field("occupancy", RANT_SCALAR_KIND_U8, occupancy, sizeof occupancy);
@@ -96,6 +98,11 @@ static void values(void){
     CHECK(rant_grid_read_value(&g, "occupancy", rant_int3(0, 0, 3), &v) == RANT_MATH_ERR_OUTSIDE, "past z");
     CHECK(rant_grid_read_value(&g, "free", rant_int3(0, 0, 0), &v) == RANT_MATH_ERR_FORMAT, "no such field");
     CHECK(rant_grid_read_value(&g, NULL, rant_int3(0, 0, 0), &v) == RANT_MATH_ERR_ARGUMENT, "no field name");
+    CHECK(rant_grid_read_values(&g, "cost", NULL, &n) == RANT_MATH_ERR_SPACE && n == 60, "a whole field needs a number per cell");
+    CHECK(rant_grid_read_values(&g, "cost", all, &n) == RANT_MATH_OK && all[0] == 0.0 && all[1] == -300.0, "a whole field in order");
+    CHECK(rant_grid_read_values(&g, "occupancy", all, &n) == RANT_MATH_OK && all[37] == 100.0, "cell (2, 3, 1) is number 37");
+    CHECK(rant_grid_read_values(&g, "height", all, &n) == RANT_MATH_OK && all[59] == 1.375, "a float field's last cell");
+    CHECK(rant_grid_read_values(&g, "free", all, &n) == RANT_MATH_ERR_FORMAT, "no such field to read whole");
     f[1].size = 239;
     CHECK(rant_grid_read_value(&g, "height", rant_int3(0, 0, 0), &v) == RANT_MATH_ERR_FORMAT, "a field short of one cell");
     f[1].size = 240;
@@ -106,6 +113,7 @@ static void values(void){
     CHECK(rant_grid_read_value(&g, "occ", rant_int3(2, 3, 1), &v) == RANT_MATH_OK && v == 100.0, "a name is its bytes, no NUL needed");
     g.cells_x = 0xFFFFFFFFu; g.cells_y = 0xFFFFFFFFu; g.cells_z = 0xFFFFFFFFu;
     CHECK(rant_grid_read_value(&g, "occ", rant_int3(0, 0, 0), &v) == RANT_MATH_ERR_FORMAT, "a grid too large for any data");
+    CHECK(rant_grid_read_values(&g, "occ", all, &n) == RANT_MATH_ERR_FORMAT, "too large to read whole");
 }
 
 void test_grid(void){

@@ -2928,6 +2928,17 @@ pub fn grid_read_value(grid: &Grid, field: &str, cell: Int3) -> Result<f64, Math
     Ok(o0)
 }
 
+pub fn grid_read_values(grid: &Grid, field: &str) -> Result<Vec<f64>, MathError> {
+    let c_grid = GridRaw::new(grid);
+    let c_field = cstring(field);
+    let mut n0 = 0u32;
+    room(unsafe { ffi::rant_grid_read_values(&c_grid.raw, c_field.as_ptr(), std::ptr::null_mut(), &mut n0) })?;
+    let mut o0 = vec![f64::default(); n0 as usize];
+    check(unsafe { ffi::rant_grid_read_values(&c_grid.raw, c_field.as_ptr(), o0.as_mut_ptr(), &mut n0) })?;
+    o0.truncate(n0 as usize);
+    Ok(o0)
+}
+
 /// Whole kinds are rounded and clamped, NaN to 0.
 pub fn grid_write_value(grid: &mut Grid, field: &str, cell: Int3, value: f64) -> Result<(), MathError> {
     let mut c_grid = GridRaw::new_mut(grid);

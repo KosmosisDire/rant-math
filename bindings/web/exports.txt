@@ -484,6 +484,7 @@ _rm_points_align
 _rm_grid_cell
 _rm_grid_center
 _rm_grid_read_value
+_rm_grid_read_values
 _rm_grid_write_value
 _rm_geo_point_to_ecef
 _rm_geo_point_from_ecef

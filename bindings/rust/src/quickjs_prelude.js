@@ -28,7 +28,7 @@
     class KdTree {
         constructor(id) { this.id = id; }
         free() {
-            if (this.id) call(fail, 471, this.id);
+            if (this.id) call(fail, 472, this.id);
             this.id = 0;
         }
     }
@@ -498,13 +498,14 @@
         gridCell: (...a) => call(fail, 461, ...a),
         gridCenter: (...a) => call(fail, 462, ...a),
         gridReadValue: (...a) => call(fail, 463, ...a),
-        gridWriteValue: (...a) => call(fail, 464, ...a),
-        geoPointToEcef: (...a) => call(fail, 465, ...a),
-        geoPointFromEcef: (...a) => call(fail, 466, ...a),
-        geoPointToEnu: (...a) => call(fail, 467, ...a),
-        geoPointFromEnu: (...a) => call(fail, 468, ...a),
-        detections2dSuppress: (...a) => call(fail, 469, ...a),
-        detections3dSuppress: (...a) => call(fail, 470, ...a),
+        gridReadValues: (...a) => call(fail, 464, ...a),
+        gridWriteValue: (...a) => call(fail, 465, ...a),
+        geoPointToEcef: (...a) => call(fail, 466, ...a),
+        geoPointFromEcef: (...a) => call(fail, 467, ...a),
+        geoPointToEnu: (...a) => call(fail, 468, ...a),
+        geoPointFromEnu: (...a) => call(fail, 469, ...a),
+        detections2dSuppress: (...a) => call(fail, 470, ...a),
+        detections3dSuppress: (...a) => call(fail, 471, ...a),
         shapeFromAlignedBox: (value) => ({ kind: "aligned_box", value }),
         shapeFromOrientedBox: (value) => ({ kind: "oriented_box", value }),
         shapeFromSphere: (value) => ({ kind: "sphere", value }),
