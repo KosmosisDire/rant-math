@@ -208,11 +208,11 @@ arr("REF_MIX", mixes)
 out.append(f"#define REF_MIX_CASES {N_MIX}")
 arr("REF_LINEAR", [to_linear(i / 255.0) for i in range(256)])
 
-MAPS = ["gray", "viridis", "plasma", "inferno", "magma", "turbo"]
+MAPS = ["gray", "viridis", "plasma", "inferno", "magma", "turbo", "cividis", "jet", "hot", "bone", "coolwarm", "twilight", "hsv"]
 ts = list(np.arange(256) / 255.0) + list(rng.uniform(0, 1, 200)) + [-0.5, 0.0, 1e-12, 1 / 256, 1 - 1e-12, 1.0, 1.5]
 arr("REF_MAP_T", ts)
 out.append(f"#define REF_MAP_CASES {len(ts)}")
-arr("REF_MAP", [[to_byte(v) for v in matplotlib.colormaps[name](t)[:3]] for name in MAPS for t in ts])
+arr("REF_MAP", [[to_byte(v) for v in matplotlib.colormaps[name].resampled(256)(t)[:3]] for name in MAPS for t in ts])
 
 # Cameras: OpenCV's projections of points in its optical frame, x right, y down, z ahead.
 CAMS = [

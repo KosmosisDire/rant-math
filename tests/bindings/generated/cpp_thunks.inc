@@ -3637,6 +3637,20 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::colormap_at(x0, x1));
         return out;
     }},
+    {"colormap_ramp", [](const std::vector<J> &a) {
+        (void)a;
+        Colormap x0 = get<Colormap>(a[0]);
+        uint32_t x1 = get<uint32_t>(a[1]);
+        J out = put(rant::math::colormap_ramp(x0, x1));
+        return out;
+    }},
+    {"color_ramp", [](const std::vector<J> &a) {
+        (void)a;
+        std::vector<Color> x0 = get_list<Color>(a[0]);
+        uint32_t x1 = get<uint32_t>(a[1]);
+        J out = put(rant::math::color_ramp(x0, x1));
+        return out;
+    }},
     {"camera_project", [](const std::vector<J> &a) {
         (void)a;
         CameraIntrinsics x0 = get<CameraIntrinsics>(a[0]);
@@ -3741,7 +3755,7 @@ const std::map<std::string, Thunk> thunks = {
         Image x0 = get_image(a[0]);
         double x1 = get<double>(a[1]);
         double x2 = get<double>(a[2]);
-        Colormap x3 = get<Colormap>(a[3]);
+        std::vector<Color> x3 = get_list<Color>(a[3]);
         ImageFormat x4 = get<ImageFormat>(a[4]);
         J out = put(rant::math::image_colorize(x0, x1, x2, x3, x4));
         return out;

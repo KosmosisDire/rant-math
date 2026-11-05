@@ -97,7 +97,7 @@ double i_math_scalar_get(RantScalarKind k, const uint8_t *p);
 void   i_math_scalar_put(RantScalarKind k, uint8_t *p, double v);
 
 /* Each map after RANT_COLORMAP_GRAY as 256 sRGB steps, from tools/colormaps.py. */
-extern const uint8_t i_math_colormaps[5][256][3];
+extern const uint8_t i_math_colormaps[12][256][3];
 
 /* A seeded random source: splitmix64 spreads the seed, then xorshift64 star. */
 typedef struct { uint64_t s; } i_MathRng;

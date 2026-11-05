@@ -238,36 +238,50 @@ static void convert(void){
 static void colorize(void){
     RantImageView s, d, m, e;
     const float values[12] = { -1.0f, 0.0f, 0.5f, 1.0f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 0.25f, 0.0f, 0.0f };
+    RantColor inferno[256], gray[256], two[2];
     int i, bad = 0;
+    rant_colormap_ramp(RANT_COLORMAP_INFERNO, inferno, 256);
+    rant_colormap_ramp(RANT_COLORMAP_GRAY, gray, 256);
     for (i = 0; i < 12; i++) put_f32(pool_a + 4 * i, values[i]);
     put_f32(pool_a + 40, (float)NAN);
     put_f32(pool_a + 44, (float)HUGE_VAL);
     s = view(RANT_IMAGE_FORMAT_MONOF32, 4, 3, 0, pool_a);
     d = view(RANT_IMAGE_FORMAT_RGBA8, 4, 3, 0, pool_b);
-    CHECK(rant_image_colorize(&s, 1.0, 4.0, RANT_COLORMAP_INFERNO, &d) == RANT_MATH_OK, "colorize");
+    CHECK(rant_image_colorize(&s, 1.0, 4.0, inferno, 256, &d) == RANT_MATH_OK, "colorize");
     for (i = 0; i < 12; i++){
         RantColor want = rant_colormap_at(RANT_COLORMAP_INFERNO, (get_f32(pool_a + 4 * i) - 1.0) / 3.0);
         if (!same_color(rant_color(pool_b[4 * i], pool_b[4 * i + 1], pool_b[4 * i + 2], pool_b[4 * i + 3]), want)) bad++;
     }
     CHECK(bad == 0, "%d pixels are not their map's colour", bad);
     CHECK(pool_b[43] == 0 && pool_b[47] == 255, "NaN is transparent and infinity takes the top");
+    CHECK(pool_b[7] == 255, "0 in Monof32 is a value");
     /* any colour format writes what Rgba8 holds */
     m = view(RANT_IMAGE_FORMAT_NV12, 4, 3, 0, pool_c);
     e = view(RANT_IMAGE_FORMAT_NV12, 4, 3, 0, pool_c + 1024);
-    CHECK(rant_image_colorize(&s, 1.0, 4.0, RANT_COLORMAP_INFERNO, &m) == RANT_MATH_OK && rant_image_convert(&d, &e) == RANT_MATH_OK
+    CHECK(rant_image_colorize(&s, 1.0, 4.0, inferno, 256, &m) == RANT_MATH_OK && rant_image_convert(&d, &e) == RANT_MATH_OK
           && !memcmp(m.data, e.data, m.size), "into Nv12 as through Rgba8");
     for (i = 0; i < 4; i++){ pool_a[2 * i] = (uint8_t)(i * 85); pool_a[2 * i + 1] = (uint8_t)(i * 85); }
     s = view(RANT_IMAGE_FORMAT_MONO16, 4, 1, 0, pool_a);
     d = view(RANT_IMAGE_FORMAT_MONO8, 4, 1, 0, pool_b);
-    CHECK(rant_image_colorize(&s, 0.0, 65535.0, RANT_COLORMAP_GRAY, &d) == RANT_MATH_OK
+    pool_a[0] = 1;
+    pool_a[1] = 0;
+    CHECK(rant_image_colorize(&s, 0.0, 65535.0, gray, 256, &d) == RANT_MATH_OK
           && pool_b[0] == 0 && pool_b[1] == 85 && pool_b[2] == 170 && pool_b[3] == 255, "Mono16 to gray, a step to each 257");
-    CHECK(rant_image_colorize(&s, 65535.0, 0.0, RANT_COLORMAP_GRAY, &d) == RANT_MATH_OK && pool_b[0] == 255 && pool_b[3] == 0,
-          "low above high turns the map around");
-    CHECK(rant_image_colorize(&s, 3.0, 3.0, RANT_COLORMAP_GRAY, &d) == RANT_MATH_ERR_ARGUMENT, "no span");
-    CHECK(rant_image_colorize(&s, NAN, 3.0, RANT_COLORMAP_GRAY, &d) == RANT_MATH_ERR_ARGUMENT, "a NaN end");
-    CHECK(rant_image_colorize(&s, 0.0, 3.0, (RantColormap)17, &d) == RANT_MATH_ERR_ARGUMENT, "an unknown map");
+    CHECK(rant_image_colorize(&s, 65535.0, 0.0, gray, 256, &d) == RANT_MATH_OK && pool_b[0] == 255 && pool_b[3] == 0,
+          "low above high turns the ramp around");
+    e = view(RANT_IMAGE_FORMAT_RGBA8, 4, 1, 0, pool_c);
+    pool_a[0] = pool_a[1] = 0;
+    CHECK(rant_image_colorize(&s, 0.0, 65535.0, gray, 256, &e) == RANT_MATH_OK && pool_c[3] == 0 && pool_c[7] == 255,
+          "0 in Mono16 is no reading, as depth cameras send it");
+    two[0] = rant_color(10, 20, 30, 255); two[1] = rant_color(200, 210, 220, 255);
+    CHECK(rant_image_colorize(&s, 0.0, 65535.0, two, 2, &e) == RANT_MATH_OK && pool_c[4] == 10 && pool_c[8] == 200 && pool_c[12] == 200,
+          "a ramp of two splits the span in halves");
+    CHECK(rant_image_colorize(&s, 0.0, 65535.0, two, 1, &e) == RANT_MATH_OK && pool_c[12] == 10, "a ramp of one is one colour");
+    CHECK(rant_image_colorize(&s, 3.0, 3.0, gray, 256, &d) == RANT_MATH_ERR_ARGUMENT, "no span");
+    CHECK(rant_image_colorize(&s, NAN, 3.0, gray, 256, &d) == RANT_MATH_ERR_ARGUMENT, "a NaN end");
+    CHECK(rant_image_colorize(&s, 0.0, 3.0, gray, 0, &d) == RANT_MATH_ERR_ARGUMENT, "an empty ramp");
     s.format = RANT_IMAGE_FORMAT_RGBA8;
-    CHECK(rant_image_colorize(&s, 0.0, 3.0, RANT_COLORMAP_GRAY, &d) == RANT_MATH_ERR_FORMAT, "colour has no values to map");
+    CHECK(rant_image_colorize(&s, 0.0, 3.0, gray, 256, &d) == RANT_MATH_ERR_FORMAT, "colour has no values to map");
 }
 
 static void crop(void){

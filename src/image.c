@@ -205,7 +205,7 @@ static void i_paint(RantImageView *dst, size_t stride, i_Source read, const void
         }
 }
 
-typedef struct { const RantImageView *v; size_t stride; double low, span; RantColormap map; int bytes; } i_From;
+typedef struct { const RantImageView *v; size_t stride; double low, span; const RantColor *ramp; uint32_t steps; int bytes; } i_From;
 
 static void i_pixels(const void *from, uint32_t y, uint32_t x0, uint32_t n, RantColor *out){
     const i_From *f = (const i_From *)from;
@@ -215,8 +215,19 @@ static void i_values(const void *from, uint32_t y, uint32_t x0, uint32_t n, Rant
     const i_From *f = (const i_From *)from;
     const uint8_t *row = f->v->data + (size_t)y * f->stride;
     uint32_t i;
-    for (i = 0; i < n; i++)
-        out[i] = rant_colormap_at(f->map, (i_get(f->bytes, row + (size_t)(x0 + i) * f->bytes) - f->low) / f->span);
+    uint32_t k;
+    double v, t;
+    for (i = 0; i < n; i++){
+        v = i_get(f->bytes, row + (size_t)(x0 + i) * f->bytes);
+        if (v != v || (f->bytes == 2 && v == 0.0)){
+            out[i] = rant_color(0, 0, 0, 0);
+            continue;
+        }
+        /* rant_colormap_at's rule: step floor(steps t), with t = 1 the last step */
+        t = (v - f->low) / f->span;
+        k = t <= 0.0 ? 0 : t >= 1.0 ? f->steps - 1 : (uint32_t)(t * f->steps);
+        out[i] = f->ramp[k < f->steps ? k : f->steps - 1];
+    }
 }
 
 RantMathResult rant_image_color_at(const RantImageView *image, uint32_t x, uint32_t y, RantColor *out){
@@ -271,20 +282,21 @@ RantMathResult rant_image_convert(const RantImageView *src, RantImageView *dst){
     return RANT_MATH_OK;
 }
 
-RantMathResult rant_image_colorize(const RantImageView *src, double low, double high, RantColormap map, RantImageView *dst){
+RantMathResult rant_image_colorize(const RantImageView *src, double low, double high, const RantColor *ramp, uint32_t ramp_count,
+                                   RantImageView *dst){
     RantMathResult r;
     size_t ss, ds;
     int channels;
     i_From from;
     if ((r = i_two_images(src, &ss, dst, &ds, src ? src->width : 0, src ? src->height : 0)) != RANT_MATH_OK) return r;
     if (!i_plain(src->format, &channels, &from.bytes) || channels != 1 || !i_colour(dst->format)) return RANT_MATH_ERR_FORMAT;
-    if (!i_math_finite(low) || !i_math_finite(high) || low == high || (int)map < 0 || (int)map > (int)RANT_COLORMAP_TURBO)
-        return RANT_MATH_ERR_ARGUMENT;
+    if (!i_math_finite(low) || !i_math_finite(high) || low == high || !ramp_count || !ramp) return RANT_MATH_ERR_ARGUMENT;
     from.v = src;
     from.stride = ss;
     from.low = low;
     from.span = high - low;
-    from.map = map;
+    from.ramp = ramp;
+    from.steps = ramp_count;
     i_paint(dst, ds, i_values, &from);
     return RANT_MATH_OK;
 }

@@ -267,6 +267,13 @@ class Colormap(IntEnum):
     Inferno = 3
     Magma = 4
     Turbo = 5
+    Cividis = 6
+    Jet = 7
+    Hot = 8
+    Bone = 9
+    Coolwarm = 10
+    Twilight = 11
+    Hsv = 12
 
 class ImageFilter(IntEnum):
     Nearest = 0
@@ -1479,6 +1486,10 @@ _lib.rant_color_from_linear.argtypes = [_RantFloat4]
 _lib.rant_color_from_linear.restype = _RantColor
 _lib.rant_colormap_at.argtypes = [c_int, c_double]
 _lib.rant_colormap_at.restype = _RantColor
+_lib.rant_colormap_ramp.argtypes = [c_int, POINTER(_RantColor), c_uint32]
+_lib.rant_colormap_ramp.restype = c_int
+_lib.rant_color_ramp.argtypes = [POINTER(_RantColor), c_uint32, POINTER(_RantColor), c_uint32]
+_lib.rant_color_ramp.restype = c_int
 _lib.rant_camera_project.argtypes = [POINTER(_RantCameraIntrinsics), _RantDouble3, POINTER(_RantDouble2)]
 _lib.rant_camera_project.restype = c_int
 _lib.rant_camera_project_points.argtypes = [POINTER(_RantCameraIntrinsics), POINTER(_RantDouble3), POINTER(_RantDouble2), c_uint32]
@@ -1505,7 +1516,7 @@ _lib.rant_image_value_at.argtypes = [POINTER(_RantImageView), c_uint32, c_uint32
 _lib.rant_image_value_at.restype = c_int
 _lib.rant_image_convert.argtypes = [POINTER(_RantImageView), POINTER(_RantImageView)]
 _lib.rant_image_convert.restype = c_int
-_lib.rant_image_colorize.argtypes = [POINTER(_RantImageView), c_double, c_double, c_int, POINTER(_RantImageView)]
+_lib.rant_image_colorize.argtypes = [POINTER(_RantImageView), c_double, c_double, POINTER(_RantColor), c_uint32, POINTER(_RantImageView)]
 _lib.rant_image_colorize.restype = c_int
 _lib.rant_image_crop.argtypes = [POINTER(_RantImageView), c_uint32, c_uint32, c_uint32, c_uint32, POINTER(_RantImageView)]
 _lib.rant_image_crop.restype = c_int
@@ -4131,6 +4142,18 @@ def colormap_at(map: Colormap, t: float) -> Color:
     r = _lib.rant_colormap_at(int(map), t)
     return _py_Color(r)
 
+def colormap_ramp(map: Colormap, count: int) -> List[Color]:
+    o0, p0 = _new_list(_RantColor, count, 'uint8', 4, False)
+    _check(_lib.rant_colormap_ramp(int(map), p0, count))
+    return _list_out(o0, _py_Color, None)
+
+def color_ramp(stops: Sequence[Color], count: int) -> List[Color]:
+    """At least two of each."""
+    c_stops, n_stops, np_stops = _list_in(stops, _RantColor, _c_Color, 'uint8', 4)
+    o0, p0 = _new_list(_RantColor, count, 'uint8', 4, np_stops)
+    _check(_lib.rant_color_ramp(c_stops, n_stops, p0, count))
+    return _list_out(o0, _py_Color, None)
+
 def camera_project(camera: CameraIntrinsics, point: Double3) -> Double2:
     """Where a point in the camera's frame lands, maybe off the image."""
     c_camera = _c_CameraIntrinsics(camera)
@@ -4216,11 +4239,11 @@ def image_convert(src: Image, format: ImageFormat) -> Image:
     _check(_lib.rant_image_convert(byref(c_src), byref(c0)))
     return o0
 
-def image_colorize(src: Image, low: float, high: float, map: Colormap, format: ImageFormat) -> Image:
-    """Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes."""
+def image_colorize(src: Image, low: float, high: float, ramp: Sequence[Color], format: ImageFormat) -> Image:
     c_src = _image(_RantImageView, src)
+    c_ramp, n_ramp, np_ramp = _list_in(ramp, _RantColor, _c_Color, 'uint8', 4)
     o0, c0 = _image_out(format, src.width, src.height)
-    _check(_lib.rant_image_colorize(byref(c_src), low, high, int(map), byref(c0)))
+    _check(_lib.rant_image_colorize(byref(c_src), low, high, c_ramp, n_ramp, byref(c0)))
     return o0
 
 def image_crop(image: Image, x: int, y: int, width: int, height: int) -> Image:
@@ -4626,8 +4649,10 @@ __all__ = [
     "circle_transform",
     "color_from_linear",
     "color_mix",
+    "color_ramp",
     "color_to_linear",
     "colormap_at",
+    "colormap_ramp",
     "cone_area",
     "cone_bounds",
     "cone_centroid",

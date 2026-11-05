@@ -58,11 +58,31 @@ RantColor rant_color_from_linear(RantFloat4 v){
 RantColor rant_colormap_at(RantColormap map, double t){
     const uint8_t *p;
     int i;
-    if (t != t || (int)map < 0 || (int)map > (int)RANT_COLORMAP_TURBO) return rant_color(0, 0, 0, 0);
+    if (t != t || (int)map < 0 || (int)map > (int)RANT_COLORMAP_HSV) return rant_color(0, 0, 0, 0);
     /* matplotlib's rule: step floor(256 t), with t = 1 the last step */
     i = t <= 0.0 ? 0 : (t >= 1.0 ? 255 : (int)(t * 256.0));
     if (i > 255) i = 255;
     if (map == RANT_COLORMAP_GRAY) return rant_color((uint8_t)i, (uint8_t)i, (uint8_t)i, 255);
     p = i_math_colormaps[(int)map - 1][i];
     return rant_color(p[0], p[1], p[2], 255);
+}
+
+RantMathResult rant_colormap_ramp(RantColormap map, RantColor *out, uint32_t count){
+    uint32_t i;
+    if (count < 2 || !out || (int)map < 0 || (int)map > (int)RANT_COLORMAP_HSV) return RANT_MATH_ERR_ARGUMENT;
+    for (i = 0; i < count; i++) out[i] = rant_colormap_at(map, (double)i / (count - 1));
+    return RANT_MATH_OK;
+}
+
+RantMathResult rant_color_ramp(const RantColor *stops, uint32_t stop_count, RantColor *out, uint32_t count){
+    uint32_t i, k;
+    double at;
+    if (stop_count < 2 || count < 2 || !stops || !out) return RANT_MATH_ERR_ARGUMENT;
+    for (i = 0; i < count; i++){
+        at = (double)i * (stop_count - 1) / (count - 1);
+        k = (uint32_t)at;
+        if (k > stop_count - 2) k = stop_count - 2;
+        out[i] = rant_color_mix(stops[k], stops[k + 1], at - k);
+    }
+    return RANT_MATH_OK;
 }

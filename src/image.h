@@ -38,9 +38,10 @@ RANT_MATH_API RantMathResult rant_image_value_at(const RantImageView *image, uin
 /* Into dst's format at the same size, between Mono8, Rgb8, Rgba8, Bgr8, Yuyv and Nv12, or a
  * copy in any raw format. Mono8 from colour is BT.601 luma, and alpha is dropped or opaque. */
 RANT_MATH_API RantMathResult rant_image_convert(const RantImageView *src, RantImageView *dst);
-/* Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes. */
-RANT_MATH_API RantMathResult rant_image_colorize(const RantImageView *src, double low, double high, RantColormap map,
-                                                 RantImageView *dst);
+/* Mono8, Mono16 or Monof32 values from low to high through a ramp, such as rant_colormap_ramp gives, into a
+ * format convert writes. NaN, and 0 in Mono16 as depth cameras send it, is no reading and comes out transparent. */
+RANT_MATH_API RantMathResult rant_image_colorize(const RantImageView *src, double low, double high, const RantColor *ramp,
+                                                 uint32_t ramp_count, RantImageView *dst);
 /* A view of the part from x, y on, sharing image's data. Not Nv12, and Yuyv keeps whole pairs. */
 RANT_MATH_API RantMathResult rant_image_crop(const RantImageView *image, uint32_t x, uint32_t y, uint32_t width,
                                              uint32_t height, RantImageView *out);

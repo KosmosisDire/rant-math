@@ -58,7 +58,7 @@ static void linear(void){
 
 static void colormaps(void){
     int m, i, bad = 0;
-    for (m = 0; m < 6; m++)
+    for (m = 0; m < 13; m++)
         for (i = 0; i < REF_MAP_CASES; i++){
             const double *want = REF_MAP + 3 * (m * REF_MAP_CASES + i);
             RantColor got = rant_colormap_at((RantColormap)m, REF_MAP_T[i]);
@@ -69,10 +69,34 @@ static void colormaps(void){
     CHECK(same_color(rant_colormap_at(RANT_COLORMAP_TURBO, HUGE_VAL), rant_colormap_at(RANT_COLORMAP_TURBO, 1.0))
           && same_color(rant_colormap_at(RANT_COLORMAP_TURBO, -HUGE_VAL), rant_colormap_at(RANT_COLORMAP_TURBO, 0.0)),
           "infinities take the ends, as matplotlib's over and under do");
-    CHECK(same_color(rant_colormap_at((RantColormap)6, 0.5), rant_color(0, 0, 0, 0)), "an unknown map is transparent");
+    CHECK(same_color(rant_colormap_at((RantColormap)13, 0.5), rant_color(0, 0, 0, 0)), "an unknown map is transparent");
     CHECK(same_color(rant_colormap_at((RantColormap)-1, 0.5), rant_color(0, 0, 0, 0)), "a negative map is transparent");
     for (i = 0; i < 256; i++)
         CHECK(rant_colormap_at(RANT_COLORMAP_GRAY, i / 255.0).r == i, "gray step %d is its own byte", i);
+    CHECK(same_color(rant_colormap_at(RANT_COLORMAP_TWILIGHT, 0.0), rant_colormap_at(RANT_COLORMAP_TWILIGHT, 1.0)), "twilight ends where it starts");
+    CHECK(rant_colormap_at(RANT_COLORMAP_HSV, 1.0).r == 255 && rant_colormap_at(RANT_COLORMAP_HSV, 1.0).b < 32, "hsv comes round to red");
+}
+
+static void ramps(void){
+    RantColor out[256], stops[3];
+    int m, i, bad = 0;
+    for (m = 0; m < 13; m++){
+        CHECK(rant_colormap_ramp((RantColormap)m, out, 256) == RANT_MATH_OK, "map %d as a ramp", m);
+        for (i = 0; i < 256; i++) bad += !same_color(out[i], rant_colormap_at((RantColormap)m, i / 255.0));
+    }
+    CHECK(bad == 0, "%d steps of a 256 ramp are not their map's own", bad);
+    CHECK(rant_colormap_ramp(RANT_COLORMAP_JET, out, 2) == RANT_MATH_OK && same_color(out[0], rant_colormap_at(RANT_COLORMAP_JET, 0.0)) &&
+          same_color(out[1], rant_colormap_at(RANT_COLORMAP_JET, 1.0)), "two steps are the ends");
+    CHECK(rant_colormap_ramp(RANT_COLORMAP_JET, out, 1) == RANT_MATH_ERR_ARGUMENT, "one step is no ramp");
+    CHECK(rant_colormap_ramp((RantColormap)13, out, 8) == RANT_MATH_ERR_ARGUMENT, "no such map");
+    stops[0] = rant_color(0, 0, 255, 255); stops[1] = rant_color(255, 255, 255, 255); stops[2] = rant_color(255, 0, 0, 0);
+    CHECK(rant_color_ramp(stops, 3, out, 5) == RANT_MATH_OK, "a ramp through three stops");
+    CHECK(same_color(out[0], stops[0]) && same_color(out[2], stops[1]) && same_color(out[4], stops[2]), "each stop where it falls");
+    CHECK(same_color(out[1], rant_color_mix(stops[0], stops[1], 0.5)) && same_color(out[3], rant_color_mix(stops[1], stops[2], 0.5)),
+          "mixed between them");
+    CHECK(rant_color_ramp(stops, 2, out, 2) == RANT_MATH_OK && same_color(out[1], stops[1]), "two stops, two steps");
+    CHECK(rant_color_ramp(stops, 1, out, 4) == RANT_MATH_ERR_ARGUMENT && rant_color_ramp(stops, 3, out, 1) == RANT_MATH_ERR_ARGUMENT,
+          "at least two stops and two steps");
 }
 
 void test_color(void){
@@ -80,4 +104,5 @@ void test_color(void){
     mix();
     linear();
     colormaps();
+    ramps();
 }

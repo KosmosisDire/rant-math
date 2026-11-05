@@ -57,6 +57,13 @@ namespace Rant.Math
         Inferno = 3,
         Magma = 4,
         Turbo = 5,
+        Cividis = 6,
+        Jet = 7,
+        Hot = 8,
+        Bone = 9,
+        Coolwarm = 10,
+        Twilight = 11,
+        Hsv = 12,
     }
 
     public enum ImageFilter
@@ -851,6 +858,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Float4 rant_color_to_linear(Color c);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Color rant_color_from_linear(Float4 linear);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Color rant_colormap_at(int map, double t);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_colormap_ramp(int map, Color* @out, uint count);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_color_ramp(Color* stops, uint stop_count, Color* @out, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_camera_project(RawCameraIntrinsics* camera, Double3 point, Double2* pixel);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_camera_project_points(RawCameraIntrinsics* camera, Double3* points, Double2* pixels, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_camera_ray(RawCameraIntrinsics* camera, Double2 pixel, Ray* @out);
@@ -864,7 +873,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_color_at(RawImageView* image, uint x, uint y, Color* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_value_at(RawImageView* image, uint x, uint y, double* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_convert(RawImageView* src, RawImageView* dst);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_colorize(RawImageView* src, double low, double high, int map, RawImageView* dst);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_colorize(RawImageView* src, double low, double high, Color* ramp, uint ramp_count, RawImageView* dst);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_crop(RawImageView* image, uint x, uint y, uint width, uint height, RawImageView* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_flip_horizontal(RawImageView* src, RawImageView* dst);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_flip_vertical(RawImageView* src, RawImageView* dst);
@@ -4379,6 +4388,28 @@ namespace Rant.Math
             return r;
         }
 
+        public static unsafe Color[] ColormapRamp(Colormap map, uint count)
+        {
+            var o0 = new Color[count];
+            fixed (Color* p0 = o0)
+            {
+                Impl.Check(Native.rant_colormap_ramp((int)map, p0, count));
+                return o0;
+            }
+        }
+
+        /// <summary>At least two of each.</summary>
+        public static unsafe Color[] ColorRamp(ReadOnlySpan<Color> stops, uint count)
+        {
+            var o0 = new Color[count];
+            fixed (Color* c_stops = stops)
+            fixed (Color* p0 = o0)
+            {
+                Impl.Check(Native.rant_color_ramp(c_stops, (uint)stops.Length, p0, count));
+                return o0;
+            }
+        }
+
         /// <summary>Where a point in the camera's frame lands, maybe off the image.</summary>
         public static unsafe Double2 CameraProject(CameraIntrinsics camera, Double3 point)
         {
@@ -4507,16 +4538,16 @@ namespace Rant.Math
             }
         }
 
-        /// <summary>Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes.</summary>
-        public static unsafe Image ImageColorize(Image src, double low, double high, Colormap map, ImageFormat format)
+        public static unsafe Image ImageColorize(Image src, double low, double high, ReadOnlySpan<Color> ramp, ImageFormat format)
         {
             var o0 = Impl.NewImage(format, src.Width, src.Height);
             fixed (byte* c_src_d = src.Data)
+            fixed (Color* c_ramp = ramp)
             fixed (byte* p0 = o0.Data)
             {
                 var c_src = Impl.Image(src, c_src_d);
                 var c0 = Impl.Image(o0, p0);
-                Impl.Check(Native.rant_image_colorize(&c_src, low, high, (int)map, &c0));
+                Impl.Check(Native.rant_image_colorize(&c_src, low, high, c_ramp, (uint)ramp.Length, &c0));
                 return o0;
             }
         }

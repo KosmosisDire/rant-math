@@ -437,6 +437,8 @@ _rm_color_mix
 _rm_color_to_linear
 _rm_color_from_linear
 _rm_colormap_at
+_rm_colormap_ramp
+_rm_color_ramp
 _rm_camera_project
 _rm_camera_project_points
 _rm_camera_ray

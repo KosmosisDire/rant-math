@@ -4,7 +4,7 @@ Working with what cameras, lidars and detectors give.
 
 | Header | For |
 |---|---|
-| `color.h` | sRGB colours: mix through OKLab, to and from linear, colormaps |
+| `color.h` | sRGB colours: mix through OKLab, to and from linear, colormaps and ramps |
 | `camera.h` | a camera's pinhole and lens: project, ray, unproject, scale, crop, field of view |
 | `image.h` | raw images: convert, colorize, crop, flip, rotate, resize, undistort, draw |
 | `cloud.h` | point clouds in PCL's layout, laser scans and depth images to points |
@@ -23,6 +23,20 @@ Working with what cameras, lidars and detectors give.
 - `RantImageView` points at your pixels: width, height, stride, format, data and size.
 - Yuyv and Nv12 are BT.601 limited range. Mono16 and Monof32 are little endian.
 - Depth is Mono16 millimeters or Monof32 meters, along the view.
+
+## Colours
+
+```c
+RantColor ramp[256];
+rant_colormap_ramp(RANT_COLORMAP_TURBO, ramp, 256);
+rant_image_colorize(&depth, 0.3, 5.0, ramp, 256, &picture);
+```
+
+- The colormaps are matplotlib's: gray, viridis, plasma, inferno, magma, turbo, cividis, jet, hot,
+  bone, coolwarm, twilight and hsv.
+- `rant_color_ramp` makes your own ramp through stops, mixed through OKLab.
+- `rant_image_colorize` takes Mono8, Mono16 or Monof32 through any ramp from low to high. NaN, and
+  0 in Mono16, is no reading and comes out transparent.
 
 ## Point clouds
 

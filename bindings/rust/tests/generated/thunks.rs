@@ -508,7 +508,7 @@ impl Json for AxesPreset {
 }
 
 impl Json for Colormap {
-    fn get(v: &Value) -> Self { match v.as_i64().unwrap() { 0 => Colormap::Gray, 1 => Colormap::Viridis, 2 => Colormap::Plasma, 3 => Colormap::Inferno, 4 => Colormap::Magma, 5 => Colormap::Turbo, x => panic!("no Colormap {x}") } }
+    fn get(v: &Value) -> Self { match v.as_i64().unwrap() { 0 => Colormap::Gray, 1 => Colormap::Viridis, 2 => Colormap::Plasma, 3 => Colormap::Inferno, 4 => Colormap::Magma, 5 => Colormap::Turbo, 6 => Colormap::Cividis, 7 => Colormap::Jet, 8 => Colormap::Hot, 9 => Colormap::Bone, 10 => Colormap::Coolwarm, 11 => Colormap::Twilight, 12 => Colormap::Hsv, x => panic!("no Colormap {x}") } }
     fn put(&self) -> Value { Value::from(*self as i64) }
 }
 
@@ -953,6 +953,8 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "color_to_linear" => { let x0: Color = Json::get(&a[0]); let mut out = rant_math::color_to_linear(x0).put();  let _ = &mut out; Ok(out) }
         "color_from_linear" => { let x0: Float4 = Json::get(&a[0]); let mut out = rant_math::color_from_linear(x0).put();  let _ = &mut out; Ok(out) }
         "colormap_at" => { let x0: Colormap = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::colormap_at(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "colormap_ramp" => { let x0: Colormap = Json::get(&a[0]); let x1: u32 = Json::get(&a[1]); let mut out = rant_math::colormap_ramp(x0, x1)?.put();  let _ = &mut out; Ok(out) }
+        "color_ramp" => { let x0: Vec<Color> = Json::get(&a[0]); let x1: u32 = Json::get(&a[1]); let mut out = rant_math::color_ramp(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
         "camera_project" => { let x0: CameraIntrinsics = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::camera_project(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
         "camera_project_points" => { let x0: CameraIntrinsics = Json::get(&a[0]); let x1: Vec<Double3> = Json::get(&a[1]); let mut out = rant_math::camera_project_points(&x0, &x1)?.put();  let _ = &mut out; Ok(out) }
         "camera_ray" => { let x0: CameraIntrinsics = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::camera_ray(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
@@ -966,7 +968,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "image_color_at" => { let x0 = get_image(&a[0]); let x1: u32 = Json::get(&a[1]); let x2: u32 = Json::get(&a[2]); let mut out = rant_math::image_color_at(&x0, x1, x2)?.put();  let _ = &mut out; Ok(out) }
         "image_value_at" => { let x0 = get_image(&a[0]); let x1: u32 = Json::get(&a[1]); let x2: u32 = Json::get(&a[2]); let mut out = rant_math::image_value_at(&x0, x1, x2)?.put();  let _ = &mut out; Ok(out) }
         "image_convert" => { let x0 = get_image(&a[0]); let x1: ImageFormat = Json::get(&a[1]); let mut out = rant_math::image_convert(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
-        "image_colorize" => { let x0 = get_image(&a[0]); let x1: f64 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let x3: Colormap = Json::get(&a[3]); let x4: ImageFormat = Json::get(&a[4]); let mut out = rant_math::image_colorize(&x0, x1, x2, x3, x4)?.put();  let _ = &mut out; Ok(out) }
+        "image_colorize" => { let x0 = get_image(&a[0]); let x1: f64 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let x3: Vec<Color> = Json::get(&a[3]); let x4: ImageFormat = Json::get(&a[4]); let mut out = rant_math::image_colorize(&x0, x1, x2, &x3, x4)?.put();  let _ = &mut out; Ok(out) }
         "image_crop" => { let x0 = get_image(&a[0]); let x1: u32 = Json::get(&a[1]); let x2: u32 = Json::get(&a[2]); let x3: u32 = Json::get(&a[3]); let x4: u32 = Json::get(&a[4]); let mut out = rant_math::image_crop(&x0, x1, x2, x3, x4)?.put();  let _ = &mut out; Ok(out) }
         "image_flip_horizontal" => { let x0 = get_image(&a[0]); let mut out = rant_math::image_flip_horizontal(&x0)?.put();  let _ = &mut out; Ok(out) }
         "image_flip_vertical" => { let x0 = get_image(&a[0]); let mut out = rant_math::image_flip_vertical(&x0)?.put();  let _ = &mut out; Ok(out) }

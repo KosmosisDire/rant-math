@@ -618,12 +618,22 @@ def image_fn(extra, dst=None):
         src = Input("src", "image", "RantImageView")
         f.inputs = [src]
         f.args = [Arg("image", src)]
-        for p in f.params[1:-1]:
-            if p.pointer:
-                raise ValueError(f.c)
+        ps = f.params[1:-1]
+        k = 0
+        while k < len(ps):
+            p = ps[k]
+            if p.pointer:                                            # const T *list, uint32_t count
+                if not p.const or k + 1 >= len(ps) or ps[k + 1].type != "uint32_t":
+                    raise ValueError(f.c)
+                inp = Input(p.name, "list", p.type)
+                f.inputs.append(inp)
+                f.args += [Arg("list_ptr", inp), Arg("list_count", inp)]
+                k += 2
+                continue
             inp = Input(p.name, "value", p.type)
             f.inputs.append(inp)
             f.args.append(Arg("value", inp))
+            k += 1
         out = dst() if dst else image_out()
         for e in extra:
             f.inputs.append(e)

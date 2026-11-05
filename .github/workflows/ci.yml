@@ -285,7 +285,7 @@ jobs:
           VERSION="$(tr -d '\r\n' < VERSION)"
           mkdir -p release
           cp build/dist/rant_math.h build/dist/rant_math.c build/dist/rant_math.hpp build/dist/rant_math.cpp release/
-          cp licenses/turbo-apache-2.0.txt release/
+          cp licenses/*.txt release/
           cp dist/Rant.Math.*.nupkg dist/rant-math-*.tgz artifacts/wheels-*/*.whl release/
           # the skill rant add offers, its files at the zip's top
           (cd skill && zip -r "../release/math-$VERSION-skill.zip" .)

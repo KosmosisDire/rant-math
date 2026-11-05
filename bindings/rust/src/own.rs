@@ -58,6 +58,13 @@ pub enum Colormap {
     Inferno = 3,
     Magma = 4,
     Turbo = 5,
+    Cividis = 6,
+    Jet = 7,
+    Hot = 8,
+    Bone = 9,
+    Coolwarm = 10,
+    Twilight = 11,
+    Hsv = 12,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]

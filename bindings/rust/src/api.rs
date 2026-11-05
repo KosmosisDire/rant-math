@@ -2540,6 +2540,19 @@ pub fn colormap_at(map: Colormap, t: f64) -> Color {
     r
 }
 
+pub fn colormap_ramp(map: Colormap, count: u32) -> Result<Vec<Color>, MathError> {
+    let mut o0 = vec![Color::default(); count as usize];
+    check(unsafe { ffi::rant_colormap_ramp(map as i32, o0.as_mut_ptr(), count) })?;
+    Ok(o0)
+}
+
+/// At least two of each.
+pub fn color_ramp(stops: &[Color], count: u32) -> Result<Vec<Color>, MathError> {
+    let mut o0 = vec![Color::default(); count as usize];
+    check(unsafe { ffi::rant_color_ramp(stops.as_ptr(), len32(stops.len()), o0.as_mut_ptr(), count) })?;
+    Ok(o0)
+}
+
 /// Where a point in the camera's frame lands, maybe off the image.
 pub fn camera_project(camera: &CameraIntrinsics, point: Double3) -> Result<Double2, MathError> {
     let mut o0 = Double2::default();
@@ -2636,13 +2649,12 @@ pub fn image_convert<'a>(src: impl Into<ImageRef<'a>>, format: ImageFormat) -> R
     Ok(o0)
 }
 
-/// Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes.
-pub fn image_colorize<'a>(src: impl Into<ImageRef<'a>>, low: f64, high: f64, map: Colormap, format: ImageFormat) -> Result<Image, MathError> {
+pub fn image_colorize<'a>(src: impl Into<ImageRef<'a>>, low: f64, high: f64, ramp: &[Color], format: ImageFormat) -> Result<Image, MathError> {
     let src: ImageRef<'a> = src.into();
     let c_src = src.raw();
     let mut o0 = new_image(format, src.width, src.height);
     let mut c0 = ImageMut::from(&mut o0).raw();
-    check(unsafe { ffi::rant_image_colorize(&c_src, low, high, map as i32, &mut c0) })?;
+    check(unsafe { ffi::rant_image_colorize(&c_src, low, high, ramp.as_ptr(), len32(ramp.len()), &mut c0) })?;
     Ok(o0)
 }
 

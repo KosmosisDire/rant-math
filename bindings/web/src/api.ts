@@ -9,9 +9,9 @@ export type AxesPreset = "Unity" | "Unreal" | "Godot" | "Bevy" | "Gltf" | "Blend
 const AxesPresetValues: Record<string, number> = { Unity: 0, Unreal: 1, Godot: 2, Bevy: 3, Gltf: 4, Blender: 5, OpencvCamera: 6, OpenglCamera: 7, Ned: 8, Frd: 9 };
 const AxesPresetNames: Record<number, AxesPreset> = { 0: "Unity", 1: "Unreal", 2: "Godot", 3: "Bevy", 4: "Gltf", 5: "Blender", 6: "OpencvCamera", 7: "OpenglCamera", 8: "Ned", 9: "Frd" };
 
-export type Colormap = "Gray" | "Viridis" | "Plasma" | "Inferno" | "Magma" | "Turbo";
-const ColormapValues: Record<string, number> = { Gray: 0, Viridis: 1, Plasma: 2, Inferno: 3, Magma: 4, Turbo: 5 };
-const ColormapNames: Record<number, Colormap> = { 0: "Gray", 1: "Viridis", 2: "Plasma", 3: "Inferno", 4: "Magma", 5: "Turbo" };
+export type Colormap = "Gray" | "Viridis" | "Plasma" | "Inferno" | "Magma" | "Turbo" | "Cividis" | "Jet" | "Hot" | "Bone" | "Coolwarm" | "Twilight" | "Hsv";
+const ColormapValues: Record<string, number> = { Gray: 0, Viridis: 1, Plasma: 2, Inferno: 3, Magma: 4, Turbo: 5, Cividis: 6, Jet: 7, Hot: 8, Bone: 9, Coolwarm: 10, Twilight: 11, Hsv: 12 };
+const ColormapNames: Record<number, Colormap> = { 0: "Gray", 1: "Viridis", 2: "Plasma", 3: "Inferno", 4: "Magma", 5: "Turbo", 6: "Cividis", 7: "Jet", 8: "Hot", 9: "Bone", 10: "Coolwarm", 11: "Twilight", 12: "Hsv" };
 
 export type ImageFormat = "Mono8" | "Mono16" | "Rgb8" | "Rgba8" | "Bgr8" | "Yuyv" | "Nv12" | "Monof32" | "Jpeg" | "Png";
 const ImageFormatValues: Record<string, number> = { Mono8: 0, Mono16: 1, Rgb8: 2, Rgba8: 3, Bgr8: 4, Yuyv: 5, Nv12: 6, Monof32: 7, Jpeg: 16, Png: 17 };
@@ -5470,6 +5470,24 @@ export function colormapAt(map: Colormap, t: number): Color {
     return r_RantColor(ret);
 }
 
+export function colormapRamp(map: Colormap, count: number): Color[] {
+    begin();
+    const s0 = count; const o0 = alloc(4 * s0);
+    check(wasm._rm_colormap_ramp(enumIn(ColormapValues, map), o0, count));
+    refresh();
+    return listOut(o0, s0, 4, r_RantColor, 0, false);
+}
+
+/** At least two of each. */
+export function colorRamp(stops: readonly Color[], count: number): Color[] {
+    begin();
+    const n_stops = countOf(stops, 0); const c_stops = listIn(stops, n_stops, 4, w_RantColor);
+    const s0 = count; const o0 = alloc(4 * s0);
+    check(wasm._rm_color_ramp(c_stops, n_stops, o0, count));
+    refresh();
+    return listOut(o0, s0, 4, r_RantColor, 0, false);
+}
+
 /** Where a point in the camera's frame lands, maybe off the image. */
 export function cameraProject(camera: CameraIntrinsics, point: Double3): Double2 {
     begin();
@@ -5598,12 +5616,12 @@ export function imageConvert(src: Image, format: ImageFormat): Image {
     return o0.image();
 }
 
-/** Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes. */
-export function imageColorize(src: Image, low: number, high: number, map: Colormap, format: ImageFormat): Image {
+export function imageColorize(src: Image, low: number, high: number, ramp: readonly Color[], format: ImageFormat): Image {
     begin();
     const c_src = imageIn(src);
+    const n_ramp = countOf(ramp, 0); const c_ramp = listIn(ramp, n_ramp, 4, w_RantColor);
     const o0 = imageOut(format, src.width, src.height);
-    check(wasm._rm_image_colorize(c_src, low, high, enumIn(ColormapValues, map), o0.view));
+    check(wasm._rm_image_colorize(c_src, low, high, c_ramp, n_ramp, o0.view));
     refresh();
     return o0.image();
 }

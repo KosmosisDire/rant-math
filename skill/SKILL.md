@@ -59,6 +59,7 @@ Double3 back = pose_inverse(pose) * Double3{ 1, 2, 3 };
 | Near points | `kdtree_create`, `kdtree_nearest`, `kdtree_within` |
 | Cameras | `camera_project`, `camera_ray`, `camera_unproject`, `image_depth_points` |
 | Images | `image_convert`, `image_resize`, `image_rotate`, `image_colorize`, `image_undistort`, `image_draw` |
+| Colour a depth image | `colormap_ramp(Turbo, 256)` or `color_ramp(stops, 256)`, then `image_colorize` |
 | Dense matrices | `matrix_solve`, `matrix_svd`, `matrix_eigen`, `matrix_inverse` |
 
 ## Keep in mind

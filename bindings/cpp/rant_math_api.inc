@@ -46,7 +46,14 @@ enum class Colormap : int {
     Plasma = 2,
     Inferno = 3,
     Magma = 4,
-    Turbo = 5
+    Turbo = 5,
+    Cividis = 6,
+    Jet = 7,
+    Hot = 8,
+    Bone = 9,
+    Coolwarm = 10,
+    Twilight = 11,
+    Hsv = 12
 };
 
 enum class ImageFilter : int {
@@ -2580,6 +2587,19 @@ inline Color colormap_at(Colormap map, double t) {
     return impl::bits<Color>(r);
 }
 
+inline std::vector<Color> colormap_ramp(Colormap map, uint32_t count) {
+    std::vector<Color> o0(count);
+    impl::check(detail::rant_colormap_ramp(static_cast<detail::RantColormap>(map), impl::mut<detail::RantColor>(o0.data()), count));
+    return o0;
+}
+
+/* At least two of each. */
+inline std::vector<Color> color_ramp(Span<const Color> stops, uint32_t count) {
+    std::vector<Color> o0(count);
+    impl::check(detail::rant_color_ramp(impl::ptr<detail::RantColor>(stops), impl::count(stops.size()), impl::mut<detail::RantColor>(o0.data()), count));
+    return o0;
+}
+
 /* Where a point in the camera's frame lands, maybe off the image. */
 inline Double2 camera_project(const CameraIntrinsics &camera, Double3 point) {
     Double2 o0{};
@@ -2671,12 +2691,11 @@ inline Image image_convert(const ImageView &src, ImageFormat format) {
     return o0;
 }
 
-/* Mono8, Mono16 or Monof32 values from low to high through a map, into a format convert writes. */
-inline Image image_colorize(const ImageView &src, double low, double high, Colormap map, ImageFormat format) {
+inline Image image_colorize(const ImageView &src, double low, double high, Span<const Color> ramp, ImageFormat format) {
     detail::RantImageView c_src = impl::image(src);
     Image o0 = impl::image_out(format, src.width, src.height);
     detail::RantImageView c_o0 = impl::image(MutableImageView(o0));
-    impl::check(detail::rant_image_colorize(&c_src, low, high, static_cast<detail::RantColormap>(map), &c_o0));
+    impl::check(detail::rant_image_colorize(&c_src, low, high, impl::ptr<detail::RantColor>(ramp), impl::count(ramp.size()), &c_o0));
     return o0;
 }
 

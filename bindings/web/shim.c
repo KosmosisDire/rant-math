@@ -704,6 +704,8 @@ EMSCRIPTEN_KEEPALIVE void rm_color_mix(RantColor *ret, const RantColor *a, const
 EMSCRIPTEN_KEEPALIVE void rm_color_to_linear(RantFloat4 *ret, const RantColor *c) { *ret = rant_color_to_linear(*c); }
 EMSCRIPTEN_KEEPALIVE void rm_color_from_linear(RantColor *ret, const RantFloat4 *linear) { *ret = rant_color_from_linear(*linear); }
 EMSCRIPTEN_KEEPALIVE void rm_colormap_at(RantColor *ret, RantColormap map, double t) { *ret = rant_colormap_at(map, t); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_colormap_ramp(RantColormap map, RantColor *out, uint32_t count) { return rant_colormap_ramp(map, out, count); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_color_ramp(const RantColor *stops, uint32_t stop_count, RantColor *out, uint32_t count) { return rant_color_ramp(stops, stop_count, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_camera_project(const RantCameraIntrinsics *camera, const RantDouble3 *point, RantDouble2 *pixel) { return rant_camera_project(camera, *point, pixel); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_camera_project_points(const RantCameraIntrinsics *camera, const RantDouble3 *points, RantDouble2 *pixels, uint32_t count) { return rant_camera_project_points(camera, points, pixels, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_camera_ray(const RantCameraIntrinsics *camera, const RantDouble2 *pixel, RantRay *out) { return rant_camera_ray(camera, *pixel, out); }
@@ -717,7 +719,7 @@ EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_check(const RantImageView *image) {
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_color_at(const RantImageView *image, uint32_t x, uint32_t y, RantColor *out) { return rant_image_color_at(image, x, y, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_value_at(const RantImageView *image, uint32_t x, uint32_t y, double *out) { return rant_image_value_at(image, x, y, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_convert(const RantImageView *src, RantImageView *dst) { return rant_image_convert(src, dst); }
-EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_colorize(const RantImageView *src, double low, double high, RantColormap map, RantImageView *dst) { return rant_image_colorize(src, low, high, map, dst); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_colorize(const RantImageView *src, double low, double high, const RantColor *ramp, uint32_t ramp_count, RantImageView *dst) { return rant_image_colorize(src, low, high, ramp, ramp_count, dst); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_crop(const RantImageView *image, uint32_t x, uint32_t y, uint32_t width, uint32_t height, RantImageView *out) { return rant_image_crop(image, x, y, width, height, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_flip_horizontal(const RantImageView *src, RantImageView *dst) { return rant_image_flip_horizontal(src, dst); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_flip_vertical(const RantImageView *src, RantImageView *dst) { return rant_image_flip_vertical(src, dst); }

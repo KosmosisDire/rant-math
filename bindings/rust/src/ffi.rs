@@ -629,6 +629,8 @@ unsafe extern "C" {
     pub fn rant_color_to_linear(c: Color) -> Float4;
     pub fn rant_color_from_linear(linear: Float4) -> Color;
     pub fn rant_colormap_at(map: c_int, t: f64) -> Color;
+    pub fn rant_colormap_ramp(map: c_int, out: *mut Color, count: u32) -> c_int;
+    pub fn rant_color_ramp(stops: *const Color, stop_count: u32, out: *mut Color, count: u32) -> c_int;
     pub fn rant_camera_project(camera: *const CameraIntrinsics, point: Double3, pixel: *mut Double2) -> c_int;
     pub fn rant_camera_project_points(camera: *const CameraIntrinsics, points: *const Double3, pixels: *mut Double2, count: u32) -> c_int;
     pub fn rant_camera_ray(camera: *const CameraIntrinsics, pixel: Double2, out: *mut Ray) -> c_int;
@@ -642,7 +644,7 @@ unsafe extern "C" {
     pub fn rant_image_color_at(image: *const RawImageView, x: u32, y: u32, out: *mut Color) -> c_int;
     pub fn rant_image_value_at(image: *const RawImageView, x: u32, y: u32, out: *mut f64) -> c_int;
     pub fn rant_image_convert(src: *const RawImageView, dst: *mut RawImageView) -> c_int;
-    pub fn rant_image_colorize(src: *const RawImageView, low: f64, high: f64, map: c_int, dst: *mut RawImageView) -> c_int;
+    pub fn rant_image_colorize(src: *const RawImageView, low: f64, high: f64, ramp: *const Color, ramp_count: u32, dst: *mut RawImageView) -> c_int;
     pub fn rant_image_crop(image: *const RawImageView, x: u32, y: u32, width: u32, height: u32, out: *mut RawImageView) -> c_int;
     pub fn rant_image_flip_horizontal(src: *const RawImageView, dst: *mut RawImageView) -> c_int;
     pub fn rant_image_flip_vertical(src: *const RawImageView, dst: *mut RawImageView) -> c_int;
