@@ -320,6 +320,7 @@ unsafe extern "C" {
     pub fn rant_covariance3_ellipsoid(c: *const Covariance3, deviations: f64, turn: *mut Quaternion, radii: *mut Double3) -> c_int;
     pub fn rant_inertia_transform(i: Inertia, p: Pose) -> Inertia;
     pub fn rant_inertia_add(a: Inertia, b: Inertia) -> Inertia;
+    pub fn rant_inertia_box(i: Inertia, out: *mut OrientedBox) -> c_int;
     pub fn rant_axes_of(preset: c_int) -> Axes;
     pub fn rant_axes_make(x: i32, y: i32, z: i32, scale: f64, out: *mut Axes) -> c_int;
     pub fn rant_axes_point_to(axes: Axes, point: Double3) -> Double3;

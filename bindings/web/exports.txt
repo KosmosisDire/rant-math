@@ -129,6 +129,7 @@ _rm_covariance6_rotate
 _rm_covariance3_ellipsoid
 _rm_inertia_transform
 _rm_inertia_add
+_rm_inertia_box
 _rm_axes_of
 _rm_axes_make
 _rm_axes_point_to

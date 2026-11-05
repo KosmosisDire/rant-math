@@ -129,6 +129,7 @@ export const NAMES = [
   {"name": "covariance3Ellipsoid", "takes": ["c", "deviations"], "words": "The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes, longest first, and radii holds its half lengths along them"},
   {"name": "inertiaTransform", "takes": ["i", "p"], "words": "The body measured in p's parent: its center moved and its tensor turned"},
   {"name": "inertiaAdd", "takes": ["a", "b"], "words": "Two bodies in one frame joined into one, about their shared center of mass"},
+  {"name": "inertiaBox", "takes": ["i"], "words": "The box of even density with i's mass and inertia: at its center of mass, along its principal axes, shortest side first"},
   {"name": "axesOf", "takes": ["preset"], "words": "axes of"},
   {"name": "axesMake", "takes": ["x", "y", "z", "scale"], "words": "Any other tool's axes"},
   {"name": "axesPointTo", "takes": ["axes", "point"], "words": "A point or length vector is scaled, a direction or normal is not"},

@@ -8,7 +8,7 @@ Where things are and how they move.
 | `rotation.h` | quaternions, Euler angles, axis and angle, rotation vectors, 2D angles |
 | `matrix.h` | Matrix3x3, Matrix4x4 and any dense matrix: solve, SVD, eigen, Cholesky |
 | `pose.h` | poses in 3D and 2D: compose, invert, apply, interpolate, teach from points |
-| `motion.h` | twists, wrenches, covariances and inertia moved between frames, a covariance's ellipsoid |
+| `motion.h` | twists, wrenches, covariances and inertia moved between frames, a covariance's ellipsoid, a body's box |
 | `axes.h` | other tools' axes: Unity, Unreal, Godot, glTF, Blender, OpenCV, NED |
 | `geo.h` | latitude, longitude and altitude to and from ECEF and local east north up |
 
@@ -55,6 +55,7 @@ rant_covariance3_ellipsoid(&fix.covariance, 2.0, &axes, &radii);   /* two standa
 - A Gaussian error lies inside 1 standard deviation 20% of the time in 3D, 39% in 2D, 68% in 1D. 95% needs
   2.80 in 3D, 2.45 in 2D and 1.96 in 1D.
 - A flat covariance, with no spread along z, gives a last radius of 0 and keeps its plane.
+- `rant_inertia_box` gives the box of even density a body turns like, along its principal axes, to draw it.
 
 ## Other tools' axes
 

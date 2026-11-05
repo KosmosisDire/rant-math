@@ -588,6 +588,7 @@ EXPLICIT = {
     "detections3d_suppress": [[DETS3[0], 0.5], [DETS3[0], 0.95], [DETS3[1], 0.5], [DETS3[2], 0.5]],
     "covariance3_ellipsoid": [[POOLS["RantCovariance3"][0], 2.0], [POOLS["RantCovariance3"][1], 0.5],
                               [m3([[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]), 1.0], [POOLS["RantCovariance3"][0], -1.0]],
+    "inertia_box": [[POOLS["RantInertia"][0]], [POOLS["RantInertia"][1]], [POOLS["RantInertia"][2]], [{**POOLS["RantInertia"][0], "mass": 0.0}]],
     "shape_mesh": [[s, seg, crease] for s, seg, crease in zip(SHAPES, [0, 8, 8, 8, 6, 6, 0, 0, 0, 0, 0, 0, 0],
                                                               [0.5, 0.0, 0.5, 4.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 4.0, 0.5])]
                   + [[SHAPES[2], 2, 0.5], [SHAPES[0], 0, -1.0]],

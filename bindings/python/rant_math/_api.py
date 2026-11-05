@@ -70,6 +70,9 @@ class _RantCovariance6(Structure):
 class _RantInertia(Structure):
     _fields_ = [("mass", c_double), ("center", _RantDouble3), ("ixx", c_double), ("ixy", c_double), ("ixz", c_double), ("iyy", c_double), ("iyz", c_double), ("izz", c_double)]
 
+class _RantOrientedBox(Structure):
+    _fields_ = [("pose", _RantPose), ("size", _RantDouble3)]
+
 class _RantAxes(Structure):
     _fields_ = [("x", c_int8), ("y", c_int8), ("z", c_int8), ("scale", c_double)]
 
@@ -120,9 +123,6 @@ class _RantCapsule2D(Structure):
 
 class _RantSurfacePoint(Structure):
     _fields_ = [("point", _RantDouble3), ("normal", _RantDouble3)]
-
-class _RantOrientedBox(Structure):
-    _fields_ = [("pose", _RantPose), ("size", _RantDouble3)]
 
 class _RantSphere(Structure):
     _fields_ = [("center", _RantDouble3), ("radius", c_double)]
@@ -437,6 +437,12 @@ def _c_Inertia(v):
 def _py_Inertia(c):
     return Inertia(c.mass, _py_Double3(c.center), c.ixx, c.ixy, c.ixz, c.iyy, c.iyz, c.izz)
 
+def _c_OrientedBox(v):
+    return _RantOrientedBox(_c_Pose(v.pose), _c_Double3(v.size))
+
+def _py_OrientedBox(c):
+    return OrientedBox(_py_Pose(c.pose), _py_Double3(c.size))
+
 def _c_Axes(v):
     return _RantAxes(v.x, v.y, v.z, v.scale)
 
@@ -538,12 +544,6 @@ def _c_SurfacePoint(v):
 
 def _py_SurfacePoint(c):
     return SurfacePoint(_py_Double3(c.point), _py_Double3(c.normal))
-
-def _c_OrientedBox(v):
-    return _RantOrientedBox(_c_Pose(v.pose), _c_Double3(v.size))
-
-def _py_OrientedBox(c):
-    return OrientedBox(_py_Pose(c.pose), _py_Double3(c.size))
 
 def _c_Sphere(v):
     return _RantSphere(_c_Double3(v.center), v.radius)
@@ -860,6 +860,8 @@ _lib.rant_inertia_transform.argtypes = [_RantInertia, _RantPose]
 _lib.rant_inertia_transform.restype = _RantInertia
 _lib.rant_inertia_add.argtypes = [_RantInertia, _RantInertia]
 _lib.rant_inertia_add.restype = _RantInertia
+_lib.rant_inertia_box.argtypes = [_RantInertia, POINTER(_RantOrientedBox)]
+_lib.rant_inertia_box.restype = c_int
 _lib.rant_axes_of.argtypes = [c_int]
 _lib.rant_axes_of.restype = _RantAxes
 _lib.rant_axes_make.argtypes = [c_int, c_int, c_int, c_double, POINTER(_RantAxes)]
@@ -2524,6 +2526,13 @@ def inertia_add(a: Inertia, b: Inertia) -> Inertia:
     """Two bodies in one frame joined into one, about their shared center of mass."""
     r = _lib.rant_inertia_add(_c_Inertia(a), _c_Inertia(b))
     return _py_Inertia(r)
+
+def inertia_box(i: Inertia) -> OrientedBox:
+    """The box of even density with i's mass and inertia: at its center of mass, along its principal axes,
+    shortest side first."""
+    o0 = _RantOrientedBox()
+    _check(_lib.rant_inertia_box(_c_Inertia(i), byref(o0)))
+    return _py_OrientedBox(o0)
 
 def axes_of(preset: AxesPreset) -> Axes:
     r = _lib.rant_axes_of(int(preset))
@@ -4686,6 +4695,7 @@ __all__ = [
     "image_undistort",
     "image_value_at",
     "inertia_add",
+    "inertia_box",
     "inertia_transform",
     "int2_floor",
     "int3_floor",

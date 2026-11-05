@@ -825,6 +825,14 @@ inline Inertia inertia_add(Inertia a, Inertia b) {
     return impl::bits<Inertia>(r);
 }
 
+/* The box of even density with i's mass and inertia: at its center of mass, along its principal axes, */
+/* shortest side first. */
+inline OrientedBox inertia_box(Inertia i) {
+    OrientedBox o0{};
+    impl::check(detail::rant_inertia_box(impl::bits<detail::RantInertia>(i), impl::mut<detail::RantOrientedBox>(&o0)));
+    return o0;
+}
+
 inline Axes axes_of(AxesPreset preset) {
     auto r = detail::rant_axes_of(static_cast<detail::RantAxesPreset>(preset));
     return impl::bits<Axes>(r);

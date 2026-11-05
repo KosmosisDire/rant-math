@@ -39,6 +39,9 @@ RANT_MATH_API RantMathResult rant_covariance3_ellipsoid(const RantCovariance3 *c
 RANT_MATH_API RantInertia rant_inertia_transform(RantInertia i, RantPose p);
 /* Two bodies in one frame joined into one, about their shared center of mass. */
 RANT_MATH_API RantInertia rant_inertia_add(RantInertia a, RantInertia b);
+/* The box of even density with i's mass and inertia: at its center of mass, along its principal axes, shortest side
+ * first. The inverse of rant_oriented_box_inertia. ERR_ARGUMENT for a mass not above 0. */
+RANT_MATH_API RantMathResult rant_inertia_box(RantInertia i, RantOrientedBox *out);
 
 #ifdef __cplusplus
 }

@@ -175,6 +175,30 @@ static void covariance_and_inertia(void){
         memset(&moved, 0, sizeof moved);
         CHECK(rant_inertia_add(moved, moved).mass == 0.0, "two massless bodies stay massless");
     }
+    {   /* boxes of 0.2, 0.4 and 0.6 placed at random come back as themselves */
+        RantOrientedBox box, found;
+        RantInertia body;
+        for (i = 0, ok = 1; i < 20; i++){
+            box.pose = random_pose(2.0);
+            box.size = rant_double3(0.2, 0.4, 0.6);
+            body = rant_oriented_box_inertia(box, 2.5);
+            if (rant_inertia_box(body, &found) != RANT_MATH_OK || !near3(found.size, box.size, 1e-9) ||
+                !near3(found.pose.position, box.pose.position, 1e-12)) ok = 0;
+            else {
+                RantInertia again = rant_oriented_box_inertia(found, 2.5);
+                if (!near(again.ixx, body.ixx, 1e-12) || !near(again.ixy, body.ixy, 1e-12) || !near(again.ixz, body.ixz, 1e-12) ||
+                    !near(again.iyy, body.iyy, 1e-12) || !near(again.iyz, body.iyz, 1e-12) || !near(again.izz, body.izz, 1e-12)) ok = 0;
+            }
+        }
+        CHECK(ok, "the box of a box's inertia is that box");
+        memset(&body, 0, sizeof body);
+        body.mass = 1.0; body.iyy = body.izz = 1.0 / 12.0;
+        CHECK(rant_inertia_box(body, &found) == RANT_MATH_OK && near3(found.size, rant_double3(0, 0, 1), 1e-12) &&
+              near(fabs(rant_quaternion_rotate(found.pose.orientation, rant_double3(0, 0, 1)).x), 1.0, 1e-12),
+              "a rod of length 1 along x is one long side, last");
+        body.mass = 0.0;
+        CHECK(rant_inertia_box(body, &found) == RANT_MATH_ERR_ARGUMENT, "a body with no mass is refused");
+    }
 }
 
 void test_motion(void){

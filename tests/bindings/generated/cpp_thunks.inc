@@ -41,6 +41,8 @@ template <> Covariance6 get<Covariance6>(const J &j);
 J put(const Covariance6 &v);
 template <> Inertia get<Inertia>(const J &j);
 J put(const Inertia &v);
+template <> OrientedBox get<OrientedBox>(const J &j);
+J put(const OrientedBox &v);
 template <> Axes get<Axes>(const J &j);
 J put(const Axes &v);
 template <> Accel get<Accel>(const J &j);
@@ -75,8 +77,6 @@ template <> Capsule2D get<Capsule2D>(const J &j);
 J put(const Capsule2D &v);
 template <> SurfacePoint get<SurfacePoint>(const J &j);
 J put(const SurfacePoint &v);
-template <> OrientedBox get<OrientedBox>(const J &j);
-J put(const OrientedBox &v);
 template <> Sphere get<Sphere>(const J &j);
 J put(const Sphere &v);
 template <> Capsule get<Capsule>(const J &j);
@@ -410,6 +410,20 @@ J put(const Inertia &v) {
     return o;
 }
 
+template <> OrientedBox get<OrientedBox>(const J &j) {
+    OrientedBox v{};
+    v.pose = get<Pose>(j.at("pose"));
+    v.size = get<Double3>(j.at("size"));
+    return v;
+}
+
+J put(const OrientedBox &v) {
+    J o = J::object();
+    o.add("pose", put(v.pose));
+    o.add("size", put(v.size));
+    return o;
+}
+
 template <> Axes get<Axes>(const J &j) {
     Axes v{};
     v.x = static_cast<decltype(v.x)>(get<double>(j.at("x")));
@@ -653,20 +667,6 @@ J put(const SurfacePoint &v) {
     J o = J::object();
     o.add("point", put(v.point));
     o.add("normal", put(v.normal));
-    return o;
-}
-
-template <> OrientedBox get<OrientedBox>(const J &j) {
-    OrientedBox v{};
-    v.pose = get<Pose>(j.at("pose"));
-    v.size = get<Double3>(j.at("size"));
-    return v;
-}
-
-J put(const OrientedBox &v) {
-    J o = J::object();
-    o.add("pose", put(v.pose));
-    o.add("size", put(v.size));
     return o;
 }
 
@@ -1689,6 +1689,12 @@ const std::map<std::string, Thunk> thunks = {
         Inertia x0 = get<Inertia>(a[0]);
         Inertia x1 = get<Inertia>(a[1]);
         J out = put(rant::math::inertia_add(x0, x1));
+        return out;
+    }},
+    {"inertia_box", [](const std::vector<J> &a) {
+        (void)a;
+        Inertia x0 = get<Inertia>(a[0]);
+        J out = put(rant::math::inertia_box(x0));
         return out;
     }},
     {"axes_of", [](const std::vector<J> &a) {

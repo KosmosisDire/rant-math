@@ -211,6 +211,16 @@ impl Json for Inertia {
     }
 }
 
+impl Json for OrientedBox {
+    fn get(v: &Value) -> Self { OrientedBox { pose: Json::get(&v["pose"]), size: Json::get(&v["size"]) } }
+    fn put(&self) -> Value {
+        let mut m = Map::new();
+        m.insert("pose".into(), self.pose.put());
+        m.insert("size".into(), self.size.put());
+        Value::Object(m)
+    }
+}
+
 impl Json for Axes {
     fn get(v: &Value) -> Self { Axes { x: Json::get(&v["x"]), y: Json::get(&v["y"]), z: Json::get(&v["z"]), scale: Json::get(&v["scale"]) } }
     fn put(&self) -> Value {
@@ -381,16 +391,6 @@ impl Json for SurfacePoint {
         let mut m = Map::new();
         m.insert("point".into(), self.point.put());
         m.insert("normal".into(), self.normal.put());
-        Value::Object(m)
-    }
-}
-
-impl Json for OrientedBox {
-    fn get(v: &Value) -> Self { OrientedBox { pose: Json::get(&v["pose"]), size: Json::get(&v["size"]) } }
-    fn put(&self) -> Value {
-        let mut m = Map::new();
-        m.insert("pose".into(), self.pose.put());
-        m.insert("size".into(), self.size.put());
         Value::Object(m)
     }
 }
@@ -663,6 +663,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "covariance3_ellipsoid" => { let x0: Covariance3 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::covariance3_ellipsoid(&x0, x1)?.put();  let _ = &mut out; Ok(out) }
         "inertia_transform" => { let x0: Inertia = Json::get(&a[0]); let x1: Pose = Json::get(&a[1]); let mut out = rant_math::inertia_transform(x0, x1).put();  let _ = &mut out; Ok(out) }
         "inertia_add" => { let x0: Inertia = Json::get(&a[0]); let x1: Inertia = Json::get(&a[1]); let mut out = rant_math::inertia_add(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "inertia_box" => { let x0: Inertia = Json::get(&a[0]); let mut out = rant_math::inertia_box(x0)?.put();  let _ = &mut out; Ok(out) }
         "axes_of" => { let x0: AxesPreset = Json::get(&a[0]); let mut out = rant_math::axes_of(x0).put();  let _ = &mut out; Ok(out) }
         "axes_make" => { let x0: i32 = Json::get(&a[0]); let x1: i32 = Json::get(&a[1]); let x2: i32 = Json::get(&a[2]); let x3: f64 = Json::get(&a[3]); let mut out = rant_math::axes_make(x0, x1, x2, x3)?.put();  let _ = &mut out; Ok(out) }
         "axes_point_to" => { let x0: Axes = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::axes_point_to(x0, x1).put();  let _ = &mut out; Ok(out) }

@@ -541,6 +541,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_covariance3_ellipsoid(RawCovariance3* c, double deviations, Quaternion* turn, Double3* radii);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_transform(Inertia i, Pose p);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_add(Inertia a, Inertia b);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_inertia_box(Inertia i, OrientedBox* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Axes rant_axes_of(int preset);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_axes_make(int x, int y, int z, double scale, Axes* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_axes_point_to(Axes axes, Double3 point);
@@ -1814,6 +1815,15 @@ namespace Rant.Math
         {
             var r = Native.rant_inertia_add(a, b);
             return r;
+        }
+
+        /// <summary>The box of even density with i's mass and inertia: at its center of mass, along its principal
+        /// axes, shortest side first.</summary>
+        public static unsafe OrientedBox InertiaBox(Inertia i)
+        {
+            OrientedBox o0 = default;
+            Impl.Check(Native.rant_inertia_box(i, &o0));
+            return o0;
         }
 
         public static unsafe Axes AxesOf(AxesPreset preset)

@@ -395,6 +395,7 @@ EMSCRIPTEN_KEEPALIVE void rm_covariance6_rotate(const RantQuaternion *q, const R
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_covariance3_ellipsoid(const RantCovariance3 *c, double deviations, RantQuaternion *turn, RantDouble3 *radii) { return rant_covariance3_ellipsoid(c, deviations, turn, radii); }
 EMSCRIPTEN_KEEPALIVE void rm_inertia_transform(RantInertia *ret, const RantInertia *i, const RantPose *p) { *ret = rant_inertia_transform(*i, *p); }
 EMSCRIPTEN_KEEPALIVE void rm_inertia_add(RantInertia *ret, const RantInertia *a, const RantInertia *b) { *ret = rant_inertia_add(*a, *b); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_inertia_box(const RantInertia *i, RantOrientedBox *out) { return rant_inertia_box(*i, out); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_of(RantAxes *ret, RantAxesPreset preset) { *ret = rant_axes_of(preset); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_axes_make(int x, int y, int z, double scale, RantAxes *out) { return rant_axes_make(x, y, z, scale, out); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_point_to(RantDouble3 *ret, const RantAxes *axes, const RantDouble3 *point) { *ret = rant_axes_point_to(*axes, *point); }

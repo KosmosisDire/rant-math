@@ -771,6 +771,14 @@ pub fn inertia_add(a: Inertia, b: Inertia) -> Inertia {
     r
 }
 
+/// The box of even density with i's mass and inertia: at its center of mass, along its principal axes,
+/// shortest side first.
+pub fn inertia_box(i: Inertia) -> Result<OrientedBox, MathError> {
+    let mut o0 = OrientedBox::default();
+    check(unsafe { ffi::rant_inertia_box(i, &mut o0) })?;
+    Ok(o0)
+}
+
 pub fn axes_of(preset: AxesPreset) -> Axes {
     let r = unsafe { ffi::rant_axes_of(preset as i32) };
     r

@@ -133,6 +133,11 @@ export interface Inertia {
     izz: number;
 }
 
+export interface OrientedBox {
+    pose: Pose;
+    size: Double3;
+}
+
 export interface Axes {
     x: number;
     y: number;
@@ -220,11 +225,6 @@ export interface Capsule2D {
 export interface SurfacePoint {
     point: Double3;
     normal: Double3;
-}
-
-export interface OrientedBox {
-    pose: Pose;
-    size: Double3;
 }
 
 export interface Sphere {
@@ -545,6 +545,15 @@ function r_RantInertia(p: number): Inertia {
     return { mass: F64[(p + 0) >> 3], center: r_RantDouble3(p + 8), ixx: F64[(p + 32) >> 3], ixy: F64[(p + 40) >> 3], ixz: F64[(p + 48) >> 3], iyy: F64[(p + 56) >> 3], iyz: F64[(p + 64) >> 3], izz: F64[(p + 72) >> 3] };
 }
 
+function w_RantOrientedBox(p: number, v: OrientedBox): void {
+    w_RantPose(p + 0, v.pose);
+    w_RantDouble3(p + 56, v.size);
+}
+
+function r_RantOrientedBox(p: number): OrientedBox {
+    return { pose: r_RantPose(p + 0), size: r_RantDouble3(p + 56) };
+}
+
 function w_RantAxes(p: number, v: Axes): void {
     I8[(p + 0) >> 0] = v.x;
     I8[(p + 1) >> 0] = v.y;
@@ -700,15 +709,6 @@ function w_RantSurfacePoint(p: number, v: SurfacePoint): void {
 
 function r_RantSurfacePoint(p: number): SurfacePoint {
     return { point: r_RantDouble3(p + 0), normal: r_RantDouble3(p + 24) };
-}
-
-function w_RantOrientedBox(p: number, v: OrientedBox): void {
-    w_RantPose(p + 0, v.pose);
-    w_RantDouble3(p + 56, v.size);
-}
-
-function r_RantOrientedBox(p: number): OrientedBox {
-    return { pose: r_RantPose(p + 0), size: r_RantDouble3(p + 56) };
 }
 
 function w_RantSphere(p: number, v: Sphere): void {
@@ -2548,6 +2548,17 @@ export function inertiaAdd(a: Inertia, b: Inertia): Inertia {
     wasm._rm_inertia_add(ret, c_a, c_b);
     refresh();
     return r_RantInertia(ret);
+}
+
+/** The box of even density with i's mass and inertia: at its center of mass, along its principal axes,
+ * shortest side first. */
+export function inertiaBox(i: Inertia): OrientedBox {
+    begin();
+    const c_i = alloc(80); w_RantInertia(c_i, i);
+    const o0 = alloc(80);
+    check(wasm._rm_inertia_box(c_i, o0));
+    refresh();
+    return r_RantOrientedBox(o0);
 }
 
 export function axesOf(preset: AxesPreset): Axes {

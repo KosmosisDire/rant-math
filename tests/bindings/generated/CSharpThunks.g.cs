@@ -137,6 +137,7 @@ static partial class Thunks
         ["covariance3_ellipsoid"] = a => { var x0 = J.To<double[][]>(a[0].GetProperty("m")); var x1 = J.To<double>(a[1]); var answer = new Answer(RantMath.Covariance3Ellipsoid(x0, x1)); return answer; },
         ["inertia_transform"] = a => { var x0 = J.To<Inertia>(a[0]); var x1 = J.To<Pose>(a[1]); var answer = new Answer(RantMath.InertiaTransform(x0, x1)); return answer; },
         ["inertia_add"] = a => { var x0 = J.To<Inertia>(a[0]); var x1 = J.To<Inertia>(a[1]); var answer = new Answer(RantMath.InertiaAdd(x0, x1)); return answer; },
+        ["inertia_box"] = a => { var x0 = J.To<Inertia>(a[0]); var answer = new Answer(RantMath.InertiaBox(x0)); return answer; },
         ["axes_of"] = a => { var x0 = (AxesPreset)J.To<int>(a[0]); var answer = new Answer(RantMath.AxesOf(x0)); return answer; },
         ["axes_make"] = a => { var x0 = J.To<int>(a[0]); var x1 = J.To<int>(a[1]); var x2 = J.To<int>(a[2]); var x3 = J.To<double>(a[3]); var answer = new Answer(RantMath.AxesMake(x0, x1, x2, x3)); return answer; },
         ["axes_point_to"] = a => { var x0 = J.To<Axes>(a[0]); var x1 = J.To<Double3>(a[1]); var answer = new Answer(RantMath.AxesPointTo(x0, x1)); return answer; },
