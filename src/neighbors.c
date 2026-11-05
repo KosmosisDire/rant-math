@@ -257,21 +257,11 @@ RantMathResult rant_kdtree_within(const RantKdTree *tree, RantDouble3 point, dou
     return r;
 }
 
-/* A point's cube and index, ordered cube by cube. */
-typedef struct { double key[3]; uint32_t i; } i_Cell;
-
-static int i_compare_cells(const void *a, const void *b){
-    const i_Cell *x = (const i_Cell *)a, *y = (const i_Cell *)b;
-    int k;
-    for (k = 0; k < 3; k++) if (x->key[k] != y->key[k]) return x->key[k] < y->key[k] ? -1 : 1;
-    return x->i < y->i ? -1 : (x->i > y->i);
-}
-
 RantMathResult rant_points_downsample(const RantDouble3 *points, uint32_t count, double voxel, uint8_t *keep){
-    i_Cell *c;
+    i_MathKey *c;
     uint32_t i, n = 0, lo, hi, j;
     if ((count && (!points || !keep)) || !(voxel > 0.0) || !i_math_finite(voxel)) return RANT_MATH_ERR_ARGUMENT;
-    c = (i_Cell *)malloc(sizeof(i_Cell) * (count ? count : 1));
+    c = (i_MathKey *)malloc(sizeof(i_MathKey) * (count ? count : 1));
     if (!c) return RANT_MATH_ERR_MEMORY;
     for (i = 0; i < count; i++){
         keep[i] = 0;
@@ -281,7 +271,7 @@ RantMathResult rant_points_downsample(const RantDouble3 *points, uint32_t count,
         c[n].key[2] = floor(points[i].z / voxel);
         c[n++].i = i;
     }
-    qsort(c, n, sizeof *c, i_compare_cells);
+    qsort(c, n, sizeof *c, i_math_compare_keys);
     for (lo = 0; lo < n; lo = hi){
         RantDouble3 first = points[c[lo].i], sum = rant_double3(0.0, 0.0, 0.0), mean;
         double best = HUGE_VAL;

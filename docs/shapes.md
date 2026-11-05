@@ -44,8 +44,20 @@ rant_shape_distances(&zone, points, distances, count);   /* inside where distanc
 
 - A shape made from a view points at your data.
 - `rant_shape_gap` is how far apart two shapes are, 0 when they touch.
-- `rant_shape_mesh` makes a triangle mesh of any shape, closed and facing out.
 - The typed calls, as `rant_sphere_distance`, answer the same and cost less.
+
+## Meshes
+
+```c
+rant_shape_mesh(&zone, 0, 0.5, vertices, normals, &vertex_count, triangles, &triangle_count);
+```
+
+- `rant_shape_mesh` makes the triangles that draw a shape, facing out, with a unit normal at each vertex.
+- Where two faces meet at more than `crease` radians, each keeps its own vertex, so the edge shows sharp.
+  0.5 splits a box's edges and a cylinder's rims, and a ball stays smooth.
+- 0 makes every face flat. Pi or more splits no edge, so a solid stays closed by index.
+- Vertices at one point count as one, so a mesh sent with a vertex per corner still smooths.
+- A face with no area is left out. `normals` may be NULL.
 
 ## Lines and planes
 

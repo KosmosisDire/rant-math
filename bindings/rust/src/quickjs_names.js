@@ -404,7 +404,7 @@ export const NAMES = [
   {"name": "shapeOverlaps", "takes": ["a", "b"], "words": "1 when they touch or overlap"},
   {"name": "shapeSampleInside", "takes": ["s", "seed", "count"], "words": "Only a solid or a closed mesh has an inside to sample"},
   {"name": "shapeSampleSurface", "takes": ["s", "seed", "count"], "words": "shape sample surface"},
-  {"name": "shapeMesh", "takes": ["s", "segments"], "words": "The surface as triangles counterclockwise seen from outside, closed for a solid"},
+  {"name": "shapeMesh", "takes": ["s", "segments", "crease"], "words": "Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for 32"},
   {"name": "shape2dFromAlignedBox2d", "takes": ["b"], "words": "shape2d from aligned box2d"},
   {"name": "shape2dFromOrientedBox2d", "takes": ["b"], "words": "shape2d from oriented box2d"},
   {"name": "shape2dFromCircle", "takes": ["c"], "words": "shape2d from circle"},

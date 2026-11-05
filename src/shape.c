@@ -933,15 +933,144 @@ static RantMathResult polygon_mesh(i_Build *b, RantPolygonView p, RantPolygon2DV
     return r;
 }
 
-RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, RantDouble3 *vertices, uint32_t *vertex_count,
-                               uint32_t *triangles, uint32_t *triangle_count){
-    uint32_t n = segments ? segments : 32, rings = n / 2 < 2 ? 2 : n / 2, half = n / 4 < 1 ? 1 : n / 4, e = 0, i, k;
+/* An edge of a kept face, its welded ends packed low then high, and the corner it starts at. */
+typedef struct { uint64_t ends; uint32_t corner; } i_MeshSide;
+
+static int compare_mesh_sides(const void *a, const void *b){
+    const i_MeshSide *x = (const i_MeshSide *)a, *y = (const i_MeshSide *)b;
+    if (x->ends != y->ends) return x->ends < y->ends ? -1 : 1;
+    return x->corner < y->corner ? -1 : (x->corner > y->corner);
+}
+
+/* The smallest corner of a joined group, halving the path on the way. */
+static uint32_t corner_root(uint32_t *up, uint32_t c){
+    while (up[c] != c){ up[c] = up[up[c]]; c = up[c]; }
+    return c;
+}
+
+static double angle_between(RantDouble3 u, RantDouble3 v){
+    return atan2(rant_double3_length(rant_double3_cross(u, v)), rant_double3_dot(u, v));
+}
+
+/* m with vertices at one point welded, a face with no area left out, and a vertex for each group of
+ * corners joined across edges where faces meet within crease, its normal the faces' by their angle there. */
+static RantMathResult shade_mesh(RantMeshView m, double crease, RantDouble3 *vertices, RantDouble3 *normals,
+                                 uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count){
+    uint32_t nv = m.vertex_count, nt = m.triangle_count, kept = 0, groups = 0, room_v = *vertex_count,
+             room_t = *triangle_count, lo, hi, i, j, c, f;
+    size_t corners = 3 * (size_t)nt + 1;
+    uint32_t *weld = (uint32_t *)malloc(sizeof(uint32_t) * ((size_t)nv + 1));
+    uint32_t *at = (uint32_t *)malloc(sizeof(uint32_t) * corners), *up = (uint32_t *)malloc(sizeof(uint32_t) * corners);
+    uint32_t *id = (uint32_t *)malloc(sizeof(uint32_t) * corners), *home = (uint32_t *)malloc(sizeof(uint32_t) * corners);
+    uint32_t *start = (uint32_t *)malloc(sizeof(uint32_t) * ((size_t)nv + 2)), *order = (uint32_t *)malloc(sizeof(uint32_t) * corners);
+    RantDouble3 *unit = (RantDouble3 *)malloc(sizeof(RantDouble3) * ((size_t)nt + 1));
+    RantDouble3 *sum = (RantDouble3 *)malloc(sizeof(RantDouble3) * corners);
+    i_MathKey *keys = (i_MathKey *)malloc(sizeof(i_MathKey) * ((size_t)nv + 1));
+    i_MeshSide *sides = (i_MeshSide *)malloc(sizeof(i_MeshSide) * corners);
+    RantMathResult r = RANT_MATH_ERR_MEMORY;
+    if (!weld || !at || !up || !id || !home || !start || !order || !unit || !sum || !keys || !sides) goto done;
+    for (i = 0, j = 0; i < nv; i++){
+        weld[i] = i;
+        if (!i_math_finite3(m.vertices[i])) continue;
+        keys[j].key[0] = m.vertices[i].x; keys[j].key[1] = m.vertices[i].y; keys[j].key[2] = m.vertices[i].z;
+        keys[j++].i = i;
+    }
+    if (j) qsort(keys, j, sizeof *keys, i_math_compare_keys);
+    for (lo = 0; lo < j; lo = hi)
+        for (hi = lo; hi < j && keys[hi].key[0] == keys[lo].key[0] && keys[hi].key[1] == keys[lo].key[1] &&
+                      keys[hi].key[2] == keys[lo].key[2]; hi++)
+            weld[keys[hi].i] = keys[lo].i;
+    for (f = 0; f < nt; f++){
+        const uint32_t *t = m.triangles + 3 * (size_t)f;
+        RantDouble3 a, n;
+        double l;
+        if (t[0] >= nv || t[1] >= nv || t[2] >= nv) continue;
+        a = m.vertices[weld[t[0]]];
+        n = rant_double3_cross(rant_double3_subtract(m.vertices[weld[t[1]]], a), rant_double3_subtract(m.vertices[weld[t[2]]], a));
+        l = rant_double3_length(n);
+        if (!(l > 0.0) || !i_math_finite(l)) continue;
+        for (i = 0; i < 3; i++){
+            c = 3 * kept + i;
+            at[c] = weld[t[i]];
+            up[c] = c;
+        }
+        unit[kept++] = rant_double3_scale(n, 1.0 / l);
+    }
+    for (c = 0; c < 3 * kept; c++){
+        uint32_t x = at[c], y = at[c - c % 3 + (c + 1) % 3];
+        sides[c].ends = x < y ? (uint64_t)x << 32 | y : (uint64_t)y << 32 | x;
+        sides[c].corner = c;
+    }
+    if (kept) qsort(sides, 3 * (size_t)kept, sizeof *sides, compare_mesh_sides);
+    for (lo = 0; lo < 3 * kept; lo = hi){
+        uint32_t p, q, e;
+        for (hi = lo; hi < 3 * kept && sides[hi].ends == sides[lo].ends; hi++){}
+        for (p = lo; p < hi; p++)
+            for (q = p + 1; q < hi; q++){
+                uint32_t fa = sides[p].corner / 3, fb = sides[q].corner / 3;
+                /* a hair of slack, so faces meeting at the crease itself join on every platform */
+                if (crease < I_MATH_PI && angle_between(unit[fa], unit[fb]) > crease + 1e-9) continue;
+                for (e = 0; e < 2; e++){
+                    uint32_t end = (uint32_t)(e ? sides[p].ends & 0xFFFFFFFFu : sides[p].ends >> 32), ca = 3 * fa, cb = 3 * fb, ra, rb;
+                    while (at[ca] != end) ca++;
+                    while (at[cb] != end) cb++;
+                    ra = corner_root(up, ca);
+                    rb = corner_root(up, cb);
+                    if (ra < rb) up[rb] = ra;
+                    else up[ra] = rb;
+                }
+            }
+    }
+    /* the corners of each welded vertex in order, so its groups take numbers by their first face */
+    memset(start, 0, sizeof(uint32_t) * ((size_t)nv + 2));
+    for (c = 0; c < 3 * kept; c++) start[at[c] + 2]++;
+    for (i = 0; i < nv; i++) start[i + 2] += start[i + 1];
+    for (c = 0; c < 3 * kept; c++) order[start[at[c] + 1]++] = c;
+    for (i = 0; i < 3 * kept; i++) id[i] = UINT32_MAX;
+    for (i = 0; i < 3 * kept; i++){
+        uint32_t root, g;
+        RantDouble3 a, e1, e2;
+        c = order[i];
+        root = corner_root(up, c);
+        if (id[root] == UINT32_MAX){
+            home[groups] = root;
+            sum[groups] = rant_double3(0.0, 0.0, 0.0);
+            id[root] = groups++;
+        }
+        g = id[c] = id[root];
+        a = m.vertices[at[c]];
+        e1 = rant_double3_subtract(m.vertices[at[c - c % 3 + (c + 1) % 3]], a);
+        e2 = rant_double3_subtract(m.vertices[at[c - c % 3 + (c + 2) % 3]], a);
+        sum[g] = rant_double3_add(sum[g], rant_double3_scale(unit[c / 3], angle_between(e1, e2)));
+    }
+    *vertex_count = groups;
+    *triangle_count = kept;
+    r = RANT_MATH_ERR_SPACE;
+    if (groups > room_v || kept > room_t || (groups && !vertices) || (kept && !triangles)) goto done;
+    for (i = 0; i < groups; i++){
+        double l = rant_double3_length(sum[i]);
+        vertices[i] = m.vertices[at[home[i]]];
+        /* faces back to back cancel, and then the first one's stands */
+        if (normals) normals[i] = l > 0.0 ? rant_double3_scale(sum[i], 1.0 / l) : unit[home[i] / 3];
+    }
+    for (c = 0; c < 3 * kept; c++) triangles[c] = id[c];
+    r = RANT_MATH_OK;
+done:
+    free(weld); free(at); free(up); free(id); free(home); free(start); free(order); free(unit); free(sum);
+    free(keys); free(sides);
+    return r;
+}
+
+RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantDouble3 *vertices, RantDouble3 *normals,
+                               uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count){
+    uint32_t n = segments ? segments : 32, rings = n / 2 < 2 ? 2 : n / 2, half = n / 4 < 1 ? 1 : n / 4, e = 0, i;
     uint64_t nv = 0, nt = 0;
     RantDouble2 *flat = NULL;
     RantPolygon2DView fv;
+    RantMeshView m;
     RantMathResult r = RANT_MATH_OK;
     i_Build b;
-    if (!s || !vertex_count || !triangle_count || (segments && segments < 3)) return RANT_MATH_ERR_ARGUMENT;
+    if (!s || !vertex_count || !triangle_count || (segments && segments < 3) || !(crease >= 0.0)) return RANT_MATH_ERR_ARGUMENT;
     fv.points = NULL;
     fv.count = 0;
     switch (s->kind){
@@ -978,12 +1107,11 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, RantDouble
     default: return RANT_MATH_ERR_ARGUMENT;
     }
     if (nv > UINT32_MAX || nt > UINT32_MAX / 3){ free(flat); return RANT_MATH_ERR_ARGUMENT; }
-    i = *vertex_count;
-    k = *triangle_count;
-    *vertex_count = (uint32_t)nv;
-    *triangle_count = (uint32_t)nt;
-    if (nv > i || nt > k || (nv && !vertices) || (nt && !triangles)){ free(flat); return RANT_MATH_ERR_SPACE; }
-    b.v = vertices; b.t = triangles; b.nv = 0; b.nt = 0;
+    if (s->kind == RANT_SHAPE_MESH) return shade_mesh(s->as.mesh, crease, vertices, normals, vertex_count, triangles, triangle_count);
+    b.v = (RantDouble3 *)malloc(sizeof(RantDouble3) * (size_t)nv);
+    b.t = (uint32_t *)malloc(sizeof(uint32_t) * 3 * (size_t)nt);
+    b.nv = 0; b.nt = 0;
+    if (!b.v || !b.t){ free(b.v); free(b.t); free(flat); return RANT_MATH_ERR_MEMORY; }
     switch (s->kind){
     case RANT_SHAPE_ALIGNED_BOX: {
         RantAlignedBox x;
@@ -1069,13 +1197,11 @@ RantMathResult rant_shape_mesh(const RantShape *s, uint32_t segments, RantDouble
     }
     case RANT_SHAPE_PRISM: r = prism_mesh(&b, s->as.prism, e); break;
     case RANT_SHAPE_POLYGON: r = polygon_mesh(&b, s->as.polygon, fv, e); break;
-    case RANT_SHAPE_MESH:
-        memcpy(vertices, s->as.mesh.vertices, sizeof(RantDouble3) * s->as.mesh.vertex_count);
-        memcpy(triangles, s->as.mesh.triangles, sizeof(uint32_t) * 3 * s->as.mesh.triangle_count);
-        break;
     default: break;
     }
-    free(flat);
+    m.vertices = b.v; m.vertex_count = b.nv; m.triangles = b.t; m.triangle_count = b.nt;
+    if (r == RANT_MATH_OK) r = shade_mesh(m, crease, vertices, normals, vertex_count, triangles, triangle_count);
+    free(b.v); free(b.t); free(flat);
     return r;
 }
 

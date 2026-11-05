@@ -516,11 +516,14 @@ SPECIAL["rant_shape2d_gap"] = shape_gap("shape2d", "RantSegment2D")
 def _(f, m):
     s = Input("s", "shape", "RantShape")
     seg = Input("segments", "value", "uint32_t")
+    crease = Input("crease", "value", "double")
     v = Output("vertices", "query", "RantDouble3")
+    n = Output("normals", "query", "RantDouble3", v)   # shares the count of vertices
     t = Output("triangles", "query", "uint32_t", per=3)
-    f.inputs = [s, seg]
-    f.outputs = [v, t]
-    f.args = [Arg("shape", s), Arg("value", seg), Arg("out", v), Arg("count_ptr", v), Arg("out", t), Arg("count_ptr", t)]
+    f.inputs = [s, seg, crease]
+    f.outputs = [v, n, t]
+    f.args = [Arg("shape", s), Arg("value", seg), Arg("value", crease), Arg("out", v), Arg("out", n), Arg("count_ptr", v),
+              Arg("out", t), Arg("count_ptr", t)]
 
 
 @special("rant_polynomial_fit")

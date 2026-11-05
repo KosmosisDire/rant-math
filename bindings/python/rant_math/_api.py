@@ -1410,7 +1410,7 @@ _lib.rant_shape_sample_inside.argtypes = [POINTER(_RantShape), c_uint64, POINTER
 _lib.rant_shape_sample_inside.restype = c_int
 _lib.rant_shape_sample_surface.argtypes = [POINTER(_RantShape), c_uint64, POINTER(_RantDouble3), c_uint32]
 _lib.rant_shape_sample_surface.restype = c_int
-_lib.rant_shape_mesh.argtypes = [POINTER(_RantShape), c_uint32, POINTER(_RantDouble3), POINTER(c_uint32), POINTER(c_uint32), POINTER(c_uint32)]
+_lib.rant_shape_mesh.argtypes = [POINTER(_RantShape), c_uint32, c_double, POINTER(_RantDouble3), POINTER(_RantDouble3), POINTER(c_uint32), POINTER(c_uint32), POINTER(c_uint32)]
 _lib.rant_shape_mesh.restype = c_int
 _lib.rant_shape2d_from_aligned_box2d.argtypes = [_RantAlignedBox2D]
 _lib.rant_shape2d_from_aligned_box2d.restype = _RantShape2D
@@ -3894,17 +3894,18 @@ def shape_sample_surface(s: Shape, seed: int, count: int) -> List[Double3]:
     _check(_lib.rant_shape_sample_surface(byref(c_s), seed, p0, count))
     return _list_out(o0, _py_Double3, None)
 
-def shape_mesh(s: Shape, segments: int) -> Tuple[List[Double3], List[int]]:
-    """The surface as triangles counterclockwise seen from outside, closed for a solid. A round part takes
-    segments round it, 0 for 32."""
+def shape_mesh(s: Shape, segments: int, crease: float) -> Tuple[List[Double3], List[Double3], List[int]]:
+    """Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
+    32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says."""
     c_s = s._raw
     n0 = c_uint32(0)
-    n1 = c_uint32(0)
-    _room(_lib.rant_shape_mesh(byref(c_s), segments, None, byref(n0), None, byref(n1)))
+    n2 = c_uint32(0)
+    _room(_lib.rant_shape_mesh(byref(c_s), segments, crease, None, None, byref(n0), None, byref(n2)))
     o0, p0 = _new_list(_RantDouble3, n0.value, 'float64', 3, False)
-    o1, p1 = _new_list(c_uint32, n1.value * 3, 'uint32', 1, False)
-    _check(_lib.rant_shape_mesh(byref(c_s), segments, p0, byref(n0), p1, byref(n1)))
-    return (_list_out(o0, _py_Double3, n0.value * 1), _list_out(o1, None, n1.value * 3))
+    o1, p1 = _new_list(_RantDouble3, n0.value, 'float64', 3, False)
+    o2, p2 = _new_list(c_uint32, n2.value * 3, 'uint32', 1, False)
+    _check(_lib.rant_shape_mesh(byref(c_s), segments, crease, p0, p1, byref(n0), p2, byref(n2)))
+    return (_list_out(o0, _py_Double3, n0.value * 1), _list_out(o1, _py_Double3, n0.value * 1), _list_out(o2, None, n2.value * 3))
 
 def shape2d_from_aligned_box2d(b: AlignedBox2D) -> Shape2D:
     return Shape2D(_lib.rant_shape2d_from_aligned_box2d(_c_AlignedBox2D(b)))

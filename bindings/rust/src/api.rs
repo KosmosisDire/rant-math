@@ -2314,18 +2314,20 @@ pub fn shape_sample_surface(s: &Shape, seed: u64, count: u32) -> Result<Vec<Doub
     Ok(o0)
 }
 
-/// The surface as triangles counterclockwise seen from outside, closed for a solid. A round part takes
-/// segments round it, 0 for 32.
-pub fn shape_mesh(s: &Shape, segments: u32) -> Result<(Vec<Double3>, Vec<u32>), MathError> {
+/// Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
+/// 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says.
+pub fn shape_mesh(s: &Shape, segments: u32, crease: f64) -> Result<(Vec<Double3>, Vec<Double3>, Vec<u32>), MathError> {
     let mut n0 = 0u32;
-    let mut n1 = 0u32;
-    room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, std::ptr::null_mut(), &mut n0, std::ptr::null_mut(), &mut n1) })?;
+    let mut n2 = 0u32;
+    room(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, std::ptr::null_mut(), std::ptr::null_mut(), &mut n0, std::ptr::null_mut(), &mut n2) })?;
     let mut o0 = vec![Double3::default(); n0 as usize];
-    let mut o1 = vec![u32::default(); n1 as usize * 3];
-    check(unsafe { ffi::rant_shape_mesh(&s.raw, segments, o0.as_mut_ptr(), &mut n0, o1.as_mut_ptr(), &mut n1) })?;
+    let mut o1 = vec![Double3::default(); n0 as usize];
+    let mut o2 = vec![u32::default(); n2 as usize * 3];
+    check(unsafe { ffi::rant_shape_mesh(&s.raw, segments, crease, o0.as_mut_ptr(), o1.as_mut_ptr(), &mut n0, o2.as_mut_ptr(), &mut n2) })?;
     o0.truncate(n0 as usize);
-    o1.truncate(n1 as usize * 3);
-    Ok((o0, o1))
+    o1.truncate(n0 as usize);
+    o2.truncate(n2 as usize * 3);
+    Ok((o0, o1, o2))
 }
 
 pub fn shape2d_from_aligned_box2d<'a>(b: AlignedBox2D) -> Shape2D<'a> {

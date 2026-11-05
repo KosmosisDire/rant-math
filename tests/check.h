@@ -37,6 +37,8 @@ RantPose random_pose(double r);
 uint32_t random_polygon(RantDouble2 *out, uint32_t most);
 
 #define PI 3.14159265358979323846
+/* A crease past a half turn, so a mesh splits at no edge and a solid stays closed by index. */
+#define SMOOTH 4.0
 
 /* Each test file holds one of these per part. */
 void test_vector(void);

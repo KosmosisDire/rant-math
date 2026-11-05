@@ -401,7 +401,7 @@ static partial class Thunks
         ["shape_overlaps"] = a => { var x0 = J.ToShape(a[0]); var x1 = J.ToShape(a[1]); var answer = new Answer(RantMath.ShapeOverlaps(x0, x1)); return answer; },
         ["shape_sample_inside"] = a => { var x0 = J.ToShape(a[0]); var x1 = J.To<ulong>(a[1]); var x2 = J.To<uint>(a[2]); var answer = new Answer(RantMath.ShapeSampleInside(x0, x1, x2)); return answer; },
         ["shape_sample_surface"] = a => { var x0 = J.ToShape(a[0]); var x1 = J.To<ulong>(a[1]); var x2 = J.To<uint>(a[2]); var answer = new Answer(RantMath.ShapeSampleSurface(x0, x1, x2)); return answer; },
-        ["shape_mesh"] = a => { var x0 = J.ToShape(a[0]); var x1 = J.To<uint>(a[1]); var answer = new Answer(RantMath.ShapeMesh(x0, x1)); return answer; },
+        ["shape_mesh"] = a => { var x0 = J.ToShape(a[0]); var x1 = J.To<uint>(a[1]); var x2 = J.To<double>(a[2]); var answer = new Answer(RantMath.ShapeMesh(x0, x1, x2)); return answer; },
         ["shape2d_distance"] = a => { var x0 = J.ToShape2D(a[0]); var x1 = J.To<Double2>(a[1]); var answer = new Answer(RantMath.Shape2DDistance(x0, x1)); return answer; },
         ["shape2d_closest"] = a => { var x0 = J.ToShape2D(a[0]); var x1 = J.To<Double2>(a[1]); var answer = new Answer(RantMath.Shape2DClosest(x0, x1)); return answer; },
         ["shape2d_contains"] = a => { var x0 = J.ToShape2D(a[0]); var x1 = J.To<Double2>(a[1]); var answer = new Answer(RantMath.Shape2DContains(x0, x1)); return answer; },

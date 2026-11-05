@@ -816,7 +816,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_overlaps(RawShape* a, RawShape* b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_sample_inside(RawShape* s, ulong seed, Double3* @out, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_sample_surface(RawShape* s, ulong seed, Double3* @out, uint count);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_mesh(RawShape* s, uint segments, Double3* vertices, uint* vertex_count, uint* triangles, uint* triangle_count);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_shape_mesh(RawShape* s, uint segments, double crease, Double3* vertices, Double3* normals, uint* vertex_count, uint* triangles, uint* triangle_count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_aligned_box2d(AlignedBox2D b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_oriented_box2d(OrientedBox2D b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern RawShape2D rant_shape2d_from_circle(Circle c);
@@ -4038,24 +4038,28 @@ namespace Rant.Math
             }
         }
 
-        /// <summary>The surface as triangles counterclockwise seen from outside, closed for a solid. A round part
-        /// takes segments round it, 0 for 32.</summary>
-        public static unsafe (Double3[] Vertices, uint[] Triangles) ShapeMesh(Shape s, uint segments)
+        /// <summary>Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0
+        /// for 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md
+        /// says.</summary>
+        public static unsafe (Double3[] Vertices, Double3[] Normals, uint[] Triangles) ShapeMesh(Shape s, uint segments, double crease)
         {
             fixed (RawShape* c_s = &s.Raw)
             {
                 uint n0 = 0;
-                uint n1 = 0;
-                Impl.Room(Native.rant_shape_mesh(c_s, segments, null, &n0, null, &n1));
+                uint n2 = 0;
+                Impl.Room(Native.rant_shape_mesh(c_s, segments, crease, null, null, &n0, null, &n2));
                 var o0 = new Double3[(int)n0];
-                var o1 = new uint[(int)n1 * 3];
+                var o1 = new Double3[(int)n0];
+                var o2 = new uint[(int)n2 * 3];
                 fixed (Double3* p0 = o0)
-                fixed (uint* p1 = o1)
+                fixed (Double3* p1 = o1)
+                fixed (uint* p2 = o2)
                 {
-                    Impl.Check(Native.rant_shape_mesh(c_s, segments, p0, &n0, p1, &n1));
+                    Impl.Check(Native.rant_shape_mesh(c_s, segments, crease, p0, p1, &n0, p2, &n2));
                     Array.Resize(ref o0, (int)n0);
-                    Array.Resize(ref o1, (int)n1 * 3);
-                    return (o0, o1);
+                    Array.Resize(ref o1, (int)n0);
+                    Array.Resize(ref o2, (int)n2 * 3);
+                    return (o0, o1, o2);
                 }
             }
         }

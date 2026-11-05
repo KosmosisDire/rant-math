@@ -3458,7 +3458,8 @@ const std::map<std::string, Thunk> thunks = {
         (void)a;
         Shape x0 = get_shape(a[0]);
         uint32_t x1 = get<uint32_t>(a[1]);
-        J out = put(rant::math::shape_mesh(x0, x1));
+        double x2 = get<double>(a[2]);
+        J out = put(rant::math::shape_mesh(x0, x1, x2));
         return out;
     }},
     {"shape2d_distance", [](const std::vector<J> &a) {

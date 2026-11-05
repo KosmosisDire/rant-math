@@ -2354,18 +2354,20 @@ inline std::vector<Double3> shape_sample_surface(const Shape &s, uint64_t seed, 
     return o0;
 }
 
-/* The surface as triangles counterclockwise seen from outside, closed for a solid. A round part takes */
-/* segments round it, 0 for 32. */
-inline std::tuple<std::vector<Double3>, std::vector<uint32_t>> shape_mesh(const Shape &s, uint32_t segments) {
+/* Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for */
+/* 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says. */
+inline std::tuple<std::vector<Double3>, std::vector<Double3>, std::vector<uint32_t>> shape_mesh(const Shape &s, uint32_t segments, double crease) {
     uint32_t n0 = 0;
-    uint32_t n1 = 0;
-    impl::room(detail::rant_shape_mesh(s.raw(), segments, nullptr, &n0, nullptr, &n1));
+    uint32_t n2 = 0;
+    impl::room(detail::rant_shape_mesh(s.raw(), segments, crease, nullptr, nullptr, &n0, nullptr, &n2));
     std::vector<Double3> o0(n0);
-    std::vector<uint32_t> o1(size_t(n1) * 3);
-    impl::check(detail::rant_shape_mesh(s.raw(), segments, impl::mut<detail::RantDouble3>(o0.data()), &n0, o1.data(), &n1));
+    std::vector<Double3> o1(n0);
+    std::vector<uint32_t> o2(size_t(n2) * 3);
+    impl::check(detail::rant_shape_mesh(s.raw(), segments, crease, impl::mut<detail::RantDouble3>(o0.data()), impl::mut<detail::RantDouble3>(o1.data()), &n0, o2.data(), &n2));
     o0.resize(n0);
-    o1.resize(size_t(n1) * 3);
-    return std::tuple<std::vector<Double3>, std::vector<uint32_t>>{ std::move(o0), std::move(o1) };
+    o1.resize(n0);
+    o2.resize(size_t(n2) * 3);
+    return std::tuple<std::vector<Double3>, std::vector<Double3>, std::vector<uint32_t>>{ std::move(o0), std::move(o1), std::move(o2) };
 }
 
 inline Shape2D shape2d_from_aligned_box2d(AlignedBox2D b) {

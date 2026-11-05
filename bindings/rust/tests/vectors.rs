@@ -595,8 +595,8 @@ fn shapes_borrow() {
     let line = shape_from_polyline(&points);
     let copy = line;
     assert!((shape_distance(&copy, d3(1.0, 1.0, 0.0)) - 1.0).abs() < 1e-12);
-    let (vertices, triangles) = shape_mesh(&shape_from_sphere(Sphere { center: d3(0.0, 0.0, 0.0), radius: 1.0 }), 8).unwrap();
-    assert!(!vertices.is_empty() && !triangles.is_empty() && triangles.len() % 3 == 0);
+    let (vertices, normals, triangles) = shape_mesh(&shape_from_sphere(Sphere { center: d3(0.0, 0.0, 0.0), radius: 1.0 }), 8, 0.5).unwrap();
+    assert!(!vertices.is_empty() && normals.len() == vertices.len() && !triangles.is_empty() && triangles.len() % 3 == 0);
 }
 
 #[test]

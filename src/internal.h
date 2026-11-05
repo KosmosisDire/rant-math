@@ -36,6 +36,16 @@ static inline RantDouble2 i_math_flat(RantDouble3 v){ return rant_double2(v.x, v
 void i_math_closest_lines(RantDouble3 p1, RantDouble3 d1, double hi1,
                           RantDouble3 p2, RantDouble3 d2, double hi2, double *s, double *t);
 
+/* Three numbers and an index for qsort, ordered by the numbers, then the index. No key may be NaN. */
+typedef struct { double key[3]; uint32_t i; } i_MathKey;
+
+static inline int i_math_compare_keys(const void *a, const void *b){
+    const i_MathKey *x = (const i_MathKey *)a, *y = (const i_MathKey *)b;
+    int k;
+    for (k = 0; k < 3; k++) if (x->key[k] != y->key[k]) return x->key[k] < y->key[k] ? -1 : 1;
+    return x->i < y->i ? -1 : (x->i > y->i);
+}
+
 /* The rule of a call that writes a list: *count holds the room and gets the need. */
 static inline RantMathResult i_math_room(uint32_t *count, uint32_t need, const void *out){
     uint32_t room = *count;

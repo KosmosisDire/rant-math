@@ -5121,20 +5121,21 @@ export function shapeSampleSurface(s: Shape, seed: number, count: number): Doubl
     return listOut(o0, s0, 24, r_RantDouble3, 3, false);
 }
 
-/** The surface as triangles counterclockwise seen from outside, closed for a solid. A round part takes
- * segments round it, 0 for 32. */
-export function shapeMesh(s: Shape, segments: number): [Double3[], Uint32Array] {
+/** Triangles counterclockwise from outside, normals beside vertices, a round part in segments, 0 for
+ * 32. Faces meeting at over crease radians get their own vertices there, as docs/shapes.md says. */
+export function shapeMesh(s: Shape, segments: number, crease: number): [Double3[], Double3[], Uint32Array] {
     begin();
     const c_s = shapeIn(s);
     const n0 = alloc(4); U32[n0 >> 2] = 0;
-    const n1 = alloc(4); U32[n1 >> 2] = 0;
-    room(wasm._rm_shape_mesh(c_s, segments, 0, n0, 0, n1));
+    const n2 = alloc(4); U32[n2 >> 2] = 0;
+    room(wasm._rm_shape_mesh(c_s, segments, crease, 0, 0, n0, 0, n2));
     refresh();
     const o0 = alloc(24 * U32[n0 >> 2] * 1);
-    const o1 = alloc(4 * U32[n1 >> 2] * 3);
-    check(wasm._rm_shape_mesh(c_s, segments, o0, n0, o1, n1));
+    const o1 = alloc(24 * U32[n0 >> 2] * 1);
+    const o2 = alloc(4 * U32[n2 >> 2] * 3);
+    check(wasm._rm_shape_mesh(c_s, segments, crease, o0, o1, n0, o2, n2));
     refresh();
-    return [listOut(o0, U32[n0 >> 2], 24, r_RantDouble3, 3, false), numbersOut(o1, U32[n1 >> 2] * 3, Uint32Array)];
+    return [listOut(o0, U32[n0 >> 2], 24, r_RantDouble3, 3, false), listOut(o1, U32[n0 >> 2], 24, r_RantDouble3, 3, false), numbersOut(o2, U32[n2 >> 2] * 3, Uint32Array)];
 }
 
 export function shape2dFromAlignedBox2d(b: AlignedBox2D): Shape2D {

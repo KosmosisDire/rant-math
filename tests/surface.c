@@ -198,7 +198,7 @@ static void vertex_normals(void){
     ball.center = rant_double3(1, -2, 0.5);
     ball.radius = 2.0;
     s = rant_shape_from_sphere(ball);
-    rant_shape_mesh(&s, 48, v, &nv, t, &nt);
+    rant_shape_mesh(&s, 48, SMOOTH, v, NULL, &nv, t, &nt);
     m.vertices = v; m.vertex_count = nv; m.triangles = t; m.triangle_count = nt;
     CHECK(rant_mesh_normals(m, n) == RANT_MATH_OK, "a ball's normals");
     {   /* the sum of each triangle's twice area normal, by its definition */

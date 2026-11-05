@@ -645,8 +645,8 @@ static void lists() {
     CHECK(indices.size() == 2 && indices[0] == 0 && near(distances[0], 0.1));
     auto [inside, far] = kdtree_within(other, { 0, 0, 0 }, 0.5);
     CHECK(inside.size() == 1 && far.size() == 1);
-    auto [vertices, triangles] = shape_mesh(shape_from_sphere(Sphere{ { 0, 0, 0 }, 1 }), 8);
-    CHECK(!vertices.empty() && triangles.size() % 3 == 0 && !triangles.empty());
+    auto [vertices, normals, triangles] = shape_mesh(shape_from_sphere(Sphere{ { 0, 0, 0 }, 1 }), 8, 0.5);
+    CHECK(!vertices.empty() && normals.size() == vertices.size() && triangles.size() % 3 == 0 && !triangles.empty());
 }
 
 static void images() {
