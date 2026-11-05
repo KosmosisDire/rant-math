@@ -1,0 +1,50 @@
+# The Python package: the wrapper in bindings/python/rant_math, the shared library the CMake target
+# rant_math_shared builds, and a private copy of Rant's standard types for when Rant is not installed.
+[build-system]
+requires = ["scikit-build-core>=0.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "rant-math"
+dynamic = ["version"]
+description = "Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds."
+readme = "bindings/python/README.md"
+requires-python = ">=3.9"
+keywords = ["robotics", "geometry", "poses", "point cloud", "rant"]
+authors = [{ name = "Nathan George" }]
+
+[project.urls]
+Homepage = "https://github.com/KosmosisDire/rant-math"
+
+[tool.scikit-build]
+metadata.version.provider = "scikit_build_core.metadata.regex"
+metadata.version.input = "VERSION"
+metadata.version.regex = "(?P<value>[0-9.]+)"
+wheel.packages = ["bindings/python/rant_math"]
+# ctypes needs no Python ABI, so the wheel is py3-none-<platform>: one per platform.
+wheel.py-api = "py3"
+cmake.build-type = "Release"
+sdist.exclude = [".github", "build", "build-*", "tests", "docs"]
+
+[tool.scikit-build.cmake.define]
+RANT_BUILD_TOOLS = "OFF"
+RANT_INSTALL = "OFF"
+
+# One interpreter per platform is enough since the wheel is py3-none. Linux builds inside manylinux.
+[tool.cibuildwheel]
+build = "cp312-*"
+skip = "*-musllinux_*"
+test-requires = ["numpy"]
+test-command = "python {project}/tests/bindings/python_test.py {project}/tests/bindings/vectors.json"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "aarch64"]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[tool.cibuildwheel.macos]
+archs = ["universal2"]
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
