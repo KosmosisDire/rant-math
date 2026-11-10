@@ -170,7 +170,8 @@ def own_types(m):
         out.append(f"    public enum {e.short}\n    {{\n" + "\n".join(f"        {n} = {v}," for n, (_, v) in zip(names, e.options)) + "\n    }\n")
     for s in m.own_structs():
         lines = [f"        public {cs_type(m, f.type)} {pascal(f.name)};" for f in s.fields]
-        out.append(f"    [StructLayout(LayoutKind.Sequential)]\n    public struct {s.short}\n    {{\n" + "\n".join(lines) + "\n    }\n")
+        out.append(f"    [StructLayout(LayoutKind.Sequential)]\n    public struct {s.short}\n    {{\n" + "\n".join(lines) + statics(m, s.short) +
+                   "\n    }\n")
     return "\n".join(out)
 
 
@@ -578,6 +579,52 @@ def function(m, f):
     return doc + head + "\n".join("            " + line for line in body) + "\n        }\n"
 
 
+def method_call(m, me, self_name):
+    """The RantMath call a method stands for, each argument by name since RantMath puts optional ones last."""
+    f = me.func
+    args = []
+    for k, i in enumerate(f.inputs):
+        if k == me.self_index and not me.static:
+            v = f"{self_name}.{pascal(me.field)}" if me.field else self_name
+        else:
+            v = camel(i.name)
+        args.append(f"{camel(i.name)}: {v}")
+    return f"RantMath.{pascal(f.name)}({', '.join(args)})"
+
+
+def method_params(m, me):
+    rest = [input_decl(m, i) for k, i in enumerate(me.func.inputs) if me.static or k != me.self_index]
+    return [a for a in rest if " = null" not in a] + [a for a in rest if " = null" in a]
+
+
+def extensions(m):
+    """A static class per type of extension methods: C# lets no other assembly add members to Rant's types.
+    A static of a type is a real one only on math's own, which this file defines."""
+    by_type = {}
+    for me in m.methods:
+        # Matrices and covariances are nested arrays here, which a method would put on every such array.
+        if not me.static and "Rant" + me.type not in ALIASES:
+            by_type.setdefault(me.type, []).append(me)
+    out = []
+    for t, methods in by_type.items():
+        lines = []
+        for me in methods:
+            params = ", ".join([f"this {t} self"] + method_params(m, me))
+            lines.append(f"        public static {result_type(m, me.func)} {pascal(me.name)}({params}) => {method_call(m, me, 'self')};")
+        out.append(f"    /// <summary>The methods of {t}.</summary>\n    public static class {t}Methods\n    {{\n" + "\n".join(lines) + "\n    }\n")
+    return "\n".join(out)
+
+
+def statics(m, t):
+    """The static methods of one of math's own types, written in its body."""
+    lines = []
+    for me in m.methods:
+        if me.static and me.type == t:
+            lines.append(f"        public static {result_type(m, me.func)} {pascal(me.name)}({', '.join(method_params(m, me))}) => "
+                         f"{method_call(m, me, '')};")
+    return "\n" + "\n".join(lines) if lines else ""
+
+
 def api(m):
     natives = [native_decl(m, f) for f in m.functions if not f.hand]
     functions = [function(m, f) for f in m.functions if not f.hand]
@@ -599,7 +646,8 @@ namespace Rant.Math
     public static partial class RantMath
     {
 """ + "\n".join(functions) + """    }
-}
+
+""" + extensions(m) + """}
 """)
 
 

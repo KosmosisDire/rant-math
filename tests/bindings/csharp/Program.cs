@@ -367,6 +367,20 @@ public static class Program
         Check(RantMath.AlignedBoxCorners(new AlignedBox { Min = D3(0, 0, 0), Max = D3(1, 1, 1) }).Length == 8, "fixed lists");
     }
 
+    static void Methods()
+    {
+        var q = RantMath.QuaternionFromAxisAngle(D3(0, 0, 1), System.Math.PI / 2);
+        var p = new Pose { Position = D3(1, 0, 0), Orientation = q };
+        Check(p.Apply(D3(1, 0, 0)).IsNear(D3(1, 1, 0), 1e-12) && p.Inverse().Apply(p.Apply(D3(2, 3, 4))).IsNear(D3(2, 3, 4), 1e-12), "pose methods");
+        Check(D3(3, 4, 0).Length() == 5.0 && D3(3, 4, 0).Normalize().IsNear(D3(0.6, 0.8, 0), 1e-12), "vector methods");
+        Check(q.IsNear(new Quaternion { X = -q.X, Y = -q.Y, Z = -q.Z, W = -q.W }, 1e-12), "q is near -q");
+        Check(new Twist { Linear = D3(1, 0, 0) }.Transform(p).Linear.IsNear(D3(0, 1, 0), 1e-12), "the value need not come first in C");
+        Check(new Sphere { Center = D3(0, 0, 0), Radius = 2 }.ToShape().Distance(D3(5, 0, 0)) == 3.0, "to a shape and its methods");
+        var square = new Polygon2D { Points = new[] { new Double2 { X = 0, Y = 0 }, new Double2 { X = 2, Y = 0 }, new Double2 { X = 2, Y = 2 }, new Double2 { X = 0, Y = 2 } } };
+        Check(square.Area() == 4.0, "a list type reads its points");
+        Check(Axes.Of(AxesPreset.Unity).PointTo(D3(1, 2, 3)).IsNear(RantMath.AxesPointTo(RantMath.AxesOf(AxesPreset.Unity), D3(1, 2, 3)), 0), "a static of math's own type");
+    }
+
     static void Lists()
     {
         var points = new[] { D3(0, 0, 0), D3(2, 0, 0) };
@@ -467,6 +481,7 @@ public static class Program
     {
         Replay(argv[0]);
         Results();
+        Methods();
         Lists();
         Shapes();
         Images();

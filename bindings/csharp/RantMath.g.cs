@@ -88,6 +88,8 @@ namespace Rant.Math
         public sbyte Y;
         public sbyte Z;
         public double Scale;
+        public static Axes Of(AxesPreset preset) => RantMath.AxesOf(preset: preset);
+        public static Axes Make(int x, int y, int z, double scale) => RantMath.AxesMake(x: x, y: y, z: z, scale: scale);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -5106,5 +5108,643 @@ namespace Rant.Math
                 return o0;
             }
         }
+    }
+
+    /// <summary>The methods of Double2.</summary>
+    public static class Double2Methods
+    {
+        public static Double2 Add(this Double2 self, Double2 b) => RantMath.Double2Add(a: self, b: b);
+        public static Double2 Subtract(this Double2 self, Double2 b) => RantMath.Double2Subtract(a: self, b: b);
+        public static Double2 Scale(this Double2 self, double k) => RantMath.Double2Scale(a: self, k: k);
+        public static Double2 Multiply(this Double2 self, Double2 b) => RantMath.Double2Multiply(a: self, b: b);
+        public static double Dot(this Double2 self, Double2 b) => RantMath.Double2Dot(a: self, b: b);
+        public static double Cross(this Double2 self, Double2 b) => RantMath.Double2Cross(a: self, b: b);
+        public static double Length(this Double2 self) => RantMath.Double2Length(a: self);
+        public static double LengthSquared(this Double2 self) => RantMath.Double2LengthSquared(a: self);
+        public static double Distance(this Double2 self, Double2 b) => RantMath.Double2Distance(a: self, b: b);
+        public static bool IsNear(this Double2 self, Double2 b, double tolerance) => RantMath.Double2IsNear(a: self, b: b, tolerance: tolerance);
+        public static Double2 Normalize(this Double2 self) => RantMath.Double2Normalize(a: self);
+        public static Double2 Lerp(this Double2 self, Double2 b, double t) => RantMath.Double2Lerp(a: self, b: b, t: t);
+        public static Double2 Min(this Double2 self, Double2 b) => RantMath.Double2Min(a: self, b: b);
+        public static Double2 Max(this Double2 self, Double2 b) => RantMath.Double2Max(a: self, b: b);
+        public static double Angle(this Double2 self, Double2 b) => RantMath.Double2Angle(a: self, b: b);
+        public static double Heading(this Double2 self) => RantMath.Double2Heading(a: self);
+        public static Double2 Rotate(this Double2 self, double angle) => RantMath.Double2Rotate(a: self, angle: angle);
+        public static Double2 Perpendicular(this Double2 self) => RantMath.Double2Perpendicular(a: self);
+        public static Double2 Project(this Double2 self, Double2 onto) => RantMath.Double2Project(a: self, onto: onto);
+        public static Double2 Reflect(this Double2 self, Double2 normal) => RantMath.Double2Reflect(a: self, normal: normal);
+    }
+
+    /// <summary>The methods of Double3.</summary>
+    public static class Double3Methods
+    {
+        public static Double3 Add(this Double3 self, Double3 b) => RantMath.Double3Add(a: self, b: b);
+        public static Double3 Subtract(this Double3 self, Double3 b) => RantMath.Double3Subtract(a: self, b: b);
+        public static Double3 Scale(this Double3 self, double k) => RantMath.Double3Scale(a: self, k: k);
+        public static Double3 Multiply(this Double3 self, Double3 b) => RantMath.Double3Multiply(a: self, b: b);
+        public static double Dot(this Double3 self, Double3 b) => RantMath.Double3Dot(a: self, b: b);
+        public static Double3 Cross(this Double3 self, Double3 b) => RantMath.Double3Cross(a: self, b: b);
+        public static double Length(this Double3 self) => RantMath.Double3Length(a: self);
+        public static double LengthSquared(this Double3 self) => RantMath.Double3LengthSquared(a: self);
+        public static double Distance(this Double3 self, Double3 b) => RantMath.Double3Distance(a: self, b: b);
+        public static bool IsNear(this Double3 self, Double3 b, double tolerance) => RantMath.Double3IsNear(a: self, b: b, tolerance: tolerance);
+        public static Double3 Normalize(this Double3 self) => RantMath.Double3Normalize(a: self);
+        public static Double3 Lerp(this Double3 self, Double3 b, double t) => RantMath.Double3Lerp(a: self, b: b, t: t);
+        public static Double3 Min(this Double3 self, Double3 b) => RantMath.Double3Min(a: self, b: b);
+        public static Double3 Max(this Double3 self, Double3 b) => RantMath.Double3Max(a: self, b: b);
+        public static double Angle(this Double3 self, Double3 b) => RantMath.Double3Angle(a: self, b: b);
+        public static Double3 Project(this Double3 self, Double3 onto) => RantMath.Double3Project(a: self, onto: onto);
+        public static Double3 Reflect(this Double3 self, Double3 normal) => RantMath.Double3Reflect(a: self, normal: normal);
+        public static Double3 Perpendicular(this Double3 self) => RantMath.Double3Perpendicular(a: self);
+    }
+
+    /// <summary>The methods of Double4.</summary>
+    public static class Double4Methods
+    {
+        public static Double4 Add(this Double4 self, Double4 b) => RantMath.Double4Add(a: self, b: b);
+        public static Double4 Subtract(this Double4 self, Double4 b) => RantMath.Double4Subtract(a: self, b: b);
+        public static Double4 Scale(this Double4 self, double k) => RantMath.Double4Scale(a: self, k: k);
+        public static double Dot(this Double4 self, Double4 b) => RantMath.Double4Dot(a: self, b: b);
+        public static double Length(this Double4 self) => RantMath.Double4Length(a: self);
+        public static Double4 Normalize(this Double4 self) => RantMath.Double4Normalize(a: self);
+        public static Double4 Lerp(this Double4 self, Double4 b, double t) => RantMath.Double4Lerp(a: self, b: b, t: t);
+    }
+
+    /// <summary>The methods of Quaternion.</summary>
+    public static class QuaternionMethods
+    {
+        public static double[] ToEuler(this Quaternion self, EulerOrder order) => RantMath.QuaternionToEuler(q: self, order: order);
+        public static (Double3 Axis, double Angle) ToAxisAngle(this Quaternion self) => RantMath.QuaternionToAxisAngle(q: self);
+        public static Double3 ToRotationVector(this Quaternion self) => RantMath.QuaternionToRotationVector(q: self);
+        public static float[][] ToMatrix3x3(this Quaternion self) => RantMath.Matrix3x3FromQuaternion(q: self);
+        public static Quaternion Compose(this Quaternion self, Quaternion b) => RantMath.QuaternionCompose(a: self, b: b);
+        public static Quaternion Inverse(this Quaternion self) => RantMath.QuaternionInverse(q: self);
+        public static Quaternion Normalize(this Quaternion self) => RantMath.QuaternionNormalize(q: self);
+        public static Double3 Rotate(this Quaternion self, Double3 v) => RantMath.QuaternionRotate(q: self, v: v);
+        public static Quaternion Slerp(this Quaternion self, Quaternion b, double t) => RantMath.QuaternionSlerp(a: self, b: b, t: t);
+        public static double Angle(this Quaternion self, Quaternion b) => RantMath.QuaternionAngle(a: self, b: b);
+        public static bool IsNear(this Quaternion self, Quaternion b, double tolerance) => RantMath.QuaternionIsNear(a: self, b: b, tolerance: tolerance);
+        public static Quaternion Integrate(this Quaternion self, Double3 angularVelocity, double dt) => RantMath.QuaternionIntegrate(q: self, angularVelocity: angularVelocity, dt: dt);
+        public static double Yaw(this Quaternion self) => RantMath.QuaternionYaw(q: self);
+    }
+
+    /// <summary>The methods of Pose.</summary>
+    public static class PoseMethods
+    {
+        public static Pose Compose(this Pose self, Pose b) => RantMath.PoseCompose(a: self, b: b);
+        public static Pose Inverse(this Pose self) => RantMath.PoseInverse(p: self);
+        public static Pose Between(this Pose self, Pose b) => RantMath.PoseBetween(a: self, b: b);
+        public static Double3 Apply(this Pose self, Double3 point) => RantMath.PoseApply(p: self, point: point);
+        public static Double3 ApplyInverse(this Pose self, Double3 point) => RantMath.PoseApplyInverse(p: self, point: point);
+        public static Double3[] ApplyPoints(this Pose self, ReadOnlySpan<Double3> points) => RantMath.PoseApplyPoints(p: self, points: points);
+        public static Pose Interpolate(this Pose self, Pose b, double t) => RantMath.PoseInterpolate(a: self, b: b, t: t);
+        public static float[][] ToMatrix4x4(this Pose self) => RantMath.Matrix4x4FromPose(p: self);
+        public static Pose2D ToPose2D(this Pose self) => RantMath.Pose2DFromPose(p: self);
+        public static Pose Integrate(this Pose self, Twist body, double dt) => RantMath.PoseIntegrate(p: self, body: body, dt: dt);
+    }
+
+    /// <summary>The methods of Pose2D.</summary>
+    public static class Pose2DMethods
+    {
+        public static Pose ToPose(this Pose2D self) => RantMath.PoseFromPose2D(p: self);
+        public static Pose2D Compose(this Pose2D self, Pose2D b) => RantMath.Pose2DCompose(a: self, b: b);
+        public static Pose2D Inverse(this Pose2D self) => RantMath.Pose2DInverse(p: self);
+        public static Pose2D Between(this Pose2D self, Pose2D b) => RantMath.Pose2DBetween(a: self, b: b);
+        public static Double2 Apply(this Pose2D self, Double2 point) => RantMath.Pose2DApply(p: self, point: point);
+        public static Double2 ApplyInverse(this Pose2D self, Double2 point) => RantMath.Pose2DApplyInverse(p: self, point: point);
+        public static Double2[] ApplyPoints(this Pose2D self, ReadOnlySpan<Double2> points) => RantMath.Pose2DApplyPoints(p: self, points: points);
+        public static Pose2D Interpolate(this Pose2D self, Pose2D b, double t) => RantMath.Pose2DInterpolate(a: self, b: b, t: t);
+        public static Pose2D Integrate(this Pose2D self, Twist2D body, double dt) => RantMath.Pose2DIntegrate(p: self, body: body, dt: dt);
+    }
+
+    /// <summary>The methods of Twist.</summary>
+    public static class TwistMethods
+    {
+        public static Twist Transform(this Twist self, Pose p) => RantMath.TwistTransform(p: p, t: self);
+    }
+
+    /// <summary>The methods of Wrench.</summary>
+    public static class WrenchMethods
+    {
+        public static Wrench Transform(this Wrench self, Pose p) => RantMath.WrenchTransform(p: p, w: self);
+    }
+
+    /// <summary>The methods of Twist2D.</summary>
+    public static class Twist2DMethods
+    {
+        public static Twist2D Transform(this Twist2D self, Pose2D p) => RantMath.Twist2DTransform(p: p, t: self);
+    }
+
+    /// <summary>The methods of Wrench2D.</summary>
+    public static class Wrench2DMethods
+    {
+        public static Wrench2D Transform(this Wrench2D self, Pose2D p) => RantMath.Wrench2DTransform(p: p, w: self);
+    }
+
+    /// <summary>The methods of Inertia.</summary>
+    public static class InertiaMethods
+    {
+        public static Inertia Transform(this Inertia self, Pose p) => RantMath.InertiaTransform(i: self, p: p);
+        public static Inertia Add(this Inertia self, Inertia b) => RantMath.InertiaAdd(a: self, b: b);
+        public static OrientedBox Box(this Inertia self) => RantMath.InertiaBox(i: self);
+    }
+
+    /// <summary>The methods of Axes.</summary>
+    public static class AxesMethods
+    {
+        public static Double3 PointTo(this Axes self, Double3 point) => RantMath.AxesPointTo(axes: self, point: point);
+        public static Double3 PointFrom(this Axes self, Double3 point) => RantMath.AxesPointFrom(axes: self, point: point);
+        public static Double3 DirectionTo(this Axes self, Double3 direction) => RantMath.AxesDirectionTo(axes: self, direction: direction);
+        public static Double3 DirectionFrom(this Axes self, Double3 direction) => RantMath.AxesDirectionFrom(axes: self, direction: direction);
+        public static Quaternion QuaternionTo(this Axes self, Quaternion q) => RantMath.AxesQuaternionTo(axes: self, q: q);
+        public static Quaternion QuaternionFrom(this Axes self, Quaternion q) => RantMath.AxesQuaternionFrom(axes: self, q: q);
+        public static Pose PoseTo(this Axes self, Pose p) => RantMath.AxesPoseTo(axes: self, p: p);
+        public static Pose PoseFrom(this Axes self, Pose p) => RantMath.AxesPoseFrom(axes: self, p: p);
+        public static Twist TwistTo(this Axes self, Twist t) => RantMath.AxesTwistTo(axes: self, t: t);
+        public static Twist TwistFrom(this Axes self, Twist t) => RantMath.AxesTwistFrom(axes: self, t: t);
+        public static Wrench WrenchTo(this Axes self, Wrench w) => RantMath.AxesWrenchTo(axes: self, w: w);
+        public static Wrench WrenchFrom(this Axes self, Wrench w) => RantMath.AxesWrenchFrom(axes: self, w: w);
+        public static Accel AccelTo(this Axes self, Accel a) => RantMath.AxesAccelTo(axes: self, a: a);
+        public static Accel AccelFrom(this Axes self, Accel a) => RantMath.AxesAccelFrom(axes: self, a: a);
+        public static double[][] Covariance6To(this Axes self, double[][] points) => RantMath.AxesCovariance6To(axes: self, points: points);
+        public static double[][] Covariance6From(this Axes self, double[][] points) => RantMath.AxesCovariance6From(axes: self, points: points);
+        public static Double3[] PointsTo(this Axes self, ReadOnlySpan<Double3> points) => RantMath.AxesPointsTo(axes: self, points: points);
+        public static Double3[] PointsFrom(this Axes self, ReadOnlySpan<Double3> points) => RantMath.AxesPointsFrom(axes: self, points: points);
+    }
+
+    /// <summary>The methods of Plane.</summary>
+    public static class PlaneMethods
+    {
+        public static double Distance(this Plane self, Double3 point) => RantMath.PlaneDistance(p: self, point: point);
+        public static Double3 Closest(this Plane self, Double3 point) => RantMath.PlaneClosest(p: self, point: point);
+        public static RayHit? Raycast(this Plane self, Ray ray) => RantMath.PlaneRaycast(p: self, ray: ray);
+        public static Plane Transform(this Plane self, Pose pose) => RantMath.PlaneTransform(p: self, pose: pose);
+        public static Ray Intersect(this Plane self, Plane b) => RantMath.PlaneIntersect(a: self, b: b);
+        public static Double3 Intersect3(this Plane self, Plane b, Plane c) => RantMath.PlaneIntersect3(a: self, b: b, c: c);
+    }
+
+    /// <summary>The methods of Segment.</summary>
+    public static class SegmentMethods
+    {
+        public static double Length(this Segment self) => RantMath.SegmentLength(s: self);
+        public static Double3 Closest(this Segment self, Double3 point) => RantMath.SegmentClosest(s: self, point: point);
+        public static double Distance(this Segment self, Double3 point) => RantMath.SegmentDistance(s: self, point: point);
+        public static Segment ClosestSegment(this Segment self, Segment b) => RantMath.SegmentClosestSegment(a: self, b: b);
+        public static Segment Transform(this Segment self, Pose pose) => RantMath.SegmentTransform(s: self, pose: pose);
+        public static AlignedBox Bounds(this Segment self) => RantMath.SegmentBounds(s: self);
+        public static Shape ToShape(this Segment self) => RantMath.ShapeFromSegment(s: self);
+    }
+
+    /// <summary>The methods of Ray.</summary>
+    public static class RayMethods
+    {
+        public static Double3 At(this Ray self, double distance) => RantMath.RayAt(ray: self, distance: distance);
+        public static Double3 Closest(this Ray self, Double3 point) => RantMath.RayClosest(ray: self, point: point);
+        public static double Distance(this Ray self, Double3 point) => RantMath.RayDistance(ray: self, point: point);
+        public static Segment ClosestRay(this Ray self, Ray b) => RantMath.RayClosestRay(a: self, b: b);
+        public static Ray Transform(this Ray self, Pose pose) => RantMath.RayTransform(ray: self, pose: pose);
+    }
+
+    /// <summary>The methods of Plane2D.</summary>
+    public static class Plane2DMethods
+    {
+        public static double Distance(this Plane2D self, Double2 point) => RantMath.Plane2DDistance(p: self, point: point);
+        public static Double2 Closest(this Plane2D self, Double2 point) => RantMath.Plane2DClosest(p: self, point: point);
+        public static RayHit2D? Raycast(this Plane2D self, Ray2D ray) => RantMath.Plane2DRaycast(p: self, ray: ray);
+        public static Plane2D Transform(this Plane2D self, Pose2D pose) => RantMath.Plane2DTransform(p: self, pose: pose);
+        public static Double2 Intersect(this Plane2D self, Plane2D b) => RantMath.Plane2DIntersect(a: self, b: b);
+    }
+
+    /// <summary>The methods of Segment2D.</summary>
+    public static class Segment2DMethods
+    {
+        public static double Length(this Segment2D self) => RantMath.Segment2DLength(s: self);
+        public static Double2 Closest(this Segment2D self, Double2 point) => RantMath.Segment2DClosest(s: self, point: point);
+        public static double Distance(this Segment2D self, Double2 point) => RantMath.Segment2DDistance(s: self, point: point);
+        public static Segment2D ClosestSegment(this Segment2D self, Segment2D b) => RantMath.Segment2DClosestSegment(a: self, b: b);
+        public static Double2? Intersect(this Segment2D self, Segment2D b) => RantMath.Segment2DIntersect(a: self, b: b);
+        public static RayHit2D? Raycast(this Segment2D self, Ray2D ray) => RantMath.Segment2DRaycast(s: self, ray: ray);
+        public static Segment2D Transform(this Segment2D self, Pose2D pose) => RantMath.Segment2DTransform(s: self, pose: pose);
+        public static AlignedBox2D Bounds(this Segment2D self) => RantMath.Segment2DBounds(s: self);
+        public static Shape2D ToShape2D(this Segment2D self) => RantMath.Shape2DFromSegment2D(s: self);
+    }
+
+    /// <summary>The methods of Ray2D.</summary>
+    public static class Ray2DMethods
+    {
+        public static Double2 At(this Ray2D self, double distance) => RantMath.Ray2DAt(ray: self, distance: distance);
+        public static Double2 Closest(this Ray2D self, Double2 point) => RantMath.Ray2DClosest(ray: self, point: point);
+        public static double Distance(this Ray2D self, Double2 point) => RantMath.Ray2DDistance(ray: self, point: point);
+        public static Ray2D Transform(this Ray2D self, Pose2D pose) => RantMath.Ray2DTransform(ray: self, pose: pose);
+    }
+
+    /// <summary>The methods of AlignedBox2D.</summary>
+    public static class AlignedBox2DMethods
+    {
+        public static double Distance(this AlignedBox2D self, Double2 point) => RantMath.AlignedBox2DDistance(b: self, point: point);
+        public static SurfacePoint2D Closest(this AlignedBox2D self, Double2 point) => RantMath.AlignedBox2DClosest(b: self, point: point);
+        public static bool Contains(this AlignedBox2D self, Double2 point) => RantMath.AlignedBox2DContains(b: self, point: point);
+        public static RayHit2D? Raycast(this AlignedBox2D self, Ray2D ray) => RantMath.AlignedBox2DRaycast(b: self, ray: ray);
+        public static Double2 Centroid(this AlignedBox2D self) => RantMath.AlignedBox2DCentroid(b: self);
+        public static double Area(this AlignedBox2D self) => RantMath.AlignedBox2DArea(b: self);
+        public static double Perimeter(this AlignedBox2D self) => RantMath.AlignedBox2DPerimeter(b: self);
+        public static Double2[] Corners(this AlignedBox2D self) => RantMath.AlignedBox2DCorners(b: self);
+        public static Segment2D[] Edges(this AlignedBox2D self) => RantMath.AlignedBox2DEdges(b: self);
+        public static Plane2D[] Planes(this AlignedBox2D self) => RantMath.AlignedBox2DPlanes(b: self);
+        public static OrientedBox2D Transform(this AlignedBox2D self, Pose2D pose) => RantMath.AlignedBox2DTransform(b: self, pose: pose);
+        public static AlignedBox2D Merge(this AlignedBox2D self, AlignedBox2D b) => RantMath.AlignedBox2DMerge(a: self, b: b);
+        public static AlignedBox2D? Overlap(this AlignedBox2D self, AlignedBox2D b) => RantMath.AlignedBox2DOverlap(a: self, b: b);
+        public static AlignedBox2D Grow(this AlignedBox2D self, double margin) => RantMath.AlignedBox2DGrow(b: self, margin: margin);
+        public static double Iou(this AlignedBox2D self, AlignedBox2D b) => RantMath.AlignedBox2DIou(a: self, b: b);
+        public static OrientedBox2D ToOrientedBox2D(this AlignedBox2D self) => RantMath.OrientedBox2DFromAlignedBox2D(b: self);
+        public static Shape2D ToShape2D(this AlignedBox2D self) => RantMath.Shape2DFromAlignedBox2D(b: self);
+    }
+
+    /// <summary>The methods of OrientedBox2D.</summary>
+    public static class OrientedBox2DMethods
+    {
+        public static double Distance(this OrientedBox2D self, Double2 point) => RantMath.OrientedBox2DDistance(b: self, point: point);
+        public static SurfacePoint2D Closest(this OrientedBox2D self, Double2 point) => RantMath.OrientedBox2DClosest(b: self, point: point);
+        public static bool Contains(this OrientedBox2D self, Double2 point) => RantMath.OrientedBox2DContains(b: self, point: point);
+        public static RayHit2D? Raycast(this OrientedBox2D self, Ray2D ray) => RantMath.OrientedBox2DRaycast(b: self, ray: ray);
+        public static AlignedBox2D Bounds(this OrientedBox2D self) => RantMath.OrientedBox2DBounds(b: self);
+        public static double Area(this OrientedBox2D self) => RantMath.OrientedBox2DArea(b: self);
+        public static double Perimeter(this OrientedBox2D self) => RantMath.OrientedBox2DPerimeter(b: self);
+        public static Double2[] Corners(this OrientedBox2D self) => RantMath.OrientedBox2DCorners(b: self);
+        public static Segment2D[] Edges(this OrientedBox2D self) => RantMath.OrientedBox2DEdges(b: self);
+        public static Plane2D[] Planes(this OrientedBox2D self) => RantMath.OrientedBox2DPlanes(b: self);
+        public static OrientedBox2D Transform(this OrientedBox2D self, Pose2D pose) => RantMath.OrientedBox2DTransform(b: self, pose: pose);
+        public static double Iou(this OrientedBox2D self, OrientedBox2D b) => RantMath.OrientedBox2DIou(a: self, b: b);
+        public static Shape2D ToShape2D(this OrientedBox2D self) => RantMath.Shape2DFromOrientedBox2D(b: self);
+    }
+
+    /// <summary>The methods of Circle.</summary>
+    public static class CircleMethods
+    {
+        public static double Distance(this Circle self, Double2 point) => RantMath.CircleDistance(c: self, point: point);
+        public static SurfacePoint2D Closest(this Circle self, Double2 point) => RantMath.CircleClosest(c: self, point: point);
+        public static bool Contains(this Circle self, Double2 point) => RantMath.CircleContains(c: self, point: point);
+        public static RayHit2D? Raycast(this Circle self, Ray2D ray) => RantMath.CircleRaycast(c: self, ray: ray);
+        public static AlignedBox2D Bounds(this Circle self) => RantMath.CircleBounds(c: self);
+        public static double Area(this Circle self) => RantMath.CircleArea(c: self);
+        public static double Perimeter(this Circle self) => RantMath.CirclePerimeter(c: self);
+        public static Circle Transform(this Circle self, Pose2D pose) => RantMath.CircleTransform(c: self, pose: pose);
+        public static Shape2D ToShape2D(this Circle self) => RantMath.Shape2DFromCircle(c: self);
+    }
+
+    /// <summary>The methods of Capsule2D.</summary>
+    public static class Capsule2DMethods
+    {
+        public static double Distance(this Capsule2D self, Double2 point) => RantMath.Capsule2DDistance(c: self, point: point);
+        public static SurfacePoint2D Closest(this Capsule2D self, Double2 point) => RantMath.Capsule2DClosest(c: self, point: point);
+        public static bool Contains(this Capsule2D self, Double2 point) => RantMath.Capsule2DContains(c: self, point: point);
+        public static RayHit2D? Raycast(this Capsule2D self, Ray2D ray) => RantMath.Capsule2DRaycast(c: self, ray: ray);
+        public static AlignedBox2D Bounds(this Capsule2D self) => RantMath.Capsule2DBounds(c: self);
+        public static double Area(this Capsule2D self) => RantMath.Capsule2DArea(c: self);
+        public static double Perimeter(this Capsule2D self) => RantMath.Capsule2DPerimeter(c: self);
+        public static Capsule2D Transform(this Capsule2D self, Pose2D pose) => RantMath.Capsule2DTransform(c: self, pose: pose);
+        public static Shape2D ToShape2D(this Capsule2D self) => RantMath.Shape2DFromCapsule2D(c: self);
+    }
+
+    /// <summary>The methods of Polygon2D.</summary>
+    public static class Polygon2DMethods
+    {
+        public static double Distance(this Polygon2D self, Double2 point) => RantMath.Polygon2DDistance(points: self.Points, point: point);
+        public static SurfacePoint2D Closest(this Polygon2D self, Double2 point) => RantMath.Polygon2DClosest(points: self.Points, point: point);
+        public static bool Contains(this Polygon2D self, Double2 point) => RantMath.Polygon2DContains(points: self.Points, point: point);
+        public static RayHit2D? Raycast(this Polygon2D self, Ray2D ray) => RantMath.Polygon2DRaycast(points: self.Points, ray: ray);
+        public static AlignedBox2D Bounds(this Polygon2D self) => RantMath.Polygon2DBounds(points: self.Points);
+        public static Double2 Centroid(this Polygon2D self) => RantMath.Polygon2DCentroid(points: self.Points);
+        public static double Area(this Polygon2D self) => RantMath.Polygon2DArea(points: self.Points);
+        public static double SignedArea(this Polygon2D self) => RantMath.Polygon2DSignedArea(points: self.Points);
+        public static double Perimeter(this Polygon2D self) => RantMath.Polygon2DPerimeter(points: self.Points);
+        public static bool IsConvex(this Polygon2D self) => RantMath.Polygon2DIsConvex(points: self.Points);
+        public static Segment2D[] Edges(this Polygon2D self) => RantMath.Polygon2DEdges(points: self.Points);
+        public static Plane2D[] Planes(this Polygon2D self) => RantMath.Polygon2DPlanes(points: self.Points);
+        public static uint[] Triangulate(this Polygon2D self) => RantMath.Polygon2DTriangulate(points: self.Points);
+        public static Shape2D ToShape2D(this Polygon2D self) => RantMath.Shape2DFromPolygon2D(points: self.Points);
+    }
+
+    /// <summary>The methods of AlignedBox.</summary>
+    public static class AlignedBoxMethods
+    {
+        public static double Distance(this AlignedBox self, Double3 point) => RantMath.AlignedBoxDistance(b: self, point: point);
+        public static SurfacePoint Closest(this AlignedBox self, Double3 point) => RantMath.AlignedBoxClosest(b: self, point: point);
+        public static bool Contains(this AlignedBox self, Double3 point) => RantMath.AlignedBoxContains(b: self, point: point);
+        public static RayHit? Raycast(this AlignedBox self, Ray ray) => RantMath.AlignedBoxRaycast(b: self, ray: ray);
+        public static Double3 Centroid(this AlignedBox self) => RantMath.AlignedBoxCentroid(b: self);
+        public static double Volume(this AlignedBox self) => RantMath.AlignedBoxVolume(b: self);
+        public static double Area(this AlignedBox self) => RantMath.AlignedBoxArea(b: self);
+        public static Inertia Inertia(this AlignedBox self, double mass) => RantMath.AlignedBoxInertia(b: self, mass: mass);
+        public static Double3[] Corners(this AlignedBox self) => RantMath.AlignedBoxCorners(b: self);
+        public static Segment[] Edges(this AlignedBox self) => RantMath.AlignedBoxEdges(b: self);
+        public static Plane[] Planes(this AlignedBox self) => RantMath.AlignedBoxPlanes(b: self);
+        public static OrientedBox Transform(this AlignedBox self, Pose pose) => RantMath.AlignedBoxTransform(b: self, pose: pose);
+        public static AlignedBox Merge(this AlignedBox self, AlignedBox b) => RantMath.AlignedBoxMerge(a: self, b: b);
+        public static AlignedBox? Overlap(this AlignedBox self, AlignedBox b) => RantMath.AlignedBoxOverlap(a: self, b: b);
+        public static AlignedBox Grow(this AlignedBox self, double margin) => RantMath.AlignedBoxGrow(b: self, margin: margin);
+        public static double Iou(this AlignedBox self, AlignedBox b) => RantMath.AlignedBoxIou(a: self, b: b);
+        public static OrientedBox ToOrientedBox(this AlignedBox self) => RantMath.OrientedBoxFromAlignedBox(b: self);
+        public static Shape ToShape(this AlignedBox self) => RantMath.ShapeFromAlignedBox(b: self);
+    }
+
+    /// <summary>The methods of OrientedBox.</summary>
+    public static class OrientedBoxMethods
+    {
+        public static double Distance(this OrientedBox self, Double3 point) => RantMath.OrientedBoxDistance(b: self, point: point);
+        public static SurfacePoint Closest(this OrientedBox self, Double3 point) => RantMath.OrientedBoxClosest(b: self, point: point);
+        public static bool Contains(this OrientedBox self, Double3 point) => RantMath.OrientedBoxContains(b: self, point: point);
+        public static RayHit? Raycast(this OrientedBox self, Ray ray) => RantMath.OrientedBoxRaycast(b: self, ray: ray);
+        public static AlignedBox Bounds(this OrientedBox self) => RantMath.OrientedBoxBounds(b: self);
+        public static double Volume(this OrientedBox self) => RantMath.OrientedBoxVolume(b: self);
+        public static double Area(this OrientedBox self) => RantMath.OrientedBoxArea(b: self);
+        public static Inertia Inertia(this OrientedBox self, double mass) => RantMath.OrientedBoxInertia(b: self, mass: mass);
+        public static Double3[] Corners(this OrientedBox self) => RantMath.OrientedBoxCorners(b: self);
+        public static Segment[] Edges(this OrientedBox self) => RantMath.OrientedBoxEdges(b: self);
+        public static Plane[] Planes(this OrientedBox self) => RantMath.OrientedBoxPlanes(b: self);
+        public static OrientedBox Transform(this OrientedBox self, Pose pose) => RantMath.OrientedBoxTransform(b: self, pose: pose);
+        public static double Iou(this OrientedBox self, OrientedBox b) => RantMath.OrientedBoxIou(a: self, b: b);
+        public static Shape ToShape(this OrientedBox self) => RantMath.ShapeFromOrientedBox(b: self);
+    }
+
+    /// <summary>The methods of Sphere.</summary>
+    public static class SphereMethods
+    {
+        public static double Distance(this Sphere self, Double3 point) => RantMath.SphereDistance(s: self, point: point);
+        public static SurfacePoint Closest(this Sphere self, Double3 point) => RantMath.SphereClosest(s: self, point: point);
+        public static bool Contains(this Sphere self, Double3 point) => RantMath.SphereContains(s: self, point: point);
+        public static RayHit? Raycast(this Sphere self, Ray ray) => RantMath.SphereRaycast(s: self, ray: ray);
+        public static AlignedBox Bounds(this Sphere self) => RantMath.SphereBounds(s: self);
+        public static double Volume(this Sphere self) => RantMath.SphereVolume(s: self);
+        public static double Area(this Sphere self) => RantMath.SphereArea(s: self);
+        public static Inertia Inertia(this Sphere self, double mass) => RantMath.SphereInertia(s: self, mass: mass);
+        public static Sphere Transform(this Sphere self, Pose pose) => RantMath.SphereTransform(s: self, pose: pose);
+        public static Shape ToShape(this Sphere self) => RantMath.ShapeFromSphere(s: self);
+    }
+
+    /// <summary>The methods of Capsule.</summary>
+    public static class CapsuleMethods
+    {
+        public static double Distance(this Capsule self, Double3 point) => RantMath.CapsuleDistance(c: self, point: point);
+        public static SurfacePoint Closest(this Capsule self, Double3 point) => RantMath.CapsuleClosest(c: self, point: point);
+        public static bool Contains(this Capsule self, Double3 point) => RantMath.CapsuleContains(c: self, point: point);
+        public static RayHit? Raycast(this Capsule self, Ray ray) => RantMath.CapsuleRaycast(c: self, ray: ray);
+        public static AlignedBox Bounds(this Capsule self) => RantMath.CapsuleBounds(c: self);
+        public static Double3 Centroid(this Capsule self) => RantMath.CapsuleCentroid(c: self);
+        public static double Volume(this Capsule self) => RantMath.CapsuleVolume(c: self);
+        public static double Area(this Capsule self) => RantMath.CapsuleArea(c: self);
+        public static Inertia Inertia(this Capsule self, double mass) => RantMath.CapsuleInertia(c: self, mass: mass);
+        public static Capsule Transform(this Capsule self, Pose pose) => RantMath.CapsuleTransform(c: self, pose: pose);
+        public static Shape ToShape(this Capsule self) => RantMath.ShapeFromCapsule(c: self);
+    }
+
+    /// <summary>The methods of Cylinder.</summary>
+    public static class CylinderMethods
+    {
+        public static double Distance(this Cylinder self, Double3 point) => RantMath.CylinderDistance(c: self, point: point);
+        public static SurfacePoint Closest(this Cylinder self, Double3 point) => RantMath.CylinderClosest(c: self, point: point);
+        public static bool Contains(this Cylinder self, Double3 point) => RantMath.CylinderContains(c: self, point: point);
+        public static RayHit? Raycast(this Cylinder self, Ray ray) => RantMath.CylinderRaycast(c: self, ray: ray);
+        public static AlignedBox Bounds(this Cylinder self) => RantMath.CylinderBounds(c: self);
+        public static Double3 Centroid(this Cylinder self) => RantMath.CylinderCentroid(c: self);
+        public static double Volume(this Cylinder self) => RantMath.CylinderVolume(c: self);
+        public static double Area(this Cylinder self) => RantMath.CylinderArea(c: self);
+        public static Inertia Inertia(this Cylinder self, double mass) => RantMath.CylinderInertia(c: self, mass: mass);
+        public static Cylinder Transform(this Cylinder self, Pose pose) => RantMath.CylinderTransform(c: self, pose: pose);
+        public static Shape ToShape(this Cylinder self) => RantMath.ShapeFromCylinder(c: self);
+    }
+
+    /// <summary>The methods of Cone.</summary>
+    public static class ConeMethods
+    {
+        public static double Distance(this Cone self, Double3 point) => RantMath.ConeDistance(c: self, point: point);
+        public static SurfacePoint Closest(this Cone self, Double3 point) => RantMath.ConeClosest(c: self, point: point);
+        public static bool Contains(this Cone self, Double3 point) => RantMath.ConeContains(c: self, point: point);
+        public static RayHit? Raycast(this Cone self, Ray ray) => RantMath.ConeRaycast(c: self, ray: ray);
+        public static AlignedBox Bounds(this Cone self) => RantMath.ConeBounds(c: self);
+        public static Double3 Centroid(this Cone self) => RantMath.ConeCentroid(c: self);
+        public static double Volume(this Cone self) => RantMath.ConeVolume(c: self);
+        public static double Area(this Cone self) => RantMath.ConeArea(c: self);
+        public static Inertia Inertia(this Cone self, double mass) => RantMath.ConeInertia(c: self, mass: mass);
+        public static Cone Transform(this Cone self, Pose pose) => RantMath.ConeTransform(c: self, pose: pose);
+        public static Shape ToShape(this Cone self) => RantMath.ShapeFromCone(c: self);
+    }
+
+    /// <summary>The methods of Prism.</summary>
+    public static class PrismMethods
+    {
+        public static double Distance(this Prism self, Double3 point) => RantMath.PrismDistance(prism: self, point: point);
+        public static SurfacePoint Closest(this Prism self, Double3 point) => RantMath.PrismClosest(prism: self, point: point);
+        public static bool Contains(this Prism self, Double3 point) => RantMath.PrismContains(prism: self, point: point);
+        public static RayHit? Raycast(this Prism self, Ray ray) => RantMath.PrismRaycast(prism: self, ray: ray);
+        public static AlignedBox Bounds(this Prism self) => RantMath.PrismBounds(prism: self);
+        public static Double3 Centroid(this Prism self) => RantMath.PrismCentroid(prism: self);
+        public static double Volume(this Prism self) => RantMath.PrismVolume(prism: self);
+        public static double Area(this Prism self) => RantMath.PrismArea(prism: self);
+        public static Inertia Inertia(this Prism self, double mass) => RantMath.PrismInertia(prism: self, mass: mass);
+        public static Double3[] Corners(this Prism self) => RantMath.PrismCorners(prism: self);
+        public static Segment[] Edges(this Prism self) => RantMath.PrismEdges(prism: self);
+        public static Plane[] Planes(this Prism self) => RantMath.PrismPlanes(prism: self);
+        public static Prism Transform(this Prism self, Pose pose) => RantMath.PrismTransform(prism: self, pose: pose);
+        public static Shape ToShape(this Prism self) => RantMath.ShapeFromPrism(prism: self);
+    }
+
+    /// <summary>The methods of Polyline.</summary>
+    public static class PolylineMethods
+    {
+        public static double Length(this Polyline self) => RantMath.PolylineLength(points: self.Points);
+        public static double Distance(this Polyline self, Double3 point) => RantMath.PolylineDistance(points: self.Points, point: point);
+        public static CurvePoint Closest(this Polyline self, Double3 point) => RantMath.PolylineClosest(points: self.Points, point: point);
+        public static CurvePoint At(this Polyline self, double distance) => RantMath.PolylineAt(points: self.Points, distance: distance);
+        public static AlignedBox Bounds(this Polyline self) => RantMath.PolylineBounds(points: self.Points);
+        public static Segment[] Edges(this Polyline self) => RantMath.PolylineEdges(points: self.Points);
+        public static Double3[] Resample(this Polyline self, uint count) => RantMath.PolylineResample(points: self.Points, count: count);
+        public static Double3[] Simplify(this Polyline self, double tolerance) => RantMath.PolylineSimplify(points: self.Points, tolerance: tolerance);
+        public static Shape ToShape(this Polyline self) => RantMath.ShapeFromPolyline(points: self.Points);
+    }
+
+    /// <summary>The methods of Polyline2D.</summary>
+    public static class Polyline2DMethods
+    {
+        public static double Length(this Polyline2D self) => RantMath.Polyline2DLength(points: self.Points);
+        public static double Distance(this Polyline2D self, Double2 point) => RantMath.Polyline2DDistance(points: self.Points, point: point);
+        public static CurvePoint2D Closest(this Polyline2D self, Double2 point) => RantMath.Polyline2DClosest(points: self.Points, point: point);
+        public static CurvePoint2D At(this Polyline2D self, double distance) => RantMath.Polyline2DAt(points: self.Points, distance: distance);
+        public static AlignedBox2D Bounds(this Polyline2D self) => RantMath.Polyline2DBounds(points: self.Points);
+        public static Segment2D[] Edges(this Polyline2D self) => RantMath.Polyline2DEdges(points: self.Points);
+        public static Plane2D[] Planes(this Polyline2D self) => RantMath.Polyline2DPlanes(points: self.Points);
+        public static Double2[] Resample(this Polyline2D self, uint count) => RantMath.Polyline2DResample(points: self.Points, count: count);
+        public static Double2[] Simplify(this Polyline2D self, double tolerance) => RantMath.Polyline2DSimplify(points: self.Points, tolerance: tolerance);
+        public static Shape2D ToShape2D(this Polyline2D self) => RantMath.Shape2DFromPolyline2D(points: self.Points);
+    }
+
+    /// <summary>The methods of Path.</summary>
+    public static class PathMethods
+    {
+        public static double Length(this Path self) => RantMath.PathLength(poses: self.Poses);
+        public static double Distance(this Path self, Double3 point) => RantMath.PathDistance(poses: self.Poses, point: point);
+        public static CurvePoint Closest(this Path self, Double3 point) => RantMath.PathClosest(poses: self.Poses, point: point);
+        public static Pose At(this Path self, double distance) => RantMath.PathAt(poses: self.Poses, distance: distance);
+        public static AlignedBox Bounds(this Path self) => RantMath.PathBounds(poses: self.Poses);
+        public static Pose[] Resample(this Path self, uint count) => RantMath.PathResample(poses: self.Poses, count: count);
+    }
+
+    /// <summary>The methods of Path2D.</summary>
+    public static class Path2DMethods
+    {
+        public static double Length(this Path2D self) => RantMath.Path2DLength(poses: self.Poses);
+        public static double Distance(this Path2D self, Double2 point) => RantMath.Path2DDistance(poses: self.Poses, point: point);
+        public static CurvePoint2D Closest(this Path2D self, Double2 point) => RantMath.Path2DClosest(poses: self.Poses, point: point);
+        public static Pose2D At(this Path2D self, double distance) => RantMath.Path2DAt(poses: self.Poses, distance: distance);
+        public static AlignedBox2D Bounds(this Path2D self) => RantMath.Path2DBounds(poses: self.Poses);
+        public static Pose2D[] Resample(this Path2D self, uint count) => RantMath.Path2DResample(poses: self.Poses, count: count);
+    }
+
+    /// <summary>The methods of Polygon.</summary>
+    public static class PolygonMethods
+    {
+        public static Plane Plane(this Polygon self) => RantMath.PolygonPlane(points: self.Points);
+        public static (Pose Frame, Double2[] Out) Flatten(this Polygon self) => RantMath.PolygonFlatten(points: self.Points);
+        public static double Distance(this Polygon self, Double3 point) => RantMath.PolygonDistance(points: self.Points, point: point);
+        public static SurfacePoint Closest(this Polygon self, Double3 point) => RantMath.PolygonClosest(points: self.Points, point: point);
+        public static RayHit? Raycast(this Polygon self, Ray ray) => RantMath.PolygonRaycast(points: self.Points, ray: ray);
+        public static AlignedBox Bounds(this Polygon self) => RantMath.PolygonBounds(points: self.Points);
+        public static Double3 Centroid(this Polygon self) => RantMath.PolygonCentroid(points: self.Points);
+        public static double Area(this Polygon self) => RantMath.PolygonArea(points: self.Points);
+        public static double Perimeter(this Polygon self) => RantMath.PolygonPerimeter(points: self.Points);
+        public static Segment[] Edges(this Polygon self) => RantMath.PolygonEdges(points: self.Points);
+        public static Shape ToShape(this Polygon self) => RantMath.ShapeFromPolygon(points: self.Points);
+    }
+
+    /// <summary>The methods of Mesh.</summary>
+    public static class MeshMethods
+    {
+        public static void Check(this Mesh self) => RantMath.MeshCheck(mesh: self);
+        public static double Distance(this Mesh self, Double3 point) => RantMath.MeshDistance(mesh: self, point: point);
+        public static SurfacePoint Closest(this Mesh self, Double3 point) => RantMath.MeshClosest(mesh: self, point: point);
+        public static bool Contains(this Mesh self, Double3 point) => RantMath.MeshContains(mesh: self, point: point);
+        public static RayHit? Raycast(this Mesh self, Ray ray) => RantMath.MeshRaycast(mesh: self, ray: ray);
+        public static AlignedBox Bounds(this Mesh self) => RantMath.MeshBounds(mesh: self);
+        public static double Area(this Mesh self) => RantMath.MeshArea(mesh: self);
+        public static double Volume(this Mesh self) => RantMath.MeshVolume(mesh: self);
+        public static Double3 Centroid(this Mesh self) => RantMath.MeshCentroid(mesh: self);
+        public static Inertia Inertia(this Mesh self, double mass) => RantMath.MeshInertia(mesh: self, mass: mass);
+        public static Double3[] Normals(this Mesh self) => RantMath.MeshNormals(mesh: self);
+        public static Shape ToShape(this Mesh self) => RantMath.ShapeFromMesh(mesh: self);
+    }
+
+    /// <summary>The methods of Shape.</summary>
+    public static class ShapeMethods
+    {
+        public static double Distance(this Shape self, Double3 point) => RantMath.ShapeDistance(s: self, point: point);
+        public static SurfacePoint Closest(this Shape self, Double3 point) => RantMath.ShapeClosest(s: self, point: point);
+        public static bool Contains(this Shape self, Double3 point) => RantMath.ShapeContains(s: self, point: point);
+        public static RayHit? Raycast(this Shape self, Ray ray) => RantMath.ShapeRaycast(s: self, ray: ray);
+        public static AlignedBox Bounds(this Shape self) => RantMath.ShapeBounds(s: self);
+        public static double[] Distances(this Shape self, ReadOnlySpan<Double3> points) => RantMath.ShapeDistances(s: self, points: points);
+        public static (double Gap, Segment Between) Gap(this Shape self, Shape b) => RantMath.ShapeGap(a: self, b: b);
+        public static bool Overlaps(this Shape self, Shape b) => RantMath.ShapeOverlaps(a: self, b: b);
+        public static Double3[] SampleInside(this Shape self, ulong seed, uint count) => RantMath.ShapeSampleInside(s: self, seed: seed, count: count);
+        public static Double3[] SampleSurface(this Shape self, ulong seed, uint count) => RantMath.ShapeSampleSurface(s: self, seed: seed, count: count);
+        public static Mesh Mesh(this Shape self, uint segments, double crease) => RantMath.ShapeMesh(s: self, segments: segments, crease: crease);
+    }
+
+    /// <summary>The methods of Shape2D.</summary>
+    public static class Shape2DMethods
+    {
+        public static double Distance(this Shape2D self, Double2 point) => RantMath.Shape2DDistance(s: self, point: point);
+        public static SurfacePoint2D Closest(this Shape2D self, Double2 point) => RantMath.Shape2DClosest(s: self, point: point);
+        public static bool Contains(this Shape2D self, Double2 point) => RantMath.Shape2DContains(s: self, point: point);
+        public static RayHit2D? Raycast(this Shape2D self, Ray2D ray) => RantMath.Shape2DRaycast(s: self, ray: ray);
+        public static AlignedBox2D Bounds(this Shape2D self) => RantMath.Shape2DBounds(s: self);
+        public static double[] Distances(this Shape2D self, ReadOnlySpan<Double2> points) => RantMath.Shape2DDistances(s: self, points: points);
+        public static (double Gap, Segment2D Between) Gap(this Shape2D self, Shape2D b) => RantMath.Shape2DGap(a: self, b: b);
+        public static bool Overlaps(this Shape2D self, Shape2D b) => RantMath.Shape2DOverlaps(a: self, b: b);
+        public static Double2[] SampleInside(this Shape2D self, ulong seed, uint count) => RantMath.Shape2DSampleInside(s: self, seed: seed, count: count);
+        public static Double2[] SampleSurface(this Shape2D self, ulong seed, uint count) => RantMath.Shape2DSampleSurface(s: self, seed: seed, count: count);
+    }
+
+    /// <summary>The methods of Color.</summary>
+    public static class ColorMethods
+    {
+        public static Color Mix(this Color self, Color b, double t) => RantMath.ColorMix(a: self, b: b, t: t);
+        public static Float4 ToLinear(this Color self) => RantMath.ColorToLinear(c: self);
+    }
+
+    /// <summary>The methods of CameraIntrinsics.</summary>
+    public static class CameraIntrinsicsMethods
+    {
+        public static Double2 Project(this CameraIntrinsics self, Double3 point) => RantMath.CameraProject(camera: self, point: point);
+        public static Double2[] ProjectPoints(this CameraIntrinsics self, ReadOnlySpan<Double3> points) => RantMath.CameraProjectPoints(camera: self, points: points);
+        public static Ray Ray(this CameraIntrinsics self, Double2 pixel) => RantMath.CameraRay(camera: self, pixel: pixel);
+        public static Double3 Unproject(this CameraIntrinsics self, Double2 pixel, double depth) => RantMath.CameraUnproject(camera: self, pixel: pixel, depth: depth);
+        public static CameraIntrinsics Scale(this CameraIntrinsics self, uint width, uint height) => RantMath.CameraScale(camera: self, width: width, height: height);
+        public static CameraIntrinsics Crop(this CameraIntrinsics self, uint x, uint y, uint width, uint height) => RantMath.CameraCrop(camera: self, x: x, y: y, width: width, height: height);
+        public static Double2 Fov(this CameraIntrinsics self) => RantMath.CameraFov(camera: self);
+    }
+
+    /// <summary>The methods of Image.</summary>
+    public static class ImageMethods
+    {
+        public static void Check(this Image self) => RantMath.ImageCheck(image: self);
+        public static Color ColorAt(this Image self, uint x, uint y) => RantMath.ImageColorAt(image: self, x: x, y: y);
+        public static double ValueAt(this Image self, uint x, uint y) => RantMath.ImageValueAt(image: self, x: x, y: y);
+        public static Image Convert(this Image self, ImageFormat format) => RantMath.ImageConvert(src: self, format: format);
+        public static Image Colorize(this Image self, double low, double high, ReadOnlySpan<Color> ramp, ImageFormat format) => RantMath.ImageColorize(src: self, low: low, high: high, ramp: ramp, format: format);
+        public static Image Crop(this Image self, uint x, uint y, uint width, uint height) => RantMath.ImageCrop(image: self, x: x, y: y, width: width, height: height);
+        public static Image FlipHorizontal(this Image self) => RantMath.ImageFlipHorizontal(src: self);
+        public static Image FlipVertical(this Image self) => RantMath.ImageFlipVertical(src: self);
+        public static Image Rotate(this Image self, int quarterTurns) => RantMath.ImageRotate(src: self, quarterTurns: quarterTurns);
+        public static Image Resize(this Image self, ImageFilter filter, uint width, uint height) => RantMath.ImageResize(src: self, filter: filter, width: width, height: height);
+        public static Image Undistort(this Image self, CameraIntrinsics camera, ImageFilter filter, CameraIntrinsics? ideal = null) => RantMath.ImageUndistort(src: self, camera: camera, ideal: ideal, filter: filter);
+        public static void Draw(this Image self, Shape2D shape, Color color, double width) => RantMath.ImageDraw(image: self, shape: shape, color: color, width: width);
+        public static Double3[] DepthPoints(this Image self, CameraIntrinsics camera) => RantMath.ImageDepthPoints(depth: self, camera: camera);
+    }
+
+    /// <summary>The methods of PointCloud.</summary>
+    public static class PointCloudMethods
+    {
+        public static void Check(this PointCloud self) => RantMath.PointCloudCheck(cloud: self);
+        public static PointField? Field(this PointCloud self, string name) => RantMath.PointCloudField(cloud: self, name: name);
+        public static Double3[] ReadPoints(this PointCloud self) => RantMath.PointCloudReadPoints(cloud: self);
+        public static void WritePoints(this PointCloud self, ReadOnlySpan<Double3> points) => RantMath.PointCloudWritePoints(cloud: self, points: points);
+        public static double[] ReadValues(this PointCloud self, string field) => RantMath.PointCloudReadValues(cloud: self, field: field);
+        public static void WriteValues(this PointCloud self, string field, ReadOnlySpan<double> values) => RantMath.PointCloudWriteValues(cloud: self, field: field, values: values);
+        public static Color[] ReadColors(this PointCloud self) => RantMath.PointCloudReadColors(cloud: self);
+        public static void WriteColors(this PointCloud self, ReadOnlySpan<Color> colors) => RantMath.PointCloudWriteColors(cloud: self, colors: colors);
+        public static void Transform(this PointCloud self, Pose pose) => RantMath.PointCloudTransform(cloud: self, pose: pose);
+        public static PointCloud Select(this PointCloud self, ReadOnlySpan<byte> keep) => RantMath.PointCloudSelect(cloud: self, keep: keep);
+    }
+
+    /// <summary>The methods of LaserScan.</summary>
+    public static class LaserScanMethods
+    {
+        public static Double2[] Points(this LaserScan self) => RantMath.LaserScanPoints(scan: self);
+    }
+
+    /// <summary>The methods of KdTree.</summary>
+    public static class KdTreeMethods
+    {
+        public static (uint[] Indices, double[] Distances) Nearest(this KdTree self, Double3 point, uint count) => RantMath.KdtreeNearest(tree: self, point: point, count: count);
+        public static (uint[] Indices, double[] Distances) Within(this KdTree self, Double3 point, double radius) => RantMath.KdtreeWithin(tree: self, point: point, radius: radius);
+    }
+
+    /// <summary>The methods of Grid.</summary>
+    public static class GridMethods
+    {
+        public static Int3 Cell(this Grid self, Double3 point) => RantMath.GridCell(grid: self, point: point);
+        public static Double3 Center(this Grid self, Int3 cell) => RantMath.GridCenter(grid: self, cell: cell);
+        public static double ReadValue(this Grid self, string field, Int3 cell) => RantMath.GridReadValue(grid: self, field: field, cell: cell);
+        public static double[] ReadValues(this Grid self, string field) => RantMath.GridReadValues(grid: self, field: field);
+        public static Color[] ReadColors(this Grid self) => RantMath.GridReadColors(grid: self);
+        public static void WriteValue(this Grid self, string field, Int3 cell, double value) => RantMath.GridWriteValue(grid: self, field: field, cell: cell, value: value);
+    }
+
+    /// <summary>The methods of GeoPoint.</summary>
+    public static class GeoPointMethods
+    {
+        public static Double3 ToEcef(this GeoPoint self) => RantMath.GeoPointToEcef(point: self);
+        public static Double3 ToEnu(this GeoPoint self, GeoPoint point) => RantMath.GeoPointToEnu(origin: self, point: point);
+        public static GeoPoint FromEnu(this GeoPoint self, Double3 enu) => RantMath.GeoPointFromEnu(origin: self, enu: enu);
     }
 }
