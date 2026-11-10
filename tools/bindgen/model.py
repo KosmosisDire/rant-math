@@ -462,8 +462,7 @@ class Walk:
     i: int = 0
     by_c: dict = field(default_factory=dict)      # each C parameter's input or output, for the tags that name one
     rooms: dict = field(default_factory=dict)     # a count parameter that a room output names, to the input it becomes
-    pending: list = field(default_factory=list)   # lists whose count parameter is still to come
-    last_list: object = None
+    pending: list = field(default_factory=list)   # outputs whose count parameter is still to come
 
     def param(self, k=0):
         j = self.i + k
@@ -529,7 +528,6 @@ def list_view(w):
     inp = w.by_c[p.name] = Input(word, "list", elem)
     f.inputs.append(inp)
     f.args.append(Arg("view", inp, p.type))
-    w.last_list = inp
     return 1
 
 
@@ -540,7 +538,6 @@ def mesh_view(w):
     inp = w.by_c[p.name] = Input("mesh", "mesh", "RantMesh")
     f.inputs.append(inp)
     f.args.append(Arg("mesh", inp))
-    w.last_list = inp
     return 1
 
 
@@ -571,7 +568,6 @@ def detection_list(w):
     inp = w.by_c[p.name] = Input(w.name, LIST_KINDS[p.type], p.type)
     f.inputs.append(inp)
     f.args += [Arg("det_ptr", inp), Arg("det_count", inp)]
-    w.last_list = inp
     return 2
 
 
@@ -592,7 +588,6 @@ def list_degree(w):
     inp = w.by_c[p.name] = Input(w.name, "list", p.type)
     f.inputs.append(inp)
     f.args += [Arg("list_ptr", inp), Arg("degree", inp)]
-    w.last_list = inp
     return 2
 
 
@@ -604,7 +599,6 @@ def list_counted(w):
     f.inputs.append(inp)
     f.args.append(Arg("list_ptr", inp))
     f.args.append(Arg("list_count", inp))
-    w.last_list = inp
     return 2
 
 
@@ -627,7 +621,6 @@ def list_with_same_out(w):
     f.inputs.append(inp)
     f.outputs.append(out)
     f.args += [Arg("list_ptr", inp), Arg("out", out), Arg("list_count", inp)]
-    w.last_list = inp
     return 3
 
 
@@ -639,7 +632,6 @@ def list_pair(w):
     b = Input(renamed(nxt), "list", nxt.type)
     f.inputs += [a, b]
     f.args += [Arg("list_ptr", a), Arg("list_ptr", b), Arg("list_count", a, b)]
-    w.last_list = a
     return 3
 
 

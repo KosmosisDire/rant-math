@@ -59,7 +59,7 @@ def test_list_view_renames_the_input():
 
 def test_list_counted_takes_two():
     used, w = run(model.list_counted, P("pts", "RantDouble3", 1, True), P("count", "uint32_t"))
-    assert used == 2 and kinds(w.f.args) == ["list_ptr", "list_count"] and w.last_list is w.f.inputs[0]
+    assert used == 2 and kinds(w.f.args) == ["list_ptr", "list_count"]
 
 
 def test_one_stops_a_counted_list():
