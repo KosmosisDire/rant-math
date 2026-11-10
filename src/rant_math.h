@@ -27,5 +27,6 @@
 #include "grid.h"
 #include "geo.h"
 #include "detection.h"
+#include "table.h"
 
 #endif /* RANT_MATH_H */

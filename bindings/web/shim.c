@@ -765,4 +765,10 @@ EMSCRIPTEN_KEEPALIVE void rm_geo_point_to_enu(RantDouble3 *ret, const RantGeoPoi
 EMSCRIPTEN_KEEPALIVE void rm_geo_point_from_enu(RantGeoPoint *ret, const RantGeoPoint *origin, const RantDouble3 *enu) { *ret = rant_geo_point_from_enu(*origin, *enu); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_detections2d_suppress(const RantDetection2DView *detections, uint32_t count, double iou, uint8_t *keep) { return rant_detections2d_suppress(detections, count, iou, keep); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_detections3d_suppress(const RantDetection3DView *detections, uint32_t count, double iou, uint8_t *keep) { return rant_detections3d_suppress(detections, count, iou, keep); }
+EMSCRIPTEN_KEEPALIVE uint32_t rm_math_function_count(void) { return rant_math_function_count(); }
+EMSCRIPTEN_KEEPALIVE const RantMathFunction * rm_math_function_at(uint32_t index) { return rant_math_function_at(index); }
+EMSCRIPTEN_KEEPALIVE uint32_t rm_math_method_count(void) { return rant_math_method_count(); }
+EMSCRIPTEN_KEEPALIVE const RantMathMethod * rm_math_method_at(uint32_t index) { return rant_math_method_at(index); }
+EMSCRIPTEN_KEEPALIVE uint32_t rm_math_operator_count(void) { return rant_math_operator_count(); }
+EMSCRIPTEN_KEEPALIVE const RantMathOperator * rm_math_operator_at(uint32_t index) { return rant_math_operator_at(index); }
 EMSCRIPTEN_KEEPALIVE const char *rm_result_text(int r) { return rant_math_result_text((RantMathResult)r); }

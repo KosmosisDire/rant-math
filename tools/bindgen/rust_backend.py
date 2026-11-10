@@ -84,6 +84,8 @@ def extern_decl(m, f):
         r = ""
     elif ret == "RantMathResult":
         r = " -> c_int"
+    elif "*" in ret and "RantMath" in ret:
+        r = " -> *const c_void"                                     # a row of the table, read in table.rs
     elif "*" in ret:
         r = " -> *const c_char" if "char" in ret else " -> *const RawPointFieldView"
     elif ret in ("RantShape", "RantShape2D"):
@@ -95,7 +97,7 @@ def extern_decl(m, f):
 
 def ffi(m):
     decls = [extern_decl(m, f) for f in m.functions if f.c != "rant_math_result_text"]
-    return GEN + """use std::ffi::{c_char, c_int};
+    return GEN + """use std::ffi::{c_char, c_int, c_void};
 
 use rant_types::*;
 

@@ -3,3 +3,5 @@
 export * from "./api.js";
 export { MathError } from "./runtime.js";
 export type { ErrorKind } from "./runtime.js";
+export { functions, methods, operators } from "./table.js";
+export type { TableArg, TableFunction, TableMethod, TableOperator } from "./table.js";

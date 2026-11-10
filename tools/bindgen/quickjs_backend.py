@@ -1,6 +1,5 @@
 # The Rust crate's QuickJS glue, for a program that scripts in QuickJS and so has no wasm: the same
 # names and the same plain values as the TypeScript binding, through one host function by number.
-import json
 
 from rust_backend import RUST_SCALARS, name_of, rs_type, short
 from web_backend import camel, type_groups
@@ -328,28 +327,8 @@ def prelude_js(m):
 """
 
 
-def names_js(m):
-    rows = []
-    for f in m.functions:
-        if f.hand:
-            continue
-        takes = []
-        for i in f.inputs:
-            word = camel(i.name)
-            takes.append(word + "?" if i.kind in ("fit_options", "align_options", "opt_ref") else word)
-        words = f.doc or f.name.replace("_", " ")
-        words = words.split(". ")[0].rstrip(".")
-        rows.append({"name": camel(f.name), "takes": takes, "words": words})
-    body = ",\n".join("  " + json.dumps(r, separators=(", ", ": ")) for r in rows)
-    return f"{GEN}// Every call of Rant Math by its name in JavaScript, for completion and hints.\nexport const NAMES = [\n{body},\n];\n"
-
-
 def generate(m):
-    fs = functions_for_glue(m)
-    names = names_js(m)
     return [
         ("bindings/rust/src/quickjs_glue.rs", glue_rs(m)),
         ("bindings/rust/src/quickjs_prelude.js", prelude_js(m)),
-        ("bindings/rust/src/quickjs_names.js", names),
-        ("bindings/web/names.js", names),
     ]

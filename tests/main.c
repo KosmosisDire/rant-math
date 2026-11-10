@@ -101,7 +101,8 @@ static const Part parts[] = {
     { "neighbors", test_neighbors },
     { "grid", test_grid },
     { "geo", test_geo },
-    { "detection", test_detection }
+    { "detection", test_detection },
+    { "table", test_table }
 };
 
 int main(int argc, char **argv){

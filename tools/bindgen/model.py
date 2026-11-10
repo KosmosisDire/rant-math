@@ -38,6 +38,7 @@ HIDDEN_STRUCTS = {
     "RantShape", "RantShape2D", "RantImageView", "RantPointFieldView", "RantPointCloudView",
     "RantGridFieldView", "RantGridView", "RantLaserScanView", "RantFitOptions", "RantAlignOptions",
     "RantMatrixView", "RantPrismView", "RantMeshView", "RantDetection2DView", "RantDetection3DView",
+    "RantMathArg", "RantMathFunction", "RantMathMethod", "RantMathOperator",
 } | set(LIST_VIEWS)
 
 HIDDEN_ENUMS = {"RantMathResult", "RantShapeKind", "RantShape2DKind"}
@@ -416,6 +417,8 @@ def clean_doc(comment):
 
 # Each backend writes these itself: the text its errors carry and the free of its own tree.
 HAND = {"rant_math_result_text", "rant_kdtree_destroy"}
+# The library's table of itself, which a binding reads by hand where it needs it.
+HAND |= {f"rant_math_{w}_{k}" for w in ("function", "method", "operator") for k in ("count", "at")}
 
 # Lists of a type a binding holds as its own kind.
 LIST_KINDS = {"RantDetection2DView": "det2d", "RantDetection3DView": "det3d"}

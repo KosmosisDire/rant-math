@@ -15,8 +15,40 @@ mod glue {
 }
 
 /// Every call by name in JavaScript with what it takes, as a module that exports `NAMES`, for
-/// completion and hints.
-pub const NAMES: &str = include_str!("quickjs_names.js");
+/// completion and hints. It is the library's table, as the TypeScript binding's names.js reads it.
+pub fn names() -> std::string::String {
+    let quote = |s: &str| format!("\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\""));
+    let rows: Vec<std::string::String> = crate::table::functions()
+        .iter()
+        .map(|f| {
+            let takes: Vec<std::string::String> = f
+                .inputs
+                .iter()
+                .map(|i| {
+                    let word = camel(i.name);
+                    quote(&if matches!(i.kind, "fit_options" | "align_options" | "opt_ref") { word + "?" } else { word })
+                })
+                .collect();
+            let words = if f.doc.is_empty() { f.name.replace('_', " ") } else { f.doc.split(". ").next().unwrap_or("").trim_end_matches('.').to_string() };
+            format!("  {{\"name\": {}, \"takes\": [{}], \"words\": {}}}", quote(&camel(f.name)), takes.join(", "), quote(&words))
+        })
+        .collect();
+    format!("export const NAMES = [\n{},\n];\n", rows.join(",\n"))
+}
+
+/// pose2d_apply as JavaScript spells it, pose2dApply.
+fn camel(name: &str) -> std::string::String {
+    let mut parts = name.split('_').filter(|p| !p.is_empty());
+    let mut out = parts.next().unwrap_or("").to_string();
+    for p in parts {
+        let mut c = p.chars();
+        if let Some(first) = c.next() {
+            out.extend(first.to_uppercase());
+            out.push_str(c.as_str());
+        }
+    }
+    out
+}
 
 const PRELUDE: &str = include_str!("quickjs_prelude.js");
 

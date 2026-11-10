@@ -1,5 +1,5 @@
 # One program holds every part's tests, and ctest runs each part on its own.
-set(RANT_MATH_PARTS vector rotation matrix pose motion axes line region solid curve surface points shape fit color camera image cloud neighbors grid geo detection)
+set(RANT_MATH_PARTS vector rotation matrix pose motion axes line region solid curve surface points shape fit color camera image cloud neighbors grid geo detection table)
 
 set(test_sources main.c)
 foreach(part ${RANT_MATH_PARTS})

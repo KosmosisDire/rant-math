@@ -8,6 +8,7 @@ mod api;
 mod ffi;
 mod methods;
 mod own;
+pub mod table;
 
 use std::ffi::{CString, c_char, c_int};
 use std::fmt;

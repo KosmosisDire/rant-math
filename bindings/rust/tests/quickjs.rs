@@ -27,7 +27,7 @@ fn names_read_as_a_module() {
     let rt = Runtime::new().unwrap();
     let ctx = Context::full(&rt).unwrap();
     ctx.with(|ctx| {
-        let (module, done) = Module::declare(ctx.clone(), "names.js", rant_math::quickjs::NAMES).unwrap().eval().catch(&ctx).unwrap();
+        let (module, done) = Module::declare(ctx.clone(), "names.js", rant_math::quickjs::names()).unwrap().eval().catch(&ctx).unwrap();
         done.finish::<()>().catch(&ctx).unwrap();
         let names: Vec<Object> = module.namespace().unwrap().get("NAMES").unwrap();
         assert!(names.len() > 400);

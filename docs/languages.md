@@ -119,6 +119,15 @@ auto plane = rant::math::points_fit_plane(points, options);
 
 C++ finds each with no setting. `RANT_MATH_NO_EIGEN`, `RANT_MATH_NO_OPENCV` and `RANT_MATH_NO_PCL` leave one out.
 
+## The table
+
+The library lists itself, for a tool that finds a call by its name: every call with what it takes and gives,
+and each type's methods and operators.
+
+| C | Rust | TypeScript |
+|---|---|---|
+| `rant_math_function_at(i)`, `rant_math_method_at(i)`, `rant_math_operator_at(i)` | `rant_math::table::functions()` and its kin | `functions()`, `methods()`, `operators()` |
+
 ## Testing a binding
 
 `tools/bindgen/gen.py` writes each binding from the C headers. `tests/bindings/vectors.json` holds the answers

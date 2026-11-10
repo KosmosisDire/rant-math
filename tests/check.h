@@ -66,5 +66,6 @@ void test_neighbors(void);
 void test_grid(void);
 void test_geo(void);
 void test_detection(void);
+void test_table(void);
 
 #endif /* RANT_MATH_CHECK_H */

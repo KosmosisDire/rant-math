@@ -498,3 +498,9 @@ _rm_geo_point_to_enu
 _rm_geo_point_from_enu
 _rm_detections2d_suppress
 _rm_detections3d_suppress
+_rm_math_function_count
+_rm_math_function_at
+_rm_math_method_count
+_rm_math_method_at
+_rm_math_operator_count
+_rm_math_operator_at
