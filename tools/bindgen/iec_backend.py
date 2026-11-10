@@ -1,5 +1,6 @@
 # The PLCnext binding: every call on fixed size values as an IEC function of the PLCnext library Rant,
 # managed C# over a native class RantMath whose C++ copies the values in and out of IEC memory.
+import json
 import textwrap
 
 from csharp_backend import pascal
@@ -14,6 +15,13 @@ SCALARS = {
     "uint8_t": ("byte", "USINT"), "int16_t": ("short", "INT"), "uint16_t": ("ushort", "UINT"),
     "int32_t": ("int", "DINT"), "uint32_t": ("uint", "UDINT"), "int64_t": ("long", "LINT"),
     "uint64_t": ("ulong", "ULINT"),
+}
+
+# The folder under Math in Engineer's library sidebar that each header's calls go in.
+FOLDERS = {
+    "vector.h": "Vectors", "rotation.h": "Rotations", "pose.h": "Poses", "matrix.h": "Matrices", "line.h": "Lines",
+    "solid.h": "Solids", "region.h": "Regions", "motion.h": "Motion", "axes.h": "Axes", "camera.h": "Camera",
+    "color.h": "Color", "geo.h": "Geo",
 }
 
 # Names ST keeps for itself, and the pin each C name becomes instead.
@@ -249,5 +257,25 @@ def cpp(m):
             "    new (this) Rant::RantMath();\n}\n")
 
 
+def folders(m):
+    """Each call's name by the folder the library's sidebar shows it in: its header's, and in that a
+    folder of the type its name starts with when that type has more than one call there. A header
+    whose calls all take one type keeps them in its own folder."""
+    types = sorted((s[4:] for s in m.structs), key=len, reverse=True)
+    groups = {}
+    for f in calls(m):
+        name = pascal(f.name)
+        header = FOLDERS.get(f.header, f.header.removesuffix(".h").capitalize())
+        groups.setdefault(header, []).append((next((t for t in types if name.startswith(t)), ""), name))
+    out = {}
+    for header, named in groups.items():
+        one = len({t for t, _ in named}) == 1
+        for t, name in named:
+            many = t and not one and sum(1 for o, _ in named if o == t) > 1
+            out.setdefault(f"{header}/{t}" if many else header, []).append(name)
+    return json.dumps(out, indent=2) + "\n"
+
+
 def generate(m):
-    return [("bindings/plcnext/RantMath.cs", csharp(m)), ("bindings/plcnext/rant_math_natives.inc", cpp(m))]
+    return [("bindings/plcnext/RantMath.cs", csharp(m)), ("bindings/plcnext/rant_math_natives.inc", cpp(m)),
+            ("bindings/plcnext/RantMath.json", folders(m))]

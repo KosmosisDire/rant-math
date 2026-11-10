@@ -1,0 +1,371 @@
+{
+  "Vectors/Double2": [
+    "Double2Add",
+    "Double2Subtract",
+    "Double2Scale",
+    "Double2Divide",
+    "Double2Negate",
+    "Double2Multiply",
+    "Double2Dot",
+    "Double2Cross",
+    "Double2Length",
+    "Double2LengthSquared",
+    "Double2Distance",
+    "Double2IsNear",
+    "Double2Normalize",
+    "Double2Lerp",
+    "Double2Min",
+    "Double2Max",
+    "Double2Angle",
+    "Double2Heading",
+    "Double2FromHeading",
+    "Double2Rotate",
+    "Double2Perpendicular",
+    "Double2Project",
+    "Double2Reflect",
+    "Double2FromFloat2",
+    "Double2FromInt2"
+  ],
+  "Vectors/Double3": [
+    "Double3Add",
+    "Double3Subtract",
+    "Double3Scale",
+    "Double3Divide",
+    "Double3Negate",
+    "Double3Multiply",
+    "Double3Dot",
+    "Double3Cross",
+    "Double3Length",
+    "Double3LengthSquared",
+    "Double3Distance",
+    "Double3IsNear",
+    "Double3Normalize",
+    "Double3Lerp",
+    "Double3Min",
+    "Double3Max",
+    "Double3Angle",
+    "Double3Project",
+    "Double3Reflect",
+    "Double3Perpendicular",
+    "Double3FromFloat3",
+    "Double3FromInt3"
+  ],
+  "Vectors/Double4": [
+    "Double4Add",
+    "Double4Subtract",
+    "Double4Scale",
+    "Double4Divide",
+    "Double4Negate",
+    "Double4Dot",
+    "Double4Length",
+    "Double4Normalize",
+    "Double4Lerp",
+    "Double4FromFloat4"
+  ],
+  "Vectors": [
+    "Float2FromDouble2",
+    "Float3FromDouble3",
+    "Float4FromDouble4",
+    "Int2Floor",
+    "Int3Floor"
+  ],
+  "Rotations/Quaternion": [
+    "QuaternionFromEuler",
+    "QuaternionFromAxisAngle",
+    "QuaternionToAxisAngle",
+    "QuaternionFromRotationVector",
+    "QuaternionToRotationVector",
+    "QuaternionFromMatrix3x3",
+    "QuaternionBetween",
+    "QuaternionLook",
+    "QuaternionCompose",
+    "QuaternionInverse",
+    "QuaternionNormalize",
+    "QuaternionRotate",
+    "QuaternionSlerp",
+    "QuaternionAngle",
+    "QuaternionIsNear",
+    "QuaternionIntegrate",
+    "QuaternionYaw"
+  ],
+  "Rotations": [
+    "Matrix3x3FromQuaternion",
+    "AngleWrap",
+    "AngleDifference"
+  ],
+  "Matrices/Matrix3x3": [
+    "Matrix3x3Identity",
+    "Matrix3x3Multiply",
+    "Matrix3x3Transpose",
+    "Matrix3x3Determinant",
+    "Matrix3x3Inverse",
+    "Matrix3x3Apply"
+  ],
+  "Matrices/Matrix4x4": [
+    "Matrix4x4Identity",
+    "Matrix4x4Multiply",
+    "Matrix4x4Transpose",
+    "Matrix4x4Determinant",
+    "Matrix4x4Inverse",
+    "Matrix4x4Apply",
+    "Matrix4x4ApplyDirection"
+  ],
+  "Poses/Pose": [
+    "PoseCompose",
+    "PoseInverse",
+    "PoseBetween",
+    "PoseApply",
+    "PoseApplyInverse",
+    "PoseInterpolate",
+    "PoseFromPoints",
+    "PoseLookAt",
+    "PoseFromMatrix4x4",
+    "PoseFromPose2D"
+  ],
+  "Poses": [
+    "Matrix4x4FromPose"
+  ],
+  "Poses/Pose2D": [
+    "Pose2DFromPose",
+    "Pose2DCompose",
+    "Pose2DInverse",
+    "Pose2DBetween",
+    "Pose2DApply",
+    "Pose2DApplyInverse",
+    "Pose2DInterpolate"
+  ],
+  "Motion/Twist": [
+    "TwistTransform",
+    "TwistBetween"
+  ],
+  "Motion": [
+    "WrenchTransform",
+    "PoseIntegrate",
+    "Wrench2DTransform",
+    "Pose2DIntegrate",
+    "Covariance6Rotate"
+  ],
+  "Motion/Twist2D": [
+    "Twist2DTransform",
+    "Twist2DBetween"
+  ],
+  "Motion/Covariance3": [
+    "Covariance3Rotate",
+    "Covariance3Ellipsoid"
+  ],
+  "Motion/Inertia": [
+    "InertiaTransform",
+    "InertiaAdd",
+    "InertiaBox"
+  ],
+  "Axes": [
+    "AxesOf",
+    "AxesMake",
+    "AxesPointTo",
+    "AxesPointFrom",
+    "AxesDirectionTo",
+    "AxesDirectionFrom",
+    "AxesQuaternionTo",
+    "AxesQuaternionFrom",
+    "AxesPoseTo",
+    "AxesPoseFrom",
+    "AxesTwistTo",
+    "AxesTwistFrom",
+    "AxesWrenchTo",
+    "AxesWrenchFrom",
+    "AxesAccelTo",
+    "AxesAccelFrom",
+    "AxesCovariance6To",
+    "AxesCovariance6From"
+  ],
+  "Lines/Plane": [
+    "PlaneFromPoints",
+    "PlaneDistance",
+    "PlaneClosest",
+    "PlaneRaycast",
+    "PlaneTransform",
+    "PlaneIntersect",
+    "PlaneIntersect3"
+  ],
+  "Lines/Segment": [
+    "SegmentLength",
+    "SegmentClosest",
+    "SegmentDistance",
+    "SegmentClosestSegment",
+    "SegmentTransform",
+    "SegmentBounds"
+  ],
+  "Lines/Ray": [
+    "RayAt",
+    "RayClosest",
+    "RayDistance",
+    "RayClosestRay",
+    "RayTransform"
+  ],
+  "Lines/Plane2D": [
+    "Plane2DFromPoints",
+    "Plane2DDistance",
+    "Plane2DClosest",
+    "Plane2DRaycast",
+    "Plane2DTransform",
+    "Plane2DIntersect"
+  ],
+  "Lines/Segment2D": [
+    "Segment2DLength",
+    "Segment2DClosest",
+    "Segment2DDistance",
+    "Segment2DClosestSegment",
+    "Segment2DIntersect",
+    "Segment2DRaycast",
+    "Segment2DTransform",
+    "Segment2DBounds"
+  ],
+  "Lines/Ray2D": [
+    "Ray2DAt",
+    "Ray2DClosest",
+    "Ray2DDistance",
+    "Ray2DTransform"
+  ],
+  "Regions/AlignedBox2D": [
+    "AlignedBox2DDistance",
+    "AlignedBox2DClosest",
+    "AlignedBox2DContains",
+    "AlignedBox2DRaycast",
+    "AlignedBox2DCentroid",
+    "AlignedBox2DArea",
+    "AlignedBox2DPerimeter",
+    "AlignedBox2DTransform",
+    "AlignedBox2DMerge",
+    "AlignedBox2DOverlap",
+    "AlignedBox2DGrow",
+    "AlignedBox2DIou"
+  ],
+  "Regions/OrientedBox2D": [
+    "OrientedBox2DDistance",
+    "OrientedBox2DClosest",
+    "OrientedBox2DContains",
+    "OrientedBox2DRaycast",
+    "OrientedBox2DBounds",
+    "OrientedBox2DArea",
+    "OrientedBox2DPerimeter",
+    "OrientedBox2DTransform",
+    "OrientedBox2DFromAlignedBox2D",
+    "OrientedBox2DIou"
+  ],
+  "Regions/Circle": [
+    "CircleDistance",
+    "CircleClosest",
+    "CircleContains",
+    "CircleRaycast",
+    "CircleBounds",
+    "CircleArea",
+    "CirclePerimeter",
+    "CircleTransform"
+  ],
+  "Regions/Capsule2D": [
+    "Capsule2DDistance",
+    "Capsule2DClosest",
+    "Capsule2DContains",
+    "Capsule2DRaycast",
+    "Capsule2DBounds",
+    "Capsule2DArea",
+    "Capsule2DPerimeter",
+    "Capsule2DTransform"
+  ],
+  "Solids/AlignedBox": [
+    "AlignedBoxDistance",
+    "AlignedBoxClosest",
+    "AlignedBoxContains",
+    "AlignedBoxRaycast",
+    "AlignedBoxCentroid",
+    "AlignedBoxVolume",
+    "AlignedBoxArea",
+    "AlignedBoxInertia",
+    "AlignedBoxTransform",
+    "AlignedBoxMerge",
+    "AlignedBoxOverlap",
+    "AlignedBoxGrow",
+    "AlignedBoxIou"
+  ],
+  "Solids/OrientedBox": [
+    "OrientedBoxDistance",
+    "OrientedBoxClosest",
+    "OrientedBoxContains",
+    "OrientedBoxRaycast",
+    "OrientedBoxBounds",
+    "OrientedBoxVolume",
+    "OrientedBoxArea",
+    "OrientedBoxInertia",
+    "OrientedBoxTransform",
+    "OrientedBoxFromAlignedBox",
+    "OrientedBoxIou"
+  ],
+  "Solids/Sphere": [
+    "SphereDistance",
+    "SphereClosest",
+    "SphereContains",
+    "SphereRaycast",
+    "SphereBounds",
+    "SphereVolume",
+    "SphereArea",
+    "SphereInertia",
+    "SphereTransform"
+  ],
+  "Solids/Capsule": [
+    "CapsuleDistance",
+    "CapsuleClosest",
+    "CapsuleContains",
+    "CapsuleRaycast",
+    "CapsuleBounds",
+    "CapsuleCentroid",
+    "CapsuleVolume",
+    "CapsuleArea",
+    "CapsuleInertia",
+    "CapsuleTransform"
+  ],
+  "Solids/Cylinder": [
+    "CylinderDistance",
+    "CylinderClosest",
+    "CylinderContains",
+    "CylinderRaycast",
+    "CylinderBounds",
+    "CylinderCentroid",
+    "CylinderVolume",
+    "CylinderArea",
+    "CylinderInertia",
+    "CylinderTransform"
+  ],
+  "Solids/Cone": [
+    "ConeDistance",
+    "ConeClosest",
+    "ConeContains",
+    "ConeRaycast",
+    "ConeBounds",
+    "ConeCentroid",
+    "ConeVolume",
+    "ConeArea",
+    "ConeInertia",
+    "ConeTransform"
+  ],
+  "Color": [
+    "ColorMix",
+    "ColorToLinear",
+    "ColorFromLinear",
+    "ColormapAt"
+  ],
+  "Camera": [
+    "CameraProject",
+    "CameraRay",
+    "CameraUnproject",
+    "CameraScale",
+    "CameraCrop",
+    "CameraFov",
+    "CameraFromFov"
+  ],
+  "Geo": [
+    "GeoPointToEcef",
+    "GeoPointFromEcef",
+    "GeoPointToEnu",
+    "GeoPointFromEnu"
+  ]
+}
