@@ -455,187 +455,414 @@ def classify(f, m):
         f.errors = "optional" if f.outputs else "bool"
 
 
+@dataclass
+class Walk:
+    """Where the read of one function's parameters stands, and what its rules share."""
+    f: Func
+    i: int = 0
+    by_c: dict = field(default_factory=dict)      # each C parameter's input or output, for the tags that name one
+    rooms: dict = field(default_factory=dict)     # a count parameter that a room output names, to the input it becomes
+    pending: list = field(default_factory=list)   # lists whose count parameter is still to come
+    last_list: object = None
+
+    def param(self, k=0):
+        j = self.i + k
+        return self.f.params[j] if j < len(self.f.params) else None
+
+    @property
+    def p(self):
+        return self.param()
+
+    @property
+    def name(self):
+        return renamed(self.p)
+
+    @property
+    def nxt(self):
+        return self.param(1)
+
+    @property
+    def counted(self):
+        return is_count(self.nxt)
+
+
+def is_count(p):
+    return p is not None and p.type == "uint32_t" and not p.pointer
+
+
+def fixed_out(w):
+    p, f = w.p, w.f
+    if not p.dim:
+        return None
+    out = Output(p.name, "fixed", p.type, p.dim)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    return 1
+
+
+def matrix_out(w):
+    p, f = w.p, w.f
+    if p.type != "RantMatrixView" or p.pointer or tag(p, "out") is None:
+        return None
+    rows, cols = tag(p, "out").split()
+    out = Output(p.name, "matrix", rows=rows, cols=cols)
+    f.outputs.append(out)
+    f.args.append(Arg("matrix_out", out))
+    return 1
+
+
+def matrix_in(w):
+    p, f = w.p, w.f
+    if p.type != "RantMatrixView" or p.pointer:
+        return None
+    inp = w.by_c[p.name] = Input(w.name, "matrix")
+    f.inputs.append(inp)
+    f.args.append(Arg("matrix", inp))
+    return 1
+
+
+def list_view(w):
+    p, f = w.p, w.f
+    if p.type not in LIST_VIEWS or p.pointer:
+        return None
+    elem, word = LIST_VIEWS[p.type]
+    inp = w.by_c[p.name] = Input(word, "list", elem)
+    f.inputs.append(inp)
+    f.args.append(Arg("view", inp, p.type))
+    w.last_list = inp
+    return 1
+
+
+def mesh_view(w):
+    p, f = w.p, w.f
+    if p.type != "RantMeshView" or p.pointer:
+        return None
+    inp = w.by_c[p.name] = Input("mesh", "mesh", "RantMesh")
+    f.inputs.append(inp)
+    f.args.append(Arg("mesh", inp))
+    w.last_list = inp
+    return 1
+
+
+def prism_view(w):
+    p, f = w.p, w.f
+    if p.type != "RantPrismView" or p.pointer:
+        return None
+    inp = w.by_c[p.name] = Input("prism", "prism", "RantPrism")
+    f.inputs.append(inp)
+    f.args.append(Arg("prism", inp))
+    return 1
+
+
+def object_ref(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and p.type in OBJECT_KINDS):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, OBJECT_KINDS[p.type], p.type)
+    f.inputs.append(inp)
+    f.args.append(Arg(OBJECT_KINDS[p.type], inp))
+    return 1
+
+
+def detection_list(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and p.type in LIST_KINDS and w.counted):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, LIST_KINDS[p.type], p.type)
+    f.inputs.append(inp)
+    f.args += [Arg("det_ptr", inp), Arg("det_count", inp)]
+    w.last_list = inp
+    return 2
+
+
+def list_same(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and tag(p, "same") is not None):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, "list", p.type)
+    f.inputs.append(inp)
+    f.args.append(Arg("list_ptr", inp))
+    return 1
+
+
+def list_degree(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and w.counted and tag(w.nxt, "degree") is not None):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, "list", p.type)
+    f.inputs.append(inp)
+    f.args += [Arg("list_ptr", inp), Arg("degree", inp)]
+    w.last_list = inp
+    return 2
+
+
+def list_counted(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and w.counted and tag(p, "one") is None):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, "list", p.type)
+    f.inputs.append(inp)
+    f.args.append(Arg("list_ptr", inp))
+    f.args.append(Arg("list_count", inp))
+    w.last_list = inp
+    return 2
+
+
+def string_in(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const and p.type == "char"):
+        return None
+    inp = w.by_c[p.name] = Input(w.name, "string", "char")
+    f.inputs.append(inp)
+    f.args.append(Arg("string", inp))
+    return 1
+
+
+def list_with_same_out(w):
+    p, nxt, f = w.p, w.nxt, w.f
+    if not (p.pointer and p.const and nxt is not None and nxt.pointer and not nxt.const and is_count(w.param(2))):
+        return None
+    inp = Input(w.name, "list", p.type)
+    out = Output(nxt.name, "same", nxt.type, inp)
+    f.inputs.append(inp)
+    f.outputs.append(out)
+    f.args += [Arg("list_ptr", inp), Arg("out", out), Arg("list_count", inp)]
+    w.last_list = inp
+    return 3
+
+
+def list_pair(w):
+    p, nxt, f = w.p, w.nxt, w.f
+    if not (p.pointer and p.const and nxt is not None and nxt.pointer and nxt.const and is_count(w.param(2))):
+        return None
+    a = Input(w.name, "list", p.type)
+    b = Input(renamed(nxt), "list", nxt.type)
+    f.inputs += [a, b]
+    f.args += [Arg("list_ptr", a), Arg("list_ptr", b), Arg("list_count", a, b)]
+    w.last_list = a
+    return 3
+
+
+def ref_in(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.const):
+        return None
+    kind = "ref" if tag(p, "optional") is None else "opt_ref"
+    inp = w.by_c[p.name] = Input(w.name, kind, p.type)
+    f.inputs.append(inp)
+    f.args.append(Arg(kind, inp))
+    return 1
+
+
+def handle_out(w):
+    p, f = w.p, w.f
+    if p.pointer != 2:
+        return None
+    out = Output(p.name, "handle", p.type)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    f.vector = False
+    return 1
+
+
+def image_new(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.type in WRITTEN_KINDS and tag(p, "image") is not None):
+        return None
+    size = dict(word.split("=") for word in tag(p, "image").split())
+    out = Output(p.name, "image", p.type, rows=size.get("height", "src.height"),
+                 cols=size.get("width", "src.width"), size=size.get("format", "src.format"))
+    f.outputs.append(out)
+    f.args.append(Arg("image_out", out))
+    for words in tags(p, "takes"):                       # what C reads from the new view
+        t, n = words.split()
+        f.inputs.append(Input(n, "value", t))
+    return 1
+
+
+def image_copy(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.type in WRITTEN_KINDS and tag(p, "copy") is not None):
+        return None
+    out = Output(p.name, "image_copy", p.type)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    return 1
+
+
+def mesh_new(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.type in WRITTEN_KINDS and tag(p, "mesh") is not None):
+        return None
+    out = Output("mesh", "mesh_new", "RantMesh")
+    f.outputs.append(out)
+    f.args.append(Arg("mesh_out", out))
+    return 4                                             # its corners, their count, triangles, their count
+
+
+def view_mutated(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.type in WRITTEN_KINDS):
+        return None
+    kind = WRITTEN_KINDS[p.type] + "_mut"
+    inp = w.by_c[p.name] = Input(w.name, kind, p.type)
+    f.inputs.append(inp)
+    f.outputs.append(Output(p.name, "mutated", p.type, inp))
+    f.args.append(Arg(kind, inp))
+    return 1
+
+
+def cloud_select(w):
+    p, f = w.p, w.f
+    if not (p.pointer and tag(p, "select") is not None):
+        return None
+    out = Output(p.name, "cloud_select", "RantPointCloudView", w.by_c[tag(p, "select")])
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    w.pending.append(out)
+    return 1
+
+
+def room_out(w):
+    p, f = w.p, w.f
+    if not (p.pointer and tag(p, "room") is not None):
+        return None
+    count = w.rooms.setdefault(tag(p, "room"), Input(tag(p, "room"), "value", "uint32_t"))
+    out = w.by_c[p.name] = Output(p.name, "room", p.type, count)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    w.pending.append(out)
+    return 1
+
+
+def query_out(w):
+    p, f = w.p, w.f
+    if not (p.pointer and tag(p, "query") is not None):
+        return None
+    shares = tag(p, "query")
+    out = w.by_c[p.name] = Output(p.name, "query", p.type, w.by_c[shares] if shares else None)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    w.pending.append(out)
+    return 1
+
+
+def count_out(w):
+    p, f = w.p, w.f
+    if not (p.pointer and p.type == "uint32_t" and w.pending):
+        return None
+    if p.name in w.rooms:
+        f.inputs.append(w.rooms[p.name])
+    f.args.append(Arg("count_ptr", w.pending[0]))
+    w.pending = []
+    return 1
+
+
+def size_out(w):
+    p, f = w.p, w.f
+    if not (p.pointer and tag(p, "size") is not None):
+        return None
+    out = Output(p.name, "expr", p.type, tag(p, "size"))
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    return 1
+
+
+def same_out(w):
+    p, f = w.p, w.f
+    if not (p.pointer and tag(p, "same") is not None):
+        return None
+    out = Output(p.name, "same", p.type, w.by_c[tag(p, "same")])
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    return 1
+
+
+def query_with_count(w):
+    p, nxt, f = w.p, w.nxt, w.f
+    if not (p.pointer and nxt is not None and nxt.type == "uint32_t" and nxt.pointer):
+        return None
+    out = Output(p.name, "query", p.type, per=int(tag(p, "per") or 1))
+    f.outputs.append(out)
+    f.args += [Arg("out", out), Arg("count_ptr", out)]
+    return 2
+
+
+def sized_out(w):
+    p, nxt, f = w.p, w.nxt, w.f
+    if not (p.pointer and w.counted):
+        return None
+    count = Input(renamed(nxt), "value", "uint32_t")
+    out = Output(p.name, "sized", p.type, count)
+    f.inputs.append(count)
+    f.outputs.append(out)
+    f.args += [Arg("out", out), Arg("value", count)]
+    return 2
+
+
+def plain_out(w):
+    p, f = w.p, w.f
+    if not p.pointer:
+        return None
+    out = Output(p.name, "out", p.type)
+    f.outputs.append(out)
+    f.args.append(Arg("out", out))
+    return 1
+
+
+def value_in(w):
+    p, f = w.p, w.f
+    inp = w.by_c[p.name] = Input(w.name, "value", p.type)
+    f.inputs.append(inp)
+    f.args.append(Arg("value", inp))
+    return 1
+
+
+# A rule returns None when its C shape is not at w.i, else applies itself and returns how many parameters
+# it took. The order is the grammar: the first rule that matches wins.
+RULES = [
+    fixed_out,      # T out[N]
+    matrix_out,     # RantMatrixView with (out rows cols)
+    matrix_in,      # RantMatrixView by value
+    list_view,      # a view of a list by value
+    mesh_view,      # a binding's Mesh, its corners read in C
+    prism_view,     # RantPrismView by value
+    object_ref,     # const pointer to a type a binding holds as its own kind
+    detection_list,  # const detections pointer, uint32_t count
+    list_same,      # const T *a with (same p): a list as long as another input
+    list_degree,    # const T *a, uint32_t degree
+    list_counted,   # const T *a, uint32_t count
+    string_in,      # const char *s
+    list_with_same_out,  # const T *in, U *out, uint32_t count
+    list_pair,      # const T *a, const T *b, uint32_t count
+    ref_in,         # const T *one, NULL too with (optional)
+    handle_out,     # T **out: a handle the binding frees
+    image_new,      # a written view with (image format= width= height=)
+    image_copy,     # a written view with (copy)
+    mesh_new,       # a written view with (mesh), four parameters
+    view_mutated,   # a written view the call changes in place
+    cloud_select,   # T *out with (select cloud): the points of a cloud a mask keeps
+    room_out,       # T *out with (room count): as many as the count asks for
+    query_out,      # T *out with (query): as many as the call finds
+    count_out,      # uint32_t *count after lists of room or query outs
+    size_out,       # T *out with (size words)
+    same_out,       # T *out with (same p): one for each item of an input
+    query_with_count,  # T *out, uint32_t *count
+    sized_out,      # T *out, uint32_t count
+    plain_out,      # T *out
+    value_in,       # anything left, by value
+]
+
+
 def auto(f, m):
     """Read the C parameters left to right, by their types and the tags beside them."""
-    ps = f.params
-    i = 0
-    by_c = {}       # each C parameter's input or output, for the tags that name one
-    rooms = {}      # a count parameter that a room output names, to the input it becomes
-    pending = []    # lists whose count parameter is still to come
-    last_list = None
-    while i < len(ps):
-        p = ps[i]
-        name = renamed(p)
-        nxt = ps[i + 1] if i + 1 < len(ps) else None
-        counted = nxt is not None and nxt.type == "uint32_t" and not nxt.pointer
-        if p.dim:                                                    # T out[N]
-            out = Output(p.name, "fixed", p.type, p.dim)
-            f.outputs.append(out)
-            f.args.append(Arg("out", out))
-        elif p.type == "RantMatrixView" and not p.pointer:
-            shape = tag(p, "out")
-            if shape is None:
-                inp = by_c[p.name] = Input(name, "matrix")
-                f.inputs.append(inp)
-                f.args.append(Arg("matrix", inp))
-            else:                                                    # (out rows cols)
-                rows, cols = shape.split()
-                out = Output(p.name, "matrix", rows=rows, cols=cols)
-                f.outputs.append(out)
-                f.args.append(Arg("matrix_out", out))
-        elif p.type in LIST_VIEWS and not p.pointer:                 # a view of a list
-            elem, word = LIST_VIEWS[p.type]
-            inp = by_c[p.name] = Input(word, "list", elem)
-            f.inputs.append(inp)
-            f.args.append(Arg("view", inp, p.type))
-            last_list = inp
-        elif p.type == "RantMeshView" and not p.pointer:            # a binding's Mesh, its corners read in C
-            inp = by_c[p.name] = Input("mesh", "mesh", "RantMesh")
-            f.inputs.append(inp)
-            f.args.append(Arg("mesh", inp))
-            last_list = inp
-        elif p.type == "RantPrismView" and not p.pointer:
-            inp = by_c[p.name] = Input("prism", "prism", "RantPrism")
-            f.inputs.append(inp)
-            f.args.append(Arg("prism", inp))
-        elif p.pointer and p.const and p.type in OBJECT_KINDS:
-            inp = by_c[p.name] = Input(name, OBJECT_KINDS[p.type], p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg(OBJECT_KINDS[p.type], inp))
-        elif p.pointer and p.const and p.type in LIST_KINDS and counted:
-            inp = by_c[p.name] = Input(name, LIST_KINDS[p.type], p.type)
-            f.inputs.append(inp)
-            f.args += [Arg("det_ptr", inp), Arg("det_count", inp)]
-            last_list = inp
-            i += 1
-        elif p.pointer and p.const and tag(p, "same") is not None:  # a list as long as another input
-            inp = by_c[p.name] = Input(name, "list", p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg("list_ptr", inp))
-        elif p.pointer and p.const and counted and tag(nxt, "degree") is not None:
-            inp = by_c[p.name] = Input(name, "list", p.type)        # const T *a, uint32_t degree
-            f.inputs.append(inp)
-            f.args += [Arg("list_ptr", inp), Arg("degree", inp)]
-            last_list = inp
-            i += 1
-        elif p.pointer and p.const and counted and tag(p, "one") is None:  # const T *a, uint32_t count
-            inp = by_c[p.name] = Input(name, "list", p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg("list_ptr", inp))
-            f.args.append(Arg("list_count", inp))
-            last_list = inp
-            i += 1
-        elif p.pointer and p.const and p.type == "char":
-            inp = by_c[p.name] = Input(name, "string", "char")
-            f.inputs.append(inp)
-            f.args.append(Arg("string", inp))
-        elif p.pointer and p.const:
-            if nxt is not None and nxt.pointer and not nxt.const and i + 2 < len(ps) and ps[i + 2].type == "uint32_t" and not ps[i + 2].pointer:
-                inp = Input(name, "list", p.type)                    # const T *in, U *out, uint32_t count
-                out = Output(nxt.name, "same", nxt.type, inp)
-                f.inputs.append(inp)
-                f.outputs.append(out)
-                f.args += [Arg("list_ptr", inp), Arg("out", out), Arg("list_count", inp)]
-                last_list = inp
-                i += 3
-                continue
-            if nxt is not None and nxt.pointer and nxt.const and i + 2 < len(ps) and ps[i + 2].type == "uint32_t" and not ps[i + 2].pointer:
-                a = Input(name, "list", p.type)                      # const T *a, const T *b, uint32_t count
-                b = Input(renamed(nxt), "list", nxt.type)
-                f.inputs += [a, b]
-                f.args += [Arg("list_ptr", a), Arg("list_ptr", b), Arg("list_count", a, b)]
-                last_list = a
-                i += 3
-                continue
-            kind = "ref" if tag(p, "optional") is None else "opt_ref"  # const T *one, NULL too with (optional)
-            inp = by_c[p.name] = Input(name, kind, p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg(kind, inp))
-        elif p.pointer == 2:                                         # T **out: a handle the binding frees
-            out = Output(p.name, "handle", p.type)
-            f.outputs.append(out)
-            f.args.append(Arg("out", out))
-            f.vector = False
-        elif p.pointer and p.type in WRITTEN_KINDS:
-            if tag(p, "image") is not None:                          # (image format= width= height=)
-                size = dict(w.split("=") for w in tag(p, "image").split())
-                out = Output(p.name, "image", p.type, rows=size.get("height", "src.height"),
-                             cols=size.get("width", "src.width"), size=size.get("format", "src.format"))
-                f.outputs.append(out)
-                f.args.append(Arg("image_out", out))
-                for words in tags(p, "takes"):                       # what C reads from the new view
-                    t, n = words.split()
-                    f.inputs.append(Input(n, "value", t))
-            elif tag(p, "copy") is not None:
-                out = Output(p.name, "image_copy", p.type)
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-            elif tag(p, "mesh") is not None:                         # its corners, their count, triangles, their count
-                out = Output("mesh", "mesh_new", "RantMesh")
-                f.outputs.append(out)
-                f.args.append(Arg("mesh_out", out))
-                i += 4
-                continue
-            else:
-                kind = WRITTEN_KINDS[p.type] + "_mut"
-                inp = by_c[p.name] = Input(name, kind, p.type)
-                f.inputs.append(inp)
-                f.outputs.append(Output(p.name, "mutated", p.type, inp))
-                f.args.append(Arg(kind, inp))
-        elif p.pointer:
-            if tag(p, "select") is not None:                         # the points of a cloud a mask keeps
-                out = Output(p.name, "cloud_select", "RantPointCloudView", by_c[tag(p, "select")])
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-                pending.append(out)
-            elif tag(p, "room") is not None:                         # as many as the count asks for
-                count = rooms.setdefault(tag(p, "room"), Input(tag(p, "room"), "value", "uint32_t"))
-                out = by_c[p.name] = Output(p.name, "room", p.type, count)
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-                pending.append(out)
-            elif tag(p, "query") is not None:                        # as many as the call finds
-                shares = tag(p, "query")
-                out = by_c[p.name] = Output(p.name, "query", p.type, by_c[shares] if shares else None)
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-                pending.append(out)
-            elif p.type == "uint32_t" and pending:                   # the count of the lists before it
-                if p.name in rooms:
-                    f.inputs.append(rooms[p.name])
-                f.args.append(Arg("count_ptr", pending[0]))
-                pending = []
-            elif tag(p, "size") is not None:                         # (size words a backend reads)
-                out = Output(p.name, "expr", p.type, tag(p, "size"))
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-            elif tag(p, "same") is not None:                         # one for each item of an input
-                out = Output(p.name, "same", p.type, by_c[tag(p, "same")])
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-            elif nxt is not None and nxt.type == "uint32_t" and nxt.pointer:
-                out = Output(p.name, "query", p.type, per=int(tag(p, "per") or 1))
-                f.outputs.append(out)                                # T *out, uint32_t *count
-                f.args += [Arg("out", out), Arg("count_ptr", out)]
-                i += 2
-                continue
-            elif counted:
-                count = Input(renamed(nxt), "value", "uint32_t")
-                out = Output(p.name, "sized", p.type, count)         # T *out, uint32_t count
-                f.inputs.append(count)
-                f.outputs.append(out)
-                f.args += [Arg("out", out), Arg("value", count)]
-                i += 2
-                continue
-            else:
-                out = Output(p.name, "out", p.type)                  # T *out
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
-        else:
-            inp = by_c[p.name] = Input(name, "value", p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg("value", inp))
-        i += 1
+    w = Walk(f)
+    while w.i < len(f.params):
+        for rule in RULES:
+            used = rule(w)
+            if used is not None:
+                break
+        w.i += used
     ret = normal_type(f.ret)
     if ret in ("RantShape", "RantShape2D"):
         f.outputs.insert(0, Output("return", "shape_new", ret))     # a binding's own Shape holds the data

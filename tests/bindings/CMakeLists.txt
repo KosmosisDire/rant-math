@@ -4,6 +4,9 @@ if(NOT Python3_Interpreter_FOUND)
   message(STATUS "Rant Math: no Python, so the binding checks are left out")
   return()
 endif()
+# The rules that read each function's parameters, on parameter lists made by hand.
+add_test(NAME bindings.model_rules COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/model_rules_test.py")
+
 find_program(RANT_MATH_CLANG clang HINTS "$ENV{ProgramFiles}/LLVM/bin")
 if(NOT RANT_MATH_CLANG)
   message(STATUS "Rant Math: no clang to read the headers, so the binding checks are left out")
