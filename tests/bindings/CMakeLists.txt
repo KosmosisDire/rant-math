@@ -16,6 +16,12 @@ file(GLOB BINDGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tools/bindgen/*
 
 add_test(NAME bindings.current COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --clang "${RANT_MATH_CLANG}" --check)
 
+# Every standard type the model uses is in Rant's own list.
+if(EXISTS "${rant_SOURCE_DIR}/types/stdtypes.json")
+  add_test(NAME bindings.rant_types COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/rant_types_check.py"
+           "${RANT_MATH_TYPES}" "${RANT_MATH_CLANG}" "${rant_SOURCE_DIR}/types/stdtypes.json")
+endif()
+
 # The C program that asks the library every case. Its answers must match the checked in vectors.
 set(RECORD_C "${CMAKE_CURRENT_BINARY_DIR}/record.c")
 add_custom_command(OUTPUT "${RECORD_C}"
@@ -103,11 +109,17 @@ foreach(order RANT_FIRST MATH_FIRST)
 endforeach()
 
 # rant_math.hpp beside rant.hpp in each order, compiled only, and the implementation on its own.
+# The plain ones set no RANT_MATH, as an Arduino sketch cannot: the members header on the path is enough.
 set(RANT_CPP_INCLUDE "${rant_SOURCE_DIR}/dist")
-foreach(order RANT_FIRST MATH_FIRST TYPES_FIRST ALONE)
+foreach(order RANT_FIRST MATH_FIRST TYPES_FIRST ALONE RANT_FIRST_PLAIN TYPES_FIRST_PLAIN)
   string(TOLOWER "${order}" lower)
   add_library(rant_math_cpp_${lower} OBJECT cpp_with_rant.cpp)
   add_dependencies(rant_math_cpp_${lower} rant_math_dist rant_dist)
   target_include_directories(rant_math_cpp_${lower} PRIVATE "${RANT_MATH_DIST}" "${RANT_CPP_INCLUDE}")
-  target_compile_definitions(rant_math_cpp_${lower} PRIVATE ${order} RANT_MATH)
+  if(order MATCHES "_PLAIN$")
+    string(REPLACE "_PLAIN" "" order "${order}")
+    target_compile_definitions(rant_math_cpp_${lower} PRIVATE ${order})
+  else()
+    target_compile_definitions(rant_math_cpp_${lower} PRIVATE ${order} RANT_MATH)
+  endif()
 endforeach()
