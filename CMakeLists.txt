@@ -15,7 +15,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_cpm.cmake")
 CPMAddPackage(NAME rant
   GITHUB_REPOSITORY KosmosisDire/Rant
-  VERSION 0.0.42
+  VERSION 0.0.44
   EXCLUDE_FROM_ALL YES
   SYSTEM YES)
 set(RANT_MATH_TYPES "${rant_SOURCE_DIR}/src/common/stdtypes.h")
