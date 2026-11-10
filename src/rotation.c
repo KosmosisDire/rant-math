@@ -187,11 +187,15 @@ RantQuaternion rant_quaternion_slerp(RantQuaternion a, RantQuaternion b, double 
                                                      wa * a.z + wb * b.z, wa * a.w + wb * b.w));
 }
 
+/* Kahan's angle between the unit 4 vectors, b on a's side: exactly 0 for equal inputs on every
+ * platform, since a difference of equal numbers has no product a fused multiply add could round. */
 double rant_quaternion_angle(RantQuaternion a, RantQuaternion b){
-    RantQuaternion d = rant_quaternion_compose(rant_quaternion_inverse(rant_quaternion_normalize(a)),
-                                               rant_quaternion_normalize(b));
-    double s = sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
-    return 2.0 * atan2(s, fabs(d.w));
+    RantQuaternion p = rant_quaternion_normalize(a), q = rant_quaternion_normalize(b);
+    double dx, dy, dz, dw, sx, sy, sz, sw;
+    if (p.x * q.x + p.y * q.y + p.z * q.z + p.w * q.w < 0.0) q = rant_quaternion(-q.x, -q.y, -q.z, -q.w);
+    dx = p.x - q.x; dy = p.y - q.y; dz = p.z - q.z; dw = p.w - q.w;
+    sx = p.x + q.x; sy = p.y + q.y; sz = p.z + q.z; sw = p.w + q.w;
+    return 4.0 * atan2(sqrt(dx * dx + dy * dy + dz * dz + dw * dw), sqrt(sx * sx + sy * sy + sz * sz + sw * sw));
 }
 
 int rant_quaternion_is_near(RantQuaternion a, RantQuaternion b, double tolerance){
