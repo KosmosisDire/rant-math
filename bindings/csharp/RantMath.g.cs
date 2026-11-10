@@ -5745,6 +5745,5 @@ namespace Rant.Math
     {
         public static Double3 ToEcef(this GeoPoint self) => RantMath.GeoPointToEcef(point: self);
         public static Double3 ToEnu(this GeoPoint self, GeoPoint point) => RantMath.GeoPointToEnu(origin: self, point: point);
-        public static GeoPoint FromEnu(this GeoPoint self, Double3 enu) => RantMath.GeoPointFromEnu(origin: self, enu: enu);
     }
 }

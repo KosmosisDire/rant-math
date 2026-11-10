@@ -6,6 +6,7 @@
 
 mod api;
 mod ffi;
+mod methods;
 mod own;
 
 use std::ffi::{CString, c_char, c_int};
@@ -14,6 +15,11 @@ use std::marker::PhantomData;
 
 pub use api::*;
 pub use own::*;
+
+/// The methods of Rant's standard types, as `pose.inverse()` and `Quaternion::from_axis_angle(axis, a)`.
+pub mod prelude {
+    pub use crate::methods::*;
+}
 pub use rant_types;
 use rant_types::*;
 

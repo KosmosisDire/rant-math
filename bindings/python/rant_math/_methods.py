@@ -413,8 +413,9 @@ class _GeoPoint:
         return geo_point_from_ecef(ecef)
     def to_enu(self, point: GeoPoint) -> Double3:
         return geo_point_to_enu(self, point)
-    def from_enu(self, enu: Double3) -> GeoPoint:
-        return geo_point_from_enu(self, enu)
+    @staticmethod
+    def from_enu(origin: GeoPoint, enu: Double3) -> GeoPoint:
+        return geo_point_from_enu(origin, enu)
 
 
 class _Grid:

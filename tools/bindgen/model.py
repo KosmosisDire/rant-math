@@ -713,7 +713,9 @@ def find_methods(m):
         t, field_name = receiver(f, m)
         made = result_type(f)
         if t is not None and f.name.startswith(prefix(t) + "_"):
-            methods.append(Method(t, f.name[len(prefix(t)) + 1:], f, field=field_name))
+            verb = f.name[len(prefix(t)) + 1:]
+            # A from_ call makes the type, so it reads as GeoPoint.from_enu(origin, enu) even with one first.
+            methods.append(Method(t, verb, f, static=verb.startswith("from_"), field=field_name))
         elif t is not None and made and f.name == prefix(made) + "_from_" + prefix(t):
             if not (is_vector(t) and is_vector(made)):
                 methods.append(Method(t, "to_" + prefix(made), f, field=field_name))

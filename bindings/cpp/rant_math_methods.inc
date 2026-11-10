@@ -401,7 +401,7 @@ inline void Grid::write_value(const char *field, Int3 cell, double value) { retu
 inline Double3 GeoPoint::to_ecef() const { return math::geo_point_to_ecef(*this); }
 inline GeoPoint GeoPoint::from_ecef(Double3 ecef) { return math::geo_point_from_ecef(ecef); }
 inline Double3 GeoPoint::to_enu(GeoPoint point) const { return math::geo_point_to_enu(*this, point); }
-inline GeoPoint GeoPoint::from_enu(Double3 enu) const { return math::geo_point_from_enu(*this, enu); }
+inline GeoPoint GeoPoint::from_enu(GeoPoint origin, Double3 enu) { return math::geo_point_from_enu(origin, enu); }
 } }
 namespace rant { namespace math {
 inline math::Axes Axes::of(math::AxesPreset preset) { return math::axes_of(preset); }

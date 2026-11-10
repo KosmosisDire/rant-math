@@ -676,8 +676,59 @@ def thunks(m):
     return "\n".join(rows)
 
 
+def method_parts(m, me):
+    """A method's generics, receiver, parameters, result and the call of the function it stands for."""
+    f = me.func
+    rest = [input_decl(m, f, i) for k, i in enumerate(f.inputs) if me.static or k != me.self_index]
+    result = result_type(m, f)
+    if f.c.startswith("rant_shape_from_") or f.c.startswith("rant_shape2d_from_"):
+        result = ("Shape" if f.ret == "RantShape" else "Shape2D") + "<'_>"     # it borrows the value's points
+    args = []
+    for k, i in enumerate(f.inputs):
+        if me.static or k != me.self_index:
+            args.append(name_of(i.name))
+        elif me.field:
+            args.append(f"&self.{me.field}")
+        else:
+            args.append("*self" if i.kind == "value" else "self")
+    receiver = [] if me.static else ["&mut self" if f.inputs[me.self_index].kind.endswith("_mut") else "&self"]
+    generic = "<'a>" if any("'a" in r for r in rest) else ""
+    ret = "" if result == "()" else f" -> {result}"
+    doc = "".join(f"    /// {line}\n" for line in textwrap.wrap(f.doc, 96)) if f.doc else ""
+    head = f"fn {name_of(me.name)}{generic}({', '.join(receiver + rest)}){ret}"
+    return doc, head, f"crate::{f.name}({', '.join(args)})"
+
+
+def methods(m):
+    """methods.rs: math's own types get their methods as their own, Rant's through a trait each, since a crate
+    adds no inherent method to another's type. `use rant_math::prelude::*` brings the traits in."""
+    own = {s.short for s in m.own_structs()} | {"Shape", "Shape2D", "KdTree"}
+    by_type = {}
+    for me in m.methods:
+        by_type.setdefault(me.type, []).append(me)
+    parts = [GEN, "use rant_types::*;", "", "use super::own::*;", "use super::*;", ""]
+    for t, ms in by_type.items():
+        typed = f"{t}<'s>" if t in ("Shape", "Shape2D") else t
+        lifetime = "<'s>" if t in ("Shape", "Shape2D") else ""
+        bodies = []
+        for me in ms:
+            doc, head, call = method_parts(m, me)
+            bodies.append(f"{doc}    {'pub ' if t in own else ''}{head} {{\n        {call}\n    }}")
+        if t in own:
+            parts.append(f"impl{lifetime} {typed} {{\n" + "\n".join(bodies) + "\n}\n")
+            continue
+        decls = []
+        for me in ms:
+            doc, head, _ = method_parts(m, me)
+            decls.append(f"{doc}    {head};")
+        parts.append(f"/// The methods of {t}.\npub trait {t}Ext {{\n" + "\n".join(decls) + "\n}\n")
+        parts.append(f"impl {t}Ext for {t} {{\n" + "\n".join(bodies) + "\n}\n")
+    return "\n".join(parts)
+
+
 def generate(m):
     return [
+        ("bindings/rust/src/methods.rs", methods(m)),
         ("bindings/rust/src/ffi.rs", ffi(m)),
         ("bindings/rust/src/own.rs", own_types(m)),
         ("bindings/rust/src/api.rs", api(m)),

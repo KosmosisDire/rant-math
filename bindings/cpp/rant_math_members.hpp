@@ -671,6 +671,6 @@ struct CurvePoint2D;
     Double3 to_ecef() const; \
     static GeoPoint from_ecef(Double3 ecef); \
     Double3 to_enu(GeoPoint point) const; \
-    GeoPoint from_enu(Double3 enu) const;
+    static GeoPoint from_enu(GeoPoint origin, Double3 enu);
 
 #endif /* RANT_MATH_MEMBERS_HPP */
