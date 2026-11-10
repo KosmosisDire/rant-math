@@ -708,6 +708,16 @@ def function(m, lay, f):
     return f"{doc}export function {camel(f.name)}({', '.join(decls)}): {result_type(m, w, f)} {{\n" + "\n".join(w.lines) + "\n}\n"
 
 
+def type_groups(m):
+    """Each type's calls as one object by its name, Pose.inverse being poseInverse, for completion after a type's name.
+    A value stays a plain object, so a literal still passes. KdTree is a class here, so it has none."""
+    groups = {}
+    for me in m.methods:
+        if me.type != "KdTree":
+            groups.setdefault(me.type, []).append((camel(me.name), camel(me.func.name)))
+    return groups
+
+
 def api_ts(m, lay):
     head = GEN + 'import { wasm, begin, alloc, refresh, check, room, MathError, F32, F64, I8, I16, I32, U8, U16, U32, enumIn, lengthOf, countOf, sameCount, numbersIn, numbersOut, listIn, listOut, viewIn, stringIn, flatCopy } from "./runtime.js";\n'
     parts = [head, types_ts(m), HAND_TYPES, structs_ts(m, lay), HAND_HELPERS]
@@ -715,6 +725,8 @@ def api_ts(m, lay):
         if f.hand:
             continue
         parts.append(function(m, lay, f))
+    for t, calls in type_groups(m).items():
+        parts.append(f"/** The calls of {t}. */\nexport const {t} = {{\n" + "".join(f"    {n}: {fn},\n" for n, fn in calls) + "};\n")
     return "\n".join(parts)
 
 

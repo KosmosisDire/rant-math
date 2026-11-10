@@ -244,6 +244,11 @@ const d3 = (x, y, z) => ({ x, y, z });
 const IDENTITY = { x: 0, y: 0, z: 0, w: 1 };
 
 function handTests() {
+    // each type's calls by its name, on plain objects
+    const turn = math.Quaternion.fromAxisAngle(d3(0, 0, 1), Math.PI / 2);
+    const placed = { position: d3(1, 0, 0), orientation: turn };
+    check(math.Pose.inverse === math.poseInverse && math.Double3.isNear(math.Pose.apply(placed, d3(1, 0, 0)), d3(1, 1, 0), 1e-12), "type groups");
+    check(math.Quaternion.isNear(turn, { x: -turn.x, y: -turn.y, z: -turn.z, w: -turn.w }, 1e-12), "q is near -q");
     // results
     const plane = { position: d3(0, 0, 0), normal: d3(0, 0, 1) };
     check(math.planeRaycast(plane, { origin: d3(0, 0, 5), direction: d3(0, 0, 1) }) === null, "a miss is null");

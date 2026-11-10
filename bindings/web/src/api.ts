@@ -6114,3 +6114,650 @@ export function detections3dSuppress(detections: readonly Detection3D[], iou: nu
     refresh();
     return numbersOut(o0, s0, Uint8Array);
 }
+
+/** The calls of Double2. */
+export const Double2 = {
+    add: double2Add,
+    subtract: double2Subtract,
+    scale: double2Scale,
+    multiply: double2Multiply,
+    dot: double2Dot,
+    cross: double2Cross,
+    length: double2Length,
+    lengthSquared: double2LengthSquared,
+    distance: double2Distance,
+    isNear: double2IsNear,
+    normalize: double2Normalize,
+    lerp: double2Lerp,
+    min: double2Min,
+    max: double2Max,
+    angle: double2Angle,
+    heading: double2Heading,
+    fromHeading: double2FromHeading,
+    rotate: double2Rotate,
+    perpendicular: double2Perpendicular,
+    project: double2Project,
+    reflect: double2Reflect,
+};
+
+/** The calls of Double3. */
+export const Double3 = {
+    add: double3Add,
+    subtract: double3Subtract,
+    scale: double3Scale,
+    multiply: double3Multiply,
+    dot: double3Dot,
+    cross: double3Cross,
+    length: double3Length,
+    lengthSquared: double3LengthSquared,
+    distance: double3Distance,
+    isNear: double3IsNear,
+    normalize: double3Normalize,
+    lerp: double3Lerp,
+    min: double3Min,
+    max: double3Max,
+    angle: double3Angle,
+    project: double3Project,
+    reflect: double3Reflect,
+    perpendicular: double3Perpendicular,
+};
+
+/** The calls of Double4. */
+export const Double4 = {
+    add: double4Add,
+    subtract: double4Subtract,
+    scale: double4Scale,
+    dot: double4Dot,
+    length: double4Length,
+    normalize: double4Normalize,
+    lerp: double4Lerp,
+};
+
+/** The calls of Int2. */
+export const Int2 = {
+    floor: int2Floor,
+};
+
+/** The calls of Int3. */
+export const Int3 = {
+    floor: int3Floor,
+};
+
+/** The calls of Quaternion. */
+export const Quaternion = {
+    fromEuler: quaternionFromEuler,
+    toEuler: quaternionToEuler,
+    fromAxisAngle: quaternionFromAxisAngle,
+    toAxisAngle: quaternionToAxisAngle,
+    fromRotationVector: quaternionFromRotationVector,
+    toRotationVector: quaternionToRotationVector,
+    toMatrix3x3: matrix3x3FromQuaternion,
+    between: quaternionBetween,
+    look: quaternionLook,
+    compose: quaternionCompose,
+    inverse: quaternionInverse,
+    normalize: quaternionNormalize,
+    rotate: quaternionRotate,
+    slerp: quaternionSlerp,
+    angle: quaternionAngle,
+    isNear: quaternionIsNear,
+    integrate: quaternionIntegrate,
+    yaw: quaternionYaw,
+};
+
+/** The calls of Matrix3x3. */
+export const Matrix3x3 = {
+    toQuaternion: quaternionFromMatrix3x3,
+    identity: matrix3x3Identity,
+    multiply: matrix3x3Multiply,
+    transpose: matrix3x3Transpose,
+    determinant: matrix3x3Determinant,
+    inverse: matrix3x3Inverse,
+    apply: matrix3x3Apply,
+};
+
+/** The calls of Matrix4x4. */
+export const Matrix4x4 = {
+    identity: matrix4x4Identity,
+    multiply: matrix4x4Multiply,
+    transpose: matrix4x4Transpose,
+    determinant: matrix4x4Determinant,
+    inverse: matrix4x4Inverse,
+    apply: matrix4x4Apply,
+    applyDirection: matrix4x4ApplyDirection,
+    toPose: poseFromMatrix4x4,
+};
+
+/** The calls of Pose. */
+export const Pose = {
+    compose: poseCompose,
+    inverse: poseInverse,
+    between: poseBetween,
+    apply: poseApply,
+    applyInverse: poseApplyInverse,
+    applyPoints: poseApplyPoints,
+    interpolate: poseInterpolate,
+    fromPoints: poseFromPoints,
+    lookAt: poseLookAt,
+    toMatrix4x4: matrix4x4FromPose,
+    toPose2d: pose2dFromPose,
+    integrate: poseIntegrate,
+};
+
+/** The calls of Pose2D. */
+export const Pose2D = {
+    toPose: poseFromPose2d,
+    compose: pose2dCompose,
+    inverse: pose2dInverse,
+    between: pose2dBetween,
+    apply: pose2dApply,
+    applyInverse: pose2dApplyInverse,
+    applyPoints: pose2dApplyPoints,
+    interpolate: pose2dInterpolate,
+    integrate: pose2dIntegrate,
+};
+
+/** The calls of Twist. */
+export const Twist = {
+    transform: twistTransform,
+    between: twistBetween,
+};
+
+/** The calls of Wrench. */
+export const Wrench = {
+    transform: wrenchTransform,
+};
+
+/** The calls of Twist2D. */
+export const Twist2D = {
+    transform: twist2dTransform,
+    between: twist2dBetween,
+};
+
+/** The calls of Wrench2D. */
+export const Wrench2D = {
+    transform: wrench2dTransform,
+};
+
+/** The calls of Covariance3. */
+export const Covariance3 = {
+    rotate: covariance3Rotate,
+    ellipsoid: covariance3Ellipsoid,
+};
+
+/** The calls of Covariance6. */
+export const Covariance6 = {
+    rotate: covariance6Rotate,
+};
+
+/** The calls of Inertia. */
+export const Inertia = {
+    transform: inertiaTransform,
+    add: inertiaAdd,
+    box: inertiaBox,
+};
+
+/** The calls of Axes. */
+export const Axes = {
+    of: axesOf,
+    make: axesMake,
+    pointTo: axesPointTo,
+    pointFrom: axesPointFrom,
+    directionTo: axesDirectionTo,
+    directionFrom: axesDirectionFrom,
+    quaternionTo: axesQuaternionTo,
+    quaternionFrom: axesQuaternionFrom,
+    poseTo: axesPoseTo,
+    poseFrom: axesPoseFrom,
+    twistTo: axesTwistTo,
+    twistFrom: axesTwistFrom,
+    wrenchTo: axesWrenchTo,
+    wrenchFrom: axesWrenchFrom,
+    accelTo: axesAccelTo,
+    accelFrom: axesAccelFrom,
+    covariance6To: axesCovariance6To,
+    covariance6From: axesCovariance6From,
+    pointsTo: axesPointsTo,
+    pointsFrom: axesPointsFrom,
+};
+
+/** The calls of Plane. */
+export const Plane = {
+    fromPoints: planeFromPoints,
+    distance: planeDistance,
+    closest: planeClosest,
+    raycast: planeRaycast,
+    transform: planeTransform,
+    intersect: planeIntersect,
+    intersect3: planeIntersect3,
+};
+
+/** The calls of Segment. */
+export const Segment = {
+    length: segmentLength,
+    closest: segmentClosest,
+    distance: segmentDistance,
+    closestSegment: segmentClosestSegment,
+    transform: segmentTransform,
+    bounds: segmentBounds,
+    toShape: shapeFromSegment,
+};
+
+/** The calls of Ray. */
+export const Ray = {
+    at: rayAt,
+    closest: rayClosest,
+    distance: rayDistance,
+    closestRay: rayClosestRay,
+    transform: rayTransform,
+};
+
+/** The calls of Plane2D. */
+export const Plane2D = {
+    fromPoints: plane2dFromPoints,
+    distance: plane2dDistance,
+    closest: plane2dClosest,
+    raycast: plane2dRaycast,
+    transform: plane2dTransform,
+    intersect: plane2dIntersect,
+};
+
+/** The calls of Segment2D. */
+export const Segment2D = {
+    length: segment2dLength,
+    closest: segment2dClosest,
+    distance: segment2dDistance,
+    closestSegment: segment2dClosestSegment,
+    intersect: segment2dIntersect,
+    raycast: segment2dRaycast,
+    transform: segment2dTransform,
+    bounds: segment2dBounds,
+    toShape2d: shape2dFromSegment2d,
+};
+
+/** The calls of Ray2D. */
+export const Ray2D = {
+    at: ray2dAt,
+    closest: ray2dClosest,
+    distance: ray2dDistance,
+    transform: ray2dTransform,
+};
+
+/** The calls of AlignedBox2D. */
+export const AlignedBox2D = {
+    distance: alignedBox2dDistance,
+    closest: alignedBox2dClosest,
+    contains: alignedBox2dContains,
+    raycast: alignedBox2dRaycast,
+    centroid: alignedBox2dCentroid,
+    area: alignedBox2dArea,
+    perimeter: alignedBox2dPerimeter,
+    corners: alignedBox2dCorners,
+    edges: alignedBox2dEdges,
+    planes: alignedBox2dPlanes,
+    transform: alignedBox2dTransform,
+    merge: alignedBox2dMerge,
+    overlap: alignedBox2dOverlap,
+    grow: alignedBox2dGrow,
+    iou: alignedBox2dIou,
+    toOrientedBox2d: orientedBox2dFromAlignedBox2d,
+    toShape2d: shape2dFromAlignedBox2d,
+};
+
+/** The calls of OrientedBox2D. */
+export const OrientedBox2D = {
+    distance: orientedBox2dDistance,
+    closest: orientedBox2dClosest,
+    contains: orientedBox2dContains,
+    raycast: orientedBox2dRaycast,
+    bounds: orientedBox2dBounds,
+    area: orientedBox2dArea,
+    perimeter: orientedBox2dPerimeter,
+    corners: orientedBox2dCorners,
+    edges: orientedBox2dEdges,
+    planes: orientedBox2dPlanes,
+    transform: orientedBox2dTransform,
+    iou: orientedBox2dIou,
+    toShape2d: shape2dFromOrientedBox2d,
+};
+
+/** The calls of Circle. */
+export const Circle = {
+    distance: circleDistance,
+    closest: circleClosest,
+    contains: circleContains,
+    raycast: circleRaycast,
+    bounds: circleBounds,
+    area: circleArea,
+    perimeter: circlePerimeter,
+    transform: circleTransform,
+    toShape2d: shape2dFromCircle,
+};
+
+/** The calls of Capsule2D. */
+export const Capsule2D = {
+    distance: capsule2dDistance,
+    closest: capsule2dClosest,
+    contains: capsule2dContains,
+    raycast: capsule2dRaycast,
+    bounds: capsule2dBounds,
+    area: capsule2dArea,
+    perimeter: capsule2dPerimeter,
+    transform: capsule2dTransform,
+    toShape2d: shape2dFromCapsule2d,
+};
+
+/** The calls of Polygon2D. */
+export const Polygon2D = {
+    distance: polygon2dDistance,
+    closest: polygon2dClosest,
+    contains: polygon2dContains,
+    raycast: polygon2dRaycast,
+    bounds: polygon2dBounds,
+    centroid: polygon2dCentroid,
+    area: polygon2dArea,
+    signedArea: polygon2dSignedArea,
+    perimeter: polygon2dPerimeter,
+    isConvex: polygon2dIsConvex,
+    edges: polygon2dEdges,
+    planes: polygon2dPlanes,
+    triangulate: polygon2dTriangulate,
+    toShape2d: shape2dFromPolygon2d,
+};
+
+/** The calls of AlignedBox. */
+export const AlignedBox = {
+    distance: alignedBoxDistance,
+    closest: alignedBoxClosest,
+    contains: alignedBoxContains,
+    raycast: alignedBoxRaycast,
+    centroid: alignedBoxCentroid,
+    volume: alignedBoxVolume,
+    area: alignedBoxArea,
+    inertia: alignedBoxInertia,
+    corners: alignedBoxCorners,
+    edges: alignedBoxEdges,
+    planes: alignedBoxPlanes,
+    transform: alignedBoxTransform,
+    merge: alignedBoxMerge,
+    overlap: alignedBoxOverlap,
+    grow: alignedBoxGrow,
+    iou: alignedBoxIou,
+    toOrientedBox: orientedBoxFromAlignedBox,
+    toShape: shapeFromAlignedBox,
+};
+
+/** The calls of OrientedBox. */
+export const OrientedBox = {
+    distance: orientedBoxDistance,
+    closest: orientedBoxClosest,
+    contains: orientedBoxContains,
+    raycast: orientedBoxRaycast,
+    bounds: orientedBoxBounds,
+    volume: orientedBoxVolume,
+    area: orientedBoxArea,
+    inertia: orientedBoxInertia,
+    corners: orientedBoxCorners,
+    edges: orientedBoxEdges,
+    planes: orientedBoxPlanes,
+    transform: orientedBoxTransform,
+    iou: orientedBoxIou,
+    toShape: shapeFromOrientedBox,
+};
+
+/** The calls of Sphere. */
+export const Sphere = {
+    distance: sphereDistance,
+    closest: sphereClosest,
+    contains: sphereContains,
+    raycast: sphereRaycast,
+    bounds: sphereBounds,
+    volume: sphereVolume,
+    area: sphereArea,
+    inertia: sphereInertia,
+    transform: sphereTransform,
+    toShape: shapeFromSphere,
+};
+
+/** The calls of Capsule. */
+export const Capsule = {
+    distance: capsuleDistance,
+    closest: capsuleClosest,
+    contains: capsuleContains,
+    raycast: capsuleRaycast,
+    bounds: capsuleBounds,
+    centroid: capsuleCentroid,
+    volume: capsuleVolume,
+    area: capsuleArea,
+    inertia: capsuleInertia,
+    transform: capsuleTransform,
+    toShape: shapeFromCapsule,
+};
+
+/** The calls of Cylinder. */
+export const Cylinder = {
+    distance: cylinderDistance,
+    closest: cylinderClosest,
+    contains: cylinderContains,
+    raycast: cylinderRaycast,
+    bounds: cylinderBounds,
+    centroid: cylinderCentroid,
+    volume: cylinderVolume,
+    area: cylinderArea,
+    inertia: cylinderInertia,
+    transform: cylinderTransform,
+    toShape: shapeFromCylinder,
+};
+
+/** The calls of Cone. */
+export const Cone = {
+    distance: coneDistance,
+    closest: coneClosest,
+    contains: coneContains,
+    raycast: coneRaycast,
+    bounds: coneBounds,
+    centroid: coneCentroid,
+    volume: coneVolume,
+    area: coneArea,
+    inertia: coneInertia,
+    transform: coneTransform,
+    toShape: shapeFromCone,
+};
+
+/** The calls of Prism. */
+export const Prism = {
+    distance: prismDistance,
+    closest: prismClosest,
+    contains: prismContains,
+    raycast: prismRaycast,
+    bounds: prismBounds,
+    centroid: prismCentroid,
+    volume: prismVolume,
+    area: prismArea,
+    inertia: prismInertia,
+    corners: prismCorners,
+    edges: prismEdges,
+    planes: prismPlanes,
+    transform: prismTransform,
+    toShape: shapeFromPrism,
+};
+
+/** The calls of Polyline. */
+export const Polyline = {
+    length: polylineLength,
+    distance: polylineDistance,
+    closest: polylineClosest,
+    at: polylineAt,
+    bounds: polylineBounds,
+    edges: polylineEdges,
+    resample: polylineResample,
+    simplify: polylineSimplify,
+    toShape: shapeFromPolyline,
+};
+
+/** The calls of Polyline2D. */
+export const Polyline2D = {
+    length: polyline2dLength,
+    distance: polyline2dDistance,
+    closest: polyline2dClosest,
+    at: polyline2dAt,
+    bounds: polyline2dBounds,
+    edges: polyline2dEdges,
+    planes: polyline2dPlanes,
+    resample: polyline2dResample,
+    simplify: polyline2dSimplify,
+    toShape2d: shape2dFromPolyline2d,
+};
+
+/** The calls of Path. */
+export const Path = {
+    length: pathLength,
+    distance: pathDistance,
+    closest: pathClosest,
+    at: pathAt,
+    bounds: pathBounds,
+    resample: pathResample,
+};
+
+/** The calls of Path2D. */
+export const Path2D = {
+    length: path2dLength,
+    distance: path2dDistance,
+    closest: path2dClosest,
+    at: path2dAt,
+    bounds: path2dBounds,
+    resample: path2dResample,
+};
+
+/** The calls of Polygon. */
+export const Polygon = {
+    plane: polygonPlane,
+    flatten: polygonFlatten,
+    distance: polygonDistance,
+    closest: polygonClosest,
+    raycast: polygonRaycast,
+    bounds: polygonBounds,
+    centroid: polygonCentroid,
+    area: polygonArea,
+    perimeter: polygonPerimeter,
+    edges: polygonEdges,
+    toShape: shapeFromPolygon,
+};
+
+/** The calls of Mesh. */
+export const Mesh = {
+    check: meshCheck,
+    distance: meshDistance,
+    closest: meshClosest,
+    contains: meshContains,
+    raycast: meshRaycast,
+    bounds: meshBounds,
+    area: meshArea,
+    volume: meshVolume,
+    centroid: meshCentroid,
+    inertia: meshInertia,
+    normals: meshNormals,
+    toShape: shapeFromMesh,
+};
+
+/** The calls of Shape. */
+export const Shape = {
+    distance: shapeDistance,
+    closest: shapeClosest,
+    contains: shapeContains,
+    raycast: shapeRaycast,
+    bounds: shapeBounds,
+    distances: shapeDistances,
+    gap: shapeGap,
+    overlaps: shapeOverlaps,
+    sampleInside: shapeSampleInside,
+    sampleSurface: shapeSampleSurface,
+    mesh: shapeMesh,
+};
+
+/** The calls of Shape2D. */
+export const Shape2D = {
+    distance: shape2dDistance,
+    closest: shape2dClosest,
+    contains: shape2dContains,
+    raycast: shape2dRaycast,
+    bounds: shape2dBounds,
+    distances: shape2dDistances,
+    gap: shape2dGap,
+    overlaps: shape2dOverlaps,
+    sampleInside: shape2dSampleInside,
+    sampleSurface: shape2dSampleSurface,
+};
+
+/** The calls of Color. */
+export const Color = {
+    mix: colorMix,
+    toLinear: colorToLinear,
+    fromLinear: colorFromLinear,
+};
+
+/** The calls of CameraIntrinsics. */
+export const CameraIntrinsics = {
+    project: cameraProject,
+    projectPoints: cameraProjectPoints,
+    ray: cameraRay,
+    unproject: cameraUnproject,
+    scale: cameraScale,
+    crop: cameraCrop,
+    fov: cameraFov,
+    fromFov: cameraFromFov,
+};
+
+/** The calls of Image. */
+export const Image = {
+    check: imageCheck,
+    colorAt: imageColorAt,
+    valueAt: imageValueAt,
+    convert: imageConvert,
+    colorize: imageColorize,
+    crop: imageCrop,
+    flipHorizontal: imageFlipHorizontal,
+    flipVertical: imageFlipVertical,
+    rotate: imageRotate,
+    resize: imageResize,
+    undistort: imageUndistort,
+    draw: imageDraw,
+    depthPoints: imageDepthPoints,
+};
+
+/** The calls of PointCloud. */
+export const PointCloud = {
+    check: pointCloudCheck,
+    field: pointCloudField,
+    readPoints: pointCloudReadPoints,
+    writePoints: pointCloudWritePoints,
+    readValues: pointCloudReadValues,
+    writeValues: pointCloudWriteValues,
+    readColors: pointCloudReadColors,
+    writeColors: pointCloudWriteColors,
+    transform: pointCloudTransform,
+    select: pointCloudSelect,
+};
+
+/** The calls of LaserScan. */
+export const LaserScan = {
+    points: laserScanPoints,
+};
+
+/** The calls of Grid. */
+export const Grid = {
+    cell: gridCell,
+    center: gridCenter,
+    readValue: gridReadValue,
+    readValues: gridReadValues,
+    readColors: gridReadColors,
+    writeValue: gridWriteValue,
+};
+
+/** The calls of GeoPoint. */
+export const GeoPoint = {
+    toEcef: geoPointToEcef,
+    fromEcef: geoPointFromEcef,
+    toEnu: geoPointToEnu,
+    fromEnu: geoPointFromEnu,
+};
