@@ -292,6 +292,49 @@ class Axes:
     y: int = 0
     z: int = 0
     scale: float = 0
+    @staticmethod
+    def of(preset: AxesPreset) -> Axes:
+        return axes_of(preset)
+    @staticmethod
+    def make(x: int, y: int, z: int, scale: float) -> Axes:
+        return axes_make(x, y, z, scale)
+    def point_to(self, point: Double3) -> Double3:
+        return axes_point_to(self, point)
+    def point_from(self, point: Double3) -> Double3:
+        return axes_point_from(self, point)
+    def direction_to(self, direction: Double3) -> Double3:
+        return axes_direction_to(self, direction)
+    def direction_from(self, direction: Double3) -> Double3:
+        return axes_direction_from(self, direction)
+    def quaternion_to(self, q: Quaternion) -> Quaternion:
+        return axes_quaternion_to(self, q)
+    def quaternion_from(self, q: Quaternion) -> Quaternion:
+        return axes_quaternion_from(self, q)
+    def pose_to(self, p: Pose) -> Pose:
+        return axes_pose_to(self, p)
+    def pose_from(self, p: Pose) -> Pose:
+        return axes_pose_from(self, p)
+    def twist_to(self, t: Twist) -> Twist:
+        return axes_twist_to(self, t)
+    def twist_from(self, t: Twist) -> Twist:
+        return axes_twist_from(self, t)
+    def wrench_to(self, w: Wrench) -> Wrench:
+        return axes_wrench_to(self, w)
+    def wrench_from(self, w: Wrench) -> Wrench:
+        return axes_wrench_from(self, w)
+    def accel_to(self, a: Accel) -> Accel:
+        return axes_accel_to(self, a)
+    def accel_from(self, a: Accel) -> Accel:
+        return axes_accel_from(self, a)
+    def covariance6_to(self, points: Covariance6) -> Covariance6:
+        return axes_covariance6_to(self, points)
+    def covariance6_from(self, points: Covariance6) -> Covariance6:
+        return axes_covariance6_from(self, points)
+    def points_to(self, points: Sequence[Double3]) -> List[Double3]:
+        return axes_points_to(self, points)
+    def points_from(self, points: Sequence[Double3]) -> List[Double3]:
+        return axes_points_from(self, points)
+
 
 @dataclass
 class SurfacePoint:
@@ -1933,6 +1976,10 @@ class KdTree:
 
     def __del__(self):
         self.close()
+    def nearest(self, point: Double3, count: int) -> Tuple[List[int], List[float]]:
+        return kdtree_nearest(self, point, count)
+    def within(self, point: Double3, radius: float) -> Tuple[List[int], List[float]]:
+        return kdtree_within(self, point, radius)
 
 
 class Shape:
@@ -1940,6 +1987,28 @@ class Shape:
     def __init__(self, raw, *keep):
         self._raw = raw
         self._keep = keep
+    def distance(self, point: Double3) -> float:
+        return shape_distance(self, point)
+    def closest(self, point: Double3) -> SurfacePoint:
+        return shape_closest(self, point)
+    def contains(self, point: Double3) -> bool:
+        return shape_contains(self, point)
+    def raycast(self, ray: Ray) -> Optional[RayHit]:
+        return shape_raycast(self, ray)
+    def bounds(self) -> AlignedBox:
+        return shape_bounds(self)
+    def distances(self, points: Sequence[Double3]) -> List[float]:
+        return shape_distances(self, points)
+    def gap(self, b: Shape) -> Tuple[float, Segment]:
+        return shape_gap(self, b)
+    def overlaps(self, b: Shape) -> bool:
+        return shape_overlaps(self, b)
+    def sample_inside(self, seed: int, count: int) -> List[Double3]:
+        return shape_sample_inside(self, seed, count)
+    def sample_surface(self, seed: int, count: int) -> List[Double3]:
+        return shape_sample_surface(self, seed, count)
+    def mesh(self, segments: int, crease: float) -> Mesh:
+        return shape_mesh(self, segments, crease)
 
 
 class Shape2D:
@@ -1947,6 +2016,27 @@ class Shape2D:
     def __init__(self, raw, *keep):
         self._raw = raw
         self._keep = keep
+    def distance(self, point: Double2) -> float:
+        return shape2d_distance(self, point)
+    def closest(self, point: Double2) -> SurfacePoint2D:
+        return shape2d_closest(self, point)
+    def contains(self, point: Double2) -> bool:
+        return shape2d_contains(self, point)
+    def raycast(self, ray: Ray2D) -> Optional[RayHit2D]:
+        return shape2d_raycast(self, ray)
+    def bounds(self) -> AlignedBox2D:
+        return shape2d_bounds(self)
+    def distances(self, points: Sequence[Double2]) -> List[float]:
+        return shape2d_distances(self, points)
+    def gap(self, b: Shape2D) -> Tuple[float, Segment2D]:
+        return shape2d_gap(self, b)
+    def overlaps(self, b: Shape2D) -> bool:
+        return shape2d_overlaps(self, b)
+    def sample_inside(self, seed: int, count: int) -> List[Double2]:
+        return shape2d_sample_inside(self, seed, count)
+    def sample_surface(self, seed: int, count: int) -> List[Double2]:
+        return shape2d_sample_surface(self, seed, count)
+
 
 
 

@@ -7,5 +7,6 @@ from ._api import *  # noqa: F401,F403
 from ._api import __all__ as _calls
 from ._convert import cloud_from_numpy, cloud_to_numpy, image_from_numpy, image_to_numpy, points_from_numpy, points_to_numpy
 from ._std import *  # noqa: F401,F403
+from . import _methods  # noqa: F401  puts each type's methods and operators on its class
 
 __all__ = list(_calls) + ["cloud_from_numpy", "cloud_to_numpy", "image_from_numpy", "image_to_numpy", "points_from_numpy", "points_to_numpy"]

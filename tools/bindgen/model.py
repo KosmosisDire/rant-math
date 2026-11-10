@@ -177,6 +177,7 @@ class Model:
     operators: list = field(default_factory=list)
     cpp_types: dict = field(default_factory=dict)   # Rant's C++ type names to struct or their enum declaration
     cpp_fields: dict = field(default_factory=dict)  # each of Rant's C++ structs to its field names
+    rant_stub: str = None                           # Rant's stub of its Python types, when its checkout has one
 
     def func(self, c):
         for f in self.functions:
@@ -760,8 +761,10 @@ def read_model(root, types_path, clang=None, types_hpp=None):
     # Rant's src/common/stdtypes.h has its C++ types at bindings/cpp/rant_types.hpp.
     types_hpp = types_hpp or os.path.join(os.path.dirname(types_path), "..", "..", "bindings", "cpp", "rant_types.hpp")
     cpp_types, cpp_fields = read_cpp_types(clang, types_hpp)
+    stub = os.path.join(os.path.dirname(types_path), "..", "..", "bindings", "python", "rant_types", "__init__.pyi")
+    rant_stub = open(stub, encoding="utf-8").read() if os.path.exists(stub) else None
     version = open(os.path.join(root, "VERSION"), encoding="utf-8").read().strip()
-    model = Model(structs, enums, functions, version, cpp_types=cpp_types, cpp_fields=cpp_fields)
+    model = Model(structs, enums, functions, version, cpp_types=cpp_types, cpp_fields=cpp_fields, rant_stub=rant_stub)
     for f in functions:
         classify(f, model)
     model.methods = find_methods(model)

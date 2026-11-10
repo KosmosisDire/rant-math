@@ -432,7 +432,31 @@ def hand_tests():
     grid = m.Grid(m.identity_transform(), 1.0, 2, 2, 1, [field])
     m.grid_write_value(grid, "cost", m.Int3(1, 1, 0), 9.0)
     check(grid.fields[0].data[3] == 9 and m.grid_read_value(grid, "cost", m.Int3(1, 1, 0)) == 9.0, "grid")
+    method_tests()
     numpy_tests()
+
+
+def method_tests():
+    import rant_math as m
+    d3 = m.Double3
+    q = m.Quaternion.from_axis_angle(d3(0, 0, 1), math.pi / 2)
+    p = m.Pose(d3(1, 0, 0), q)
+    check((p * d3(1, 0, 0)).is_near(d3(1, 1, 0), 1e-12) and (p * p).position.is_near(d3(1, 1, 0), 1e-12), "pose operators")
+    check(p.inverse().apply(p.apply(d3(2, 3, 4))).is_near(d3(2, 3, 4), 1e-12), "pose methods")
+    a = d3(3, 4, 0)
+    check(a.length() == 5.0 and (a + a - a) == a and 2 * a == a * 2 == d3(6, 8, 0) and a / 2 == d3(1.5, 2, 0) and -a == d3(-3, -4, 0),
+          "vector operators")
+    check(q.is_near(m.Quaternion(-q.x, -q.y, -q.z, -q.w), 1e-12) and (q * q * d3(1, 0, 0)).is_near(d3(-1, 0, 0), 1e-12), "quaternion")
+    check(m.Twist(d3(1, 0, 0), d3()).transform(p).linear.is_near(d3(0, 1, 0), 1e-12), "the value need not come first in C")
+    check(m.Sphere(d3(), 2.0).to_shape().distance(d3(5, 0, 0)) == 3.0, "to a shape and its methods")
+    check(m.Polygon2D([m.Double2(0, 0), m.Double2(2, 0), m.Double2(2, 2), m.Double2(0, 2)]).area() == 4.0, "a list type reads its points")
+    check(m.Axes.of(m.AxesPreset.Unity).point_to(d3(1, 2, 3)) == m.axes_point_to(m.axes_of(m.AxesPreset.Unity), d3(1, 2, 3)),
+          "math's own type")
+    try:
+        p * "x"
+        check(False, "an unknown right side raises")
+    except TypeError:
+        pass
 
 
 def numpy_tests():
