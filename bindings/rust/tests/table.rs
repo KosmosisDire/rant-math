@@ -19,7 +19,8 @@ fn the_table_reads() {
 #[cfg(feature = "quickjs")]
 #[test]
 fn names_come_from_the_table() {
-    let names = rant_math::quickjs::names();
+    // A Windows checkout may end the generated file's lines with CRLF.
+    let names = rant_math::quickjs::names().replace("\r\n", "\n");
     assert!(names.contains("export const NAMES = [\n"));
     assert!(names.contains(r#"{"name": "poseInverse", "takes": ["p"], "words": "pose inverse"}"#));
 }
