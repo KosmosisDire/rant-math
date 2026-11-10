@@ -95,7 +95,7 @@ foreach(part "rant_math.h" "rant_types.hpp" "rant_math_members.hpp" "rant_math_a
   string(REPLACE "#include \"${part}\"   /* @RANT_EMBED@ */" "${body}" hpp "${hpp}")
 endforeach()
 file(WRITE "${OUT}/rant_math.hpp" "${hpp}")
-# Rant's rant_types.hpp includes the members by name when RANT_MATH is set, so they ship apart too.
+# Rant's rant_types.hpp includes the members by name when RANT_MATH is set or they are on the path, so they ship apart too.
 file(COPY "${cpp}/rant_math_members.hpp" DESTINATION "${OUT}")
 file(WRITE "${OUT}/rant_math.cpp" [==[
 /* GENERATED. The one file that holds the implementation, for a program built from rant_math.hpp. */

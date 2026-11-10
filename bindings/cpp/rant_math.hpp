@@ -44,9 +44,10 @@ namespace rant { namespace detail {
 #include <utility>
 #include <vector>
 
-/* Each type's methods are declared in its struct, so the types must not come in without them. */
+/* Each type's methods are declared in its struct, so the types must not come in without them. Rant's
+ * types find rant_math_members.hpp on the include path, so this means it was not there. */
 #if defined(RANT_TYPES_HPP) && !defined(RANT_MATH_MEMBERS_HPP)
-#error "Rant's types came in without Rant Math's methods: define RANT_MATH for the whole build, as linking rant_math does"
+#error "Rant's types came in without Rant Math's methods: put rant_math_members.hpp on the include path or define RANT_MATH for the whole build"
 #endif
 #include "rant_math_members.hpp"   /* @RANT_EMBED@ */
 #include "rant_types.hpp"   /* @RANT_EMBED@ */

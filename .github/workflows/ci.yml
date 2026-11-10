@@ -84,6 +84,7 @@ jobs:
             build/dist/rant_math.h
             build/dist/rant_math.c
             build/dist/rant_math.hpp
+            build/dist/rant_math_members.hpp
             build/dist/rant_math.cpp
 
   # Clang with the address and undefined behaviour sanitizers, which fail on the first report. A binding
@@ -287,7 +288,7 @@ jobs:
         run: |
           VERSION="$(tr -d '\r\n' < VERSION)"
           mkdir -p release
-          cp build/dist/rant_math.h build/dist/rant_math.c build/dist/rant_math.hpp build/dist/rant_math.cpp release/
+          cp build/dist/rant_math.h build/dist/rant_math.c build/dist/rant_math.hpp build/dist/rant_math_members.hpp build/dist/rant_math.cpp release/
           cp licenses/*.txt release/
           cp dist/Rant.Math.*.nupkg dist/rant-math-*.tgz dist/math-*-arduino.zip artifacts/wheels-*/*.whl release/
           # the skill rant add offers, its files at the zip's top

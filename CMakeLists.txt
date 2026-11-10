@@ -21,7 +21,11 @@ CPMAddPackage(NAME rant
 set(RANT_MATH_TYPES "${rant_SOURCE_DIR}/src/common/stdtypes.h")
 set(RANT_MATH_TYPES_HPP "${rant_SOURCE_DIR}/bindings/cpp/rant_types.hpp")
 if(NOT EXISTS "${RANT_MATH_TYPES}" OR NOT EXISTS "${RANT_MATH_TYPES_HPP}")
-  message(FATAL_ERROR "Rant at ${rant_SOURCE_DIR} has no src/common/stdtypes.h, Rant Math needs Rant 0.0.41 or newer")
+  message(FATAL_ERROR "Rant at ${rant_SOURCE_DIR} has no src/common/stdtypes.h or bindings/cpp/rant_types.hpp, Rant Math needs Rant 0.0.44 or newer")
+endif()
+file(STRINGS "${RANT_MATH_TYPES_HPP}" RANT_MATH_HOOK REGEX "RANT_MEMBERS_Double3" LIMIT_COUNT 1)
+if(NOT RANT_MATH_HOOK)
+  message(FATAL_ERROR "Rant at ${rant_SOURCE_DIR} has no RANT_MEMBERS_ hook in rant_types.hpp, Rant Math needs Rant 0.0.44 or newer")
 endif()
 
 # 1. Pack src/ and the types into dist/rant_math.h in the build tree, which depends on the

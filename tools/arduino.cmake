@@ -13,7 +13,7 @@ set(STAGE "${ROOT}/dist/arduino")
 set(OUT "${STAGE}/Rant_Math")
 
 file(REMOVE_RECURSE "${STAGE}")
-foreach(f rant_math.h rant_math.hpp rant_math.cpp)
+foreach(f rant_math.h rant_math.hpp rant_math_members.hpp rant_math.cpp)
   if(NOT EXISTS "${DIST}/${f}")
     message(FATAL_ERROR "arduino: no ${DIST}/${f}, build first or set DIST")
   endif()

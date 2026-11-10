@@ -26,6 +26,8 @@ As one file: take `rant_math.h` from a release, and build it in one source file:
 ```
 
 - `rant_math.h` carries Rant's types, so it goes beside `rant.h` in either order.
+- In C++ either order works too when `rant_math_members.hpp` is on the include path, as in an Arduino
+  sketch or with `rant_math` linked. Otherwise include `rant_math.hpp` first.
 - Link `m` on Linux.
 
 ## First call
