@@ -669,13 +669,13 @@ fn images_clouds_grids() {
 #[test]
 fn nalgebra_conversions() {
     let v = d3(1.0, 2.0, 3.0);
-    assert_eq!(v.to_nalgebra().to_rant(), v);
+    assert_eq!(Double3::from(nalgebra::Vector3::from(v)), v);
     let q = quaternion_from_axis_angle(d3(0.0, 0.0, 1.0), 0.5);
     let p = Pose { position: v, orientation: q };
     let by_math = pose_apply(p, d3(4.0, 5.0, 6.0));
     let by_na = p.to_nalgebra() * nalgebra::Point3::new(4.0, 5.0, 6.0);
     assert!((by_math.x - by_na.x).abs() < 1e-9 && (by_math.y - by_na.y).abs() < 1e-9);
-    let back = p.to_nalgebra().to_rant();
+    let back = Pose::from(p.to_nalgebra());
     assert!((back.orientation.w - q.w).abs() < 1e-12 && back.position == v);
     let m = Matrix { rows: 2, cols: 3, data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0] };
     assert_eq!(m.to_nalgebra()[(1, 0)], 4.0);

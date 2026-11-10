@@ -467,13 +467,18 @@ public static class Program
 
     static void Numerics()
     {
-        var v = D3(1, 2, 3).ToVector3();
+        var v = (System.Numerics.Vector3)D3(1, 2, 3);
         Check(v.Y == 2f, "to Vector3");
-        Check(v.ToDouble3().Z == 3.0, "from Vector3");
-        var q = RantMath.QuaternionFromAxisAngle(D3(0, 0, 1), 0.5).ToNumerics();
-        Check(System.Math.Abs(q.ToRant().W - System.Math.Cos(0.25)) < 1e-6, "quaternions");
+        Double3 back = v;
+        Check(back.Z == 3.0, "from Vector3");
+        Float3 f = (Float3)D3(1, 2, 3);
+        Double3 up = f;
+        Check(up.Y == 2.0, "between precisions");
+        var q = (System.Numerics.Quaternion)RantMath.QuaternionFromAxisAngle(D3(0, 0, 1), 0.5);
+        Quaternion rant = q;
+        Check(System.Math.Abs(rant.W - System.Math.Cos(0.25)) < 1e-6, "quaternions");
         var turned = System.Numerics.Vector3.Transform(new System.Numerics.Vector3(1, 0, 0), q);
-        var byMath = RantMath.QuaternionRotate(q.ToRant(), D3(1, 0, 0));
+        var byMath = RantMath.QuaternionRotate(rant, D3(1, 0, 0));
         Check(System.Math.Abs(turned.Y - byMath.Y) < 1e-5, "both turn alike");
     }
 

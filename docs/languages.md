@@ -112,10 +112,10 @@ auto plane = rant::math::points_fit_plane(points, options);
 | C++ | Eigen | `to_eigen`, `from_eigen`, `points_to_eigen` |
 | C++ | OpenCV | a `cv::Mat` goes in as an image, `to_mat`, `from_mat` |
 | C++ | PCL | a `pcl::PointCloud` goes in as a cloud, `to_pcl`, `from_pcl` |
-| Python | numpy | `image_to_numpy`, `cloud_to_numpy`, `points_to_numpy` and their `from` forms |
-| C# | System.Numerics | `v.ToVector3()`, `q.ToNumerics()`, `v.ToDouble3()` |
+| Python | numpy | `image_to_numpy`, `cloud_to_numpy`, `points_to_numpy` and their `from` forms, and `np.array(v)` from Rant's types |
+| C# | System.Numerics | casts, from Rant's types with no math: `(Vector3)v`, `Double3 d = vector3` |
 | Unity | UnityEngine | `v.ToUnity()`, `v.ToRant()`, for `Vector3`, `Quaternion` and `Pose`, in Unity's axes |
-| Rust | nalgebra, the feature `nalgebra` | `v.to_nalgebra()`, `m.to_rant()` |
+| Rust | nalgebra, the feature `nalgebra` | `From` both ways from rant-types, and `q.to_nalgebra()` and `p.to_nalgebra()` for a unit rotation |
 
 C++ finds each with no setting. `RANT_MATH_NO_EIGEN`, `RANT_MATH_NO_OPENCV` and `RANT_MATH_NO_PCL` leave one out.
 

@@ -14,7 +14,7 @@ name = "rant_math"
 
 [features]
 # Conversions to nalgebra's types.
-nalgebra = ["dep:nalgebra"]
+nalgebra = ["dep:nalgebra", "rant-types/nalgebra"]
 # Every call for JavaScript running in QuickJS, which has no wasm.
 quickjs = ["dep:rquickjs"]
 

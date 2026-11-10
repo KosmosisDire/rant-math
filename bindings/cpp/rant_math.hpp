@@ -859,13 +859,6 @@ namespace rant { namespace types {
 
 #include "rant_math_operators.inc"   /* @RANT_EMBED@ */
 
-inline bool operator==(Double2 a, Double2 b) { return a.x == b.x && a.y == b.y; }
-inline bool operator!=(Double2 a, Double2 b) { return !(a == b); }
-inline bool operator==(Double3 a, Double3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
-inline bool operator!=(Double3 a, Double3 b) { return !(a == b); }
-inline bool operator==(Double4 a, Double4 b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
-inline bool operator!=(Double4 a, Double4 b) { return !(a == b); }
-
 } }   /* namespace rant::types */
 
 #include "rant_math_methods.inc"   /* @RANT_EMBED@ */
