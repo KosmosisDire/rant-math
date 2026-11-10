@@ -1,8 +1,8 @@
 # Every language
 
-Rant Math is one set of calls in C, C++, Python, C#, Unity, Rust, TypeScript and HMI code. Each takes the
-standard types of its language, so a value from the mesh goes straight in. The pages here use C names, and
-this page says how a name reads in each.
+Rant Math is one set of calls in C, C++, Python, C#, Unity, Rust, TypeScript, HMI code and PLCnext IEC.
+Each takes the standard types of its language, so a value from the mesh goes straight in. The pages here use
+C names, and this page says how a name reads in each.
 
 ## Add it
 
@@ -52,6 +52,21 @@ Each call on a type is also a method of it: `rant_pose_inverse(p)` is `p.inverse
   linking `rant_math` defines `RANT_MATH` for all. Define it yourself in a build without CMake.
 - In TypeScript and QuickJS a value a call hands back names its type under `Symbol.for("rant.type")`,
   exported as `TYPE`: `p[TYPE]` is `"Pose"`, and `p.position[TYPE]` is `"Double3"`.
+
+## PLCnext
+
+The PLCnext library `Rant` carries the calls on fixed size values: vectors, rotations, poses, matrices,
+lines, solids, motion, axes, color, camera and geo. Each is an IEC function named as in C#.
+
+```
+sum := Double3Add(a, b);
+q := QuaternionFromEuler(LREAL#0.1, LREAL#0.2, LREAL#0.3, EulerOrder#MovingZyx);
+```
+
+- A call that can fail, finds nothing, takes no input or gives several answers is a function block, with
+  `Ok`, or `Found` where nothing may be found: `cast(S := sphere, Ray := ray); IF cast.Found THEN ...`.
+- Engineer calls a function by position only, and cannot pass a struct one function returns straight into
+  another: put it in a variable first.
 
 ## Answers
 

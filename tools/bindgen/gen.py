@@ -25,7 +25,7 @@ VECTORS = os.path.join(ROOT, "tests", "bindings", "vectors.json")
 def outputs(model):
     """Each generated file as (path under the repo, text). Backends join as they land."""
     files = []
-    for name in ("table_backend", "cpp_backend", "python_backend", "csharp_backend", "rust_backend", "web_backend", "quickjs_backend"):
+    for name in ("table_backend", "cpp_backend", "python_backend", "csharp_backend", "rust_backend", "web_backend", "quickjs_backend", "iec_backend"):
         try:
             backend = __import__(name)
         except ModuleNotFoundError:
