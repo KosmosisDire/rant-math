@@ -44,6 +44,11 @@ namespace rant { namespace detail {
 #include <utility>
 #include <vector>
 
+/* Each type's methods are declared in its struct, so the types must not come in without them. */
+#if defined(RANT_TYPES_HPP) && !defined(RANT_MATH_MEMBERS_HPP)
+#error "Rant's types came in without Rant Math's methods: define RANT_MATH for the whole build, as linking rant_math does"
+#endif
+#include "rant_math_members.hpp"   /* @RANT_EMBED@ */
 #include "rant_types.hpp"   /* @RANT_EMBED@ */
 
 /* Conversions appear for each library the compiler can find. RANT_MATH_NO_EIGEN and its siblings
@@ -519,6 +524,7 @@ public:
         return *this;
     }
     ~KdTree() { detail::rant_kdtree_destroy(tree_); }
+    RANT_MEMBERS_KdTree
     const detail::RantKdTree *raw() const noexcept { return tree_; }
 private:
     detail::RantKdTree *tree_;
@@ -527,6 +533,7 @@ private:
 /* Any shape behind one type, made by a shape_from_ call. It keeps its own copy of any list. */
 class Shape {
 public:
+    RANT_MEMBERS_Shape
     Shape() noexcept { std::memset(static_cast<void *>(&raw_), 0, sizeof raw_); }
     Shape(const Shape &other)
         : raw_(other.raw_), points_(other.points_), flat_(other.flat_), triangles_(other.triangles_), colors_(other.colors_) {
@@ -611,6 +618,7 @@ private:
 /* The same in 2D. */
 class Shape2D {
 public:
+    RANT_MEMBERS_Shape2D
     Shape2D() noexcept { std::memset(static_cast<void *>(&raw_), 0, sizeof raw_); }
     Shape2D(const Shape2D &other) : raw_(other.raw_), points_(other.points_) { aim(); }
     Shape2D(Shape2D &&other) noexcept : raw_(other.raw_), points_(std::move(other.points_)) {
@@ -859,6 +867,8 @@ inline bool operator==(Double4 a, Double4 b) { return a.x == b.x && a.y == b.y &
 inline bool operator!=(Double4 a, Double4 b) { return !(a == b); }
 
 } }   /* namespace rant::types */
+
+#include "rant_math_methods.inc"   /* @RANT_EMBED@ */
 
 #endif   /* !RANT_MATH_IMPLEMENTATION */
 #endif   /* RANT_MATH_HPP */

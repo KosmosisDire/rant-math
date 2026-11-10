@@ -82,7 +82,8 @@ file(WRITE "${OUT}/rant_math.c" [==[
 set(cpp "${CMAKE_CURRENT_LIST_DIR}/../bindings/cpp")
 file(READ "${cpp}/rant_math.hpp" hpp)
 string(REPLACE "\r" "" hpp "${hpp}")
-foreach(part "rant_math.h" "rant_types.hpp" "rant_math_api.inc" "rant_math_operators.inc")
+foreach(part "rant_math.h" "rant_types.hpp" "rant_math_members.hpp" "rant_math_api.inc" "rant_math_operators.inc"
+        "rant_math_methods.inc")
   if(part STREQUAL "rant_math.h")
     file(READ "${header}" body)
   elseif(part STREQUAL "rant_types.hpp")
@@ -94,6 +95,8 @@ foreach(part "rant_math.h" "rant_types.hpp" "rant_math_api.inc" "rant_math_opera
   string(REPLACE "#include \"${part}\"   /* @RANT_EMBED@ */" "${body}" hpp "${hpp}")
 endforeach()
 file(WRITE "${OUT}/rant_math.hpp" "${hpp}")
+# Rant's rant_types.hpp includes the members by name when RANT_MATH is set, so they ship apart too.
+file(COPY "${cpp}/rant_math_members.hpp" DESTINATION "${OUT}")
 file(WRITE "${OUT}/rant_math.cpp" [==[
 /* GENERATED. The one file that holds the implementation, for a program built from rant_math.hpp. */
 #define RANT_MATH_IMPLEMENTATION

@@ -74,40 +74,61 @@ struct Axes {
     int8_t y = 0;
     int8_t z = 0;
     double scale = 0;
+#ifdef RANT_MEMBERS_Axes
+    RANT_MEMBERS_Axes
+#endif
 };
 
 struct SurfacePoint {
     Double3 point;
     Double3 normal;
+#ifdef RANT_MEMBERS_SurfacePoint
+    RANT_MEMBERS_SurfacePoint
+#endif
 };
 
 struct SurfacePoint2D {
     Double2 point;
     Double2 normal;
+#ifdef RANT_MEMBERS_SurfacePoint2D
+    RANT_MEMBERS_SurfacePoint2D
+#endif
 };
 
 struct RayHit {
     Double3 point;
     Double3 normal;
     double distance = 0;
+#ifdef RANT_MEMBERS_RayHit
+    RANT_MEMBERS_RayHit
+#endif
 };
 
 struct RayHit2D {
     Double2 point;
     Double2 normal;
     double distance = 0;
+#ifdef RANT_MEMBERS_RayHit2D
+    RANT_MEMBERS_RayHit2D
+#endif
 };
 
 struct CurvePoint {
     Double3 point;
     Double3 tangent;
     double distance = 0;
+#ifdef RANT_MEMBERS_CurvePoint
+    RANT_MEMBERS_CurvePoint
+#endif
 };
 
 struct CurvePoint2D {
     Double2 point;
     Double2 tangent;
     double distance = 0;
+#ifdef RANT_MEMBERS_CurvePoint2D
+    RANT_MEMBERS_CurvePoint2D
+#endif
 };
 
 

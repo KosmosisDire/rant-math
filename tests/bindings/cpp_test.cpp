@@ -781,6 +781,24 @@ static void operators() {
     CHECK(near((one + one).mass, 4.0));
 }
 
+static void methods() {
+    Double3 a{ 3, 4, 0 };
+    CHECK(near(a.length(), 5.0) && near(a.normalize().x, 0.6) && a.is_near(Double3{ 3, 4, 1e-12 }, 1e-9));
+    CHECK(near((a.min)(Double3{ 1, 9, 0 }).x, 1.0));
+    Quaternion q = Quaternion::from_axis_angle({ 0, 0, 1 }, 1.5707963267948966);
+    CHECK(near(q.rotate({ 1, 0, 0 }).y, 1.0) && near(q.inverse().compose(q).w, 1.0) && near(q.yaw(), 1.5707963267948966));
+    CHECK(q.is_near(Quaternion{ -q.x, -q.y, -q.z, -q.w }, 1e-12));
+    Pose p{ { 1, 0, 0 }, q };
+    CHECK(near(p.inverse().apply(p.apply({ 2, 3, 4 })).z, 4.0) && near(p.to_matrix4x4().apply({ 1, 0, 0 }).y, 1.0));
+    CHECK(near(Twist{ { 1, 0, 0 }, { 0, 0, 0 } }.transform(p).linear.y, 1.0));
+    Sphere ball{ { 0, 0, 0 }, 2 };
+    CHECK(ball.contains({ 1, 0, 0 }) && !ball.contains({ 3, 0, 0 }) && near(ball.to_shape().distance({ 5, 0, 0 }), 3.0));
+    Polygon2D square{ { { 0, 0 }, { 2, 0 }, { 2, 2 }, { 0, 2 } } };
+    CHECK(near(square.area(), 4.0) && square.contains({ 1, 1 }));
+    Segment s{ { 0, 0, 0 }, { 0, 0, 2 } };
+    CHECK(near(s.length(), 2.0) && near(s.distance({ 1, 0, 1 }), 1.0));
+}
+
 static void axes() {
     Axes unity = axes_of(AxesPreset::Unity);
     Double3 forward = axes_point_to(unity, { 1, 0, 0 });
@@ -878,6 +896,7 @@ int main(int argc, char **argv) {
     clouds();
     grids();
     operators();
+    methods();
     axes();
 #if defined(RANT_MATH_HAS_EIGEN)
     eigen();

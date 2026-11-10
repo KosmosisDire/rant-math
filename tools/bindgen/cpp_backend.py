@@ -1,5 +1,7 @@
 # The C++ binding: the calls of rant_math.hpp, and the table of thunks its vector test replays.
+import re
 import textwrap
+from dataclasses import replace
 
 from model import HIDDEN_STRUCTS
 
@@ -434,7 +436,8 @@ def own_types(m):
             t = type_of(fld.type)
             init = " = 0" if fld.type in CPP_SCALARS else ""
             lines.append(f"    {t} {fld.name}{init};")
-        out.append(f"struct {s.short} {{\n" + "\n".join(lines) + "\n};\n")
+        hook = f"RANT_MEMBERS_{s.short}"
+        out.append(f"struct {s.short} {{\n" + "\n".join(lines) + f"\n#ifdef {hook}\n    {hook}\n#endif\n}};\n")
     return "\n".join(out)
 
 
@@ -573,9 +576,104 @@ def operators(m):
     return "\n".join(lines) + "\n"
 
 
+# Math's own types a member's signature may name, and how each is declared ahead of its definition.
+MATH_HAND_TYPES = {
+    "Span": "template <class T> class Span", "Matrix": "struct Matrix", "FitOptions": "struct FitOptions",
+    "AlignOptions": "struct AlignOptions", "ImageView": "struct ImageView", "MutableImageView": "struct MutableImageView",
+    "PointCloudView": "class PointCloudView", "MutablePointCloudView": "class MutablePointCloudView",
+    "KdTree": "class KdTree", "Shape": "class Shape", "Shape2D": "class Shape2D",
+}
+
+# Names windows.h makes macros: a member of that name is declared in parentheses so they cannot expand.
+MACRO_NAMES = {"min", "max", "near", "far", "small"}
+
+
+def math_types(m):
+    names = dict(MATH_HAND_TYPES)
+    for e in m.own_enums():
+        names[e.short] = f"enum class {e.short} : int"
+    for s in m.own_structs():
+        names[s.short] = f"struct {s.short}"
+    return names
+
+
+def qualified(m, text):
+    """A C++ type written for anywhere in rant: math's own names as math::, Rant's left as they are."""
+    own = math_types(m)
+    return re.sub(r"\b[A-Z]\w*\b", lambda w: "math::" + w.group(0) if w.group(0) in own else w.group(0), text)
+
+
+def member_parts(m, me):
+    """A method's return type, its parameters, the arguments of its call and whether it changes the value."""
+    f = me.func
+    # A parameter named as one of the type's fields would hide it, so it takes a trailing _.
+    fields = set(m.cpp_fields.get(me.type, [])) | {x.name for s in m.own_structs() if s.short == me.type for x in s.fields}
+    rename = lambda i: replace(i, name=i.name + "_") if i.name in fields else i
+    rest = [rename(i) for k, i in enumerate(f.inputs) if k != me.self_index or me.static]
+    params = [qualified(m, input_decl(i, f)) for i in rest]
+    args = []
+    for k, i in enumerate(f.inputs):
+        if me.static or k != me.self_index:
+            args.append(rename(i).name)
+        else:
+            args.append(f"this->{me.field}" if me.field else "*this")
+    changes = not me.static and f.inputs[me.self_index].kind.endswith("_mut")
+    return qualified(m, result_type(f)), params, args, changes
+
+
+def member_name(name):
+    return f"({name})" if name in MACRO_NAMES else name
+
+
+def members(m):
+    """rant_math_members.hpp: each type's methods, declared in its struct through RANT_MEMBERS_<type>."""
+    lines = [GEN.rstrip(), "/* Rant Math's methods, declared in each type's struct through RANT_MEMBERS_<type>. Every file of a",
+             " * program sees them, so RANT_MATH is set for the whole build, as linking rant_math does. */",
+             "#ifndef RANT_MATH_MEMBERS_HPP", "#define RANT_MATH_MEMBERS_HPP", "",
+             "#include <stdint.h>", "#include <array>", "#include <optional>", "#include <tuple>", "#include <vector>", "",
+             "namespace rant { namespace types {"]
+    lines += [f"{v if v.startswith('enum') else v + ' ' + k};" for k, v in m.cpp_types.items()]
+    lines += ["} }", "namespace rant { namespace math {"]
+    lines += [f"{v};" for v in math_types(m).values()]
+    lines += ["} }", ""]
+    by_type = {}
+    for me in m.methods:
+        by_type.setdefault(me.type, []).append(me)
+    for t, methods in by_type.items():
+        decls = []
+        for me in methods:
+            ret, params, _, changes = member_parts(m, me)
+            params = [re.sub(r" = \{\}$", "", p) for p in params]
+            head = "static " if me.static else ""
+            tail = "" if me.static or changes else " const"
+            decls.append(f"    {head}{ret} {member_name(me.name)}({', '.join(params)}){tail};")
+        lines.append(f"#define RANT_MEMBERS_{t} \\\n" + " \\\n".join(decls))
+        lines.append("")
+    lines.append("#endif /* RANT_MATH_MEMBERS_HPP */")
+    return "\n".join(lines) + "\n"
+
+
+def methods(m):
+    """rant_math_methods.inc: each method's body, a call of the function it stands for."""
+    own = math_types(m)
+    blocks = {"types": [], "math": []}
+    for me in m.methods:
+        ret, params, args, changes = member_parts(m, me)
+        params = [re.sub(r" = \{\}$", "", p) for p in params]
+        tail = "" if me.static or changes else " const"
+        call = f"math::{me.func.name}({', '.join(args)})"
+        name = f"({me.type}::{me.name})" if me.name in MACRO_NAMES else f"{me.type}::{me.name}"
+        blocks["math" if me.type in own else "types"].append(
+            f"inline {ret} {name}({', '.join(params)}){tail} {{ return {call}; }}")
+    return (GEN + "namespace rant { namespace types {\n" + "\n".join(blocks["types"]) + "\n} }\n"
+            "namespace rant { namespace math {\n" + "\n".join(blocks["math"]) + "\n} }\n")
+
+
 def generate(m):
     return [
         ("bindings/cpp/rant_math_api.inc", api(m)),
         ("bindings/cpp/rant_math_operators.inc", operators(m)),
+        ("bindings/cpp/rant_math_members.hpp", members(m)),
+        ("bindings/cpp/rant_math_methods.inc", methods(m)),
         ("tests/bindings/generated/cpp_thunks.inc", thunks(m)),
     ]

@@ -175,6 +175,8 @@ class Model:
     version: str
     methods: list = field(default_factory=list)
     operators: list = field(default_factory=list)
+    cpp_types: dict = field(default_factory=dict)   # Rant's C++ type names to struct or their enum declaration
+    cpp_fields: dict = field(default_factory=dict)  # each of Rant's C++ structs to its field names
 
     def func(self, c):
         for f in self.functions:
@@ -371,6 +373,27 @@ def read_headers(clang, root, types_path, order):
         enums.update((x.name, x) for x in e)
         functions += f
     return structs, enums, functions
+
+
+def read_cpp_types(clang, path):
+    """Rant's C++ types: each struct as "struct", each enum as its declaration, and each struct's fields."""
+    run = subprocess.run([clang, "-x", "c++", "-std=c++17", "-fsyntax-only", "-Xclang", "-ast-dump=json", path],
+                         capture_output=True, text=True, encoding="utf-8")
+    if run.returncode != 0:
+        raise RuntimeError("clang could not read " + path + ":\n" + run.stderr)
+    found, fields = {}, {}
+
+    def walk(node, where):
+        for n in node.get("inner", []):
+            if n.get("kind") == "NamespaceDecl":
+                walk(n, where + [n.get("name")])
+            elif where == ["rant", "types"] and n.get("kind") == "CXXRecordDecl" and n.get("completeDefinition"):
+                found[n["name"]] = n["tagUsed"]
+                fields[n["name"]] = [c["name"] for c in n.get("inner", []) if c.get("kind") == "FieldDecl"]
+            elif where == ["rant", "types"] and n.get("kind") == "EnumDecl":
+                found[n["name"]] = "enum class " + n["name"] + " : " + n["fixedUnderlyingType"]["qualType"]
+    walk(json.loads(run.stdout), [])
+    return found, fields
 
 
 def find_clang():
@@ -729,12 +752,16 @@ def find_operators(m):
     return ops
 
 
-def read_model(root, types_path, clang=None):
+def read_model(root, types_path, clang=None, types_hpp=None):
     src = os.path.join(root, "src")
     order = re.findall(r'#include "(\w+\.h)"', open(os.path.join(src, "rant_math.h"), encoding="utf-8").read())
-    structs, enums, functions = read_headers(clang or find_clang(), root, types_path, order)
+    clang = clang or find_clang()
+    structs, enums, functions = read_headers(clang, root, types_path, order)
+    # Rant's src/common/stdtypes.h has its C++ types at bindings/cpp/rant_types.hpp.
+    types_hpp = types_hpp or os.path.join(os.path.dirname(types_path), "..", "..", "bindings", "cpp", "rant_types.hpp")
+    cpp_types, cpp_fields = read_cpp_types(clang, types_hpp)
     version = open(os.path.join(root, "VERSION"), encoding="utf-8").read().strip()
-    model = Model(structs, enums, functions, version)
+    model = Model(structs, enums, functions, version, cpp_types=cpp_types, cpp_fields=cpp_fields)
     for f in functions:
         classify(f, model)
     model.methods = find_methods(model)

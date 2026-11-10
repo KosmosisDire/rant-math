@@ -68,6 +68,8 @@ function(rant_math_target name kind)
   add_library(${name} ${kind} "${RANT_MATH_DIST}/rant_math.c")
   add_dependencies(${name} rant_math_dist)
   target_include_directories(${name} PUBLIC "${RANT_MATH_DIST}")
+  # Every file that links math sees its methods in the standard types, Rant's own copy of them too.
+  target_compile_definitions(${name} INTERFACE RANT_MATH)
   target_compile_options(${name} PRIVATE ${RANT_MATH_WARNINGS})
   if(UNIX)
     target_link_libraries(${name} PUBLIC m)
