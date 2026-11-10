@@ -133,6 +133,14 @@ namespace Rant
         {
         }
 
+        public static void Double2Divide(UIntPtr Result, UIntPtr A, UIntPtr Divisor)
+        {
+        }
+
+        public static void Double2Negate(UIntPtr Result, UIntPtr A)
+        {
+        }
+
         public static void Double2Multiply(UIntPtr Result, UIntPtr A, UIntPtr B)
         {
         }
@@ -218,6 +226,14 @@ namespace Rant
         {
         }
 
+        public static void Double3Divide(UIntPtr Result, UIntPtr A, UIntPtr Divisor)
+        {
+        }
+
+        public static void Double3Negate(UIntPtr Result, UIntPtr A)
+        {
+        }
+
         public static void Double3Multiply(UIntPtr Result, UIntPtr A, UIntPtr B)
         {
         }
@@ -288,6 +304,14 @@ namespace Rant
         }
 
         public static void Double4Scale(UIntPtr Result, UIntPtr A, UIntPtr K)
+        {
+        }
+
+        public static void Double4Divide(UIntPtr Result, UIntPtr A, UIntPtr Divisor)
+        {
+        }
+
+        public static void Double4Negate(UIntPtr Result, UIntPtr A)
         {
         }
 
@@ -590,11 +614,11 @@ namespace Rant
             return false;
         }
 
-        public static void Covariance3Rotate(UIntPtr Q, UIntPtr Points, UIntPtr Result)
+        public static void Covariance3Rotate(UIntPtr Q, UIntPtr Covariance, UIntPtr Result)
         {
         }
 
-        public static void Covariance6Rotate(UIntPtr Q, UIntPtr Points, UIntPtr Result)
+        public static void Covariance6Rotate(UIntPtr Q, UIntPtr Covariance, UIntPtr Result)
         {
         }
 
@@ -681,11 +705,11 @@ namespace Rant
         {
         }
 
-        public static void AxesCovariance6To(UIntPtr Axes, UIntPtr Points, UIntPtr Result)
+        public static void AxesCovariance6To(UIntPtr Axes, UIntPtr Covariance, UIntPtr Result)
         {
         }
 
-        public static void AxesCovariance6From(UIntPtr Axes, UIntPtr Points, UIntPtr Result)
+        public static void AxesCovariance6From(UIntPtr Axes, UIntPtr Covariance, UIntPtr Result)
         {
         }
 
@@ -1377,6 +1401,33 @@ namespace Rant
         }
     }
 
+    /// <summary>true division, 0 gives inf or nan</summary>
+    [Function]
+    public static class Double2Divide
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double2 Double2Divide, [Input] ref Double2 A, [Input] double Divisor)
+        {
+            Double2 a = A;
+            Double2 answer = new Double2();
+            RantMath.Double2Divide((UIntPtr)(&answer), (UIntPtr)(&a), (UIntPtr)(&Divisor));
+            Double2Divide = answer;
+        }
+    }
+
+    [Function]
+    public static class Double2Negate
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double2 Double2Negate, [Input] ref Double2 A)
+        {
+            Double2 a = A;
+            Double2 answer = new Double2();
+            RantMath.Double2Negate((UIntPtr)(&answer), (UIntPtr)(&a));
+            Double2Negate = answer;
+        }
+    }
+
     /// <summary>component by component</summary>
     [Function]
     public static class Double2Multiply
@@ -1667,6 +1718,33 @@ namespace Rant
         }
     }
 
+    /// <summary>true division, 0 gives inf or nan</summary>
+    [Function]
+    public static class Double3Divide
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double3 Double3Divide, [Input] ref Double3 A, [Input] double Divisor)
+        {
+            Double3 a = A;
+            Double3 answer = new Double3();
+            RantMath.Double3Divide((UIntPtr)(&answer), (UIntPtr)(&a), (UIntPtr)(&Divisor));
+            Double3Divide = answer;
+        }
+    }
+
+    [Function]
+    public static class Double3Negate
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double3 Double3Negate, [Input] ref Double3 A)
+        {
+            Double3 a = A;
+            Double3 answer = new Double3();
+            RantMath.Double3Negate((UIntPtr)(&answer), (UIntPtr)(&a));
+            Double3Negate = answer;
+        }
+    }
+
     /// <summary>component by component</summary>
     [Function]
     public static class Double3Multiply
@@ -1914,6 +1992,33 @@ namespace Rant
             Double4 answer = new Double4();
             RantMath.Double4Scale((UIntPtr)(&answer), (UIntPtr)(&a), (UIntPtr)(&K));
             Double4Scale = answer;
+        }
+    }
+
+    /// <summary>true division, 0 gives inf or nan</summary>
+    [Function]
+    public static class Double4Divide
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double4 Double4Divide, [Input] ref Double4 A, [Input] double Divisor)
+        {
+            Double4 a = A;
+            Double4 answer = new Double4();
+            RantMath.Double4Divide((UIntPtr)(&answer), (UIntPtr)(&a), (UIntPtr)(&Divisor));
+            Double4Divide = answer;
+        }
+    }
+
+    [Function]
+    public static class Double4Negate
+    {
+        [Execution]
+        public static unsafe void __Process([Output] ref Double4 Double4Negate, [Input] ref Double4 A)
+        {
+            Double4 a = A;
+            Double4 answer = new Double4();
+            RantMath.Double4Negate((UIntPtr)(&answer), (UIntPtr)(&a));
+            Double4Negate = answer;
         }
     }
 
@@ -3056,12 +3161,12 @@ namespace Rant
     public static class Covariance3Rotate
     {
         [Execution]
-        public static unsafe void __Process([Output] ref Covariance3 Covariance3Rotate, [Input] ref Quaternion Q, [Input] ref Covariance3 Points)
+        public static unsafe void __Process([Output] ref Covariance3 Covariance3Rotate, [Input] ref Quaternion Q, [Input] ref Covariance3 Covariance)
         {
             Quaternion q = Q;
-            Covariance3 points = Points;
+            Covariance3 covariance = Covariance;
             Covariance3 answer = new Covariance3();
-            RantMath.Covariance3Rotate((UIntPtr)(&q), (UIntPtr)(&points), (UIntPtr)(&answer));
+            RantMath.Covariance3Rotate((UIntPtr)(&q), (UIntPtr)(&covariance), (UIntPtr)(&answer));
             Covariance3Rotate = answer;
         }
     }
@@ -3070,12 +3175,12 @@ namespace Rant
     public static class Covariance6Rotate
     {
         [Execution]
-        public static unsafe void __Process([Output] ref Covariance6 Covariance6Rotate, [Input] ref Quaternion Q, [Input] ref Covariance6 Points)
+        public static unsafe void __Process([Output] ref Covariance6 Covariance6Rotate, [Input] ref Quaternion Q, [Input] ref Covariance6 Covariance)
         {
             Quaternion q = Q;
-            Covariance6 points = Points;
+            Covariance6 covariance = Covariance;
             Covariance6 answer = new Covariance6();
-            RantMath.Covariance6Rotate((UIntPtr)(&q), (UIntPtr)(&points), (UIntPtr)(&answer));
+            RantMath.Covariance6Rotate((UIntPtr)(&q), (UIntPtr)(&covariance), (UIntPtr)(&answer));
             Covariance6Rotate = answer;
         }
     }
@@ -3421,12 +3526,12 @@ namespace Rant
     public static class AxesCovariance6To
     {
         [Execution]
-        public static unsafe void __Process([Output] ref Covariance6 AxesCovariance6To, [Input] ref Axes Axes, [Input] ref Covariance6 Points)
+        public static unsafe void __Process([Output] ref Covariance6 AxesCovariance6To, [Input] ref Axes Axes, [Input] ref Covariance6 Covariance)
         {
             Axes axes = Axes;
-            Covariance6 points = Points;
+            Covariance6 covariance = Covariance;
             Covariance6 answer = new Covariance6();
-            RantMath.AxesCovariance6To((UIntPtr)(&axes), (UIntPtr)(&points), (UIntPtr)(&answer));
+            RantMath.AxesCovariance6To((UIntPtr)(&axes), (UIntPtr)(&covariance), (UIntPtr)(&answer));
             AxesCovariance6To = answer;
         }
     }
@@ -3435,12 +3540,12 @@ namespace Rant
     public static class AxesCovariance6From
     {
         [Execution]
-        public static unsafe void __Process([Output] ref Covariance6 AxesCovariance6From, [Input] ref Axes Axes, [Input] ref Covariance6 Points)
+        public static unsafe void __Process([Output] ref Covariance6 AxesCovariance6From, [Input] ref Axes Axes, [Input] ref Covariance6 Covariance)
         {
             Axes axes = Axes;
-            Covariance6 points = Points;
+            Covariance6 covariance = Covariance;
             Covariance6 answer = new Covariance6();
-            RantMath.AxesCovariance6From((UIntPtr)(&axes), (UIntPtr)(&points), (UIntPtr)(&answer));
+            RantMath.AxesCovariance6From((UIntPtr)(&axes), (UIntPtr)(&covariance), (UIntPtr)(&answer));
             AxesCovariance6From = answer;
         }
     }

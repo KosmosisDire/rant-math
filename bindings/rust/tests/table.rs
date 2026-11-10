@@ -20,6 +20,6 @@ fn the_table_reads() {
 #[test]
 fn names_come_from_the_table() {
     let names = rant_math::quickjs::names();
-    assert!(names.starts_with("export const NAMES = [\n"));
+    assert!(names.contains("export const NAMES = [\n"));
     assert!(names.contains(r#"{"name": "poseInverse", "takes": ["p"], "words": "pose inverse"}"#));
 }

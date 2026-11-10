@@ -39,7 +39,7 @@ typedef struct {
     const char *field;
 } RantMathMethod;
 
-/* left op right, as Pose * Double3. op is + - * / or neg, how is call, scale, scale_left, divide or negate. */
+/* left op right, as Pose * Double3. op is + - * / or neg, how is call, scale or scale_left. */
 typedef struct {
     const char *op;
     const char *left;

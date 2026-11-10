@@ -271,6 +271,8 @@ _Static_assert(offsetof(RantWrench2D, torque) == 16, "RantWrench2D.torque");
 EMSCRIPTEN_KEEPALIVE void rm_double2_add(RantDouble2 *ret, const RantDouble2 *a, const RantDouble2 *b) { *ret = rant_double2_add(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_subtract(RantDouble2 *ret, const RantDouble2 *a, const RantDouble2 *b) { *ret = rant_double2_subtract(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_scale(RantDouble2 *ret, const RantDouble2 *a, double k) { *ret = rant_double2_scale(*a, k); }
+EMSCRIPTEN_KEEPALIVE void rm_double2_divide(RantDouble2 *ret, const RantDouble2 *a, double divisor) { *ret = rant_double2_divide(*a, divisor); }
+EMSCRIPTEN_KEEPALIVE void rm_double2_negate(RantDouble2 *ret, const RantDouble2 *a) { *ret = rant_double2_negate(*a); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_multiply(RantDouble2 *ret, const RantDouble2 *a, const RantDouble2 *b) { *ret = rant_double2_multiply(*a, *b); }
 EMSCRIPTEN_KEEPALIVE double rm_double2_dot(const RantDouble2 *a, const RantDouble2 *b) { return rant_double2_dot(*a, *b); }
 EMSCRIPTEN_KEEPALIVE double rm_double2_cross(const RantDouble2 *a, const RantDouble2 *b) { return rant_double2_cross(*a, *b); }
@@ -292,6 +294,8 @@ EMSCRIPTEN_KEEPALIVE void rm_double2_reflect(RantDouble2 *ret, const RantDouble2
 EMSCRIPTEN_KEEPALIVE void rm_double3_add(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b) { *ret = rant_double3_add(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_subtract(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b) { *ret = rant_double3_subtract(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_scale(RantDouble3 *ret, const RantDouble3 *a, double k) { *ret = rant_double3_scale(*a, k); }
+EMSCRIPTEN_KEEPALIVE void rm_double3_divide(RantDouble3 *ret, const RantDouble3 *a, double divisor) { *ret = rant_double3_divide(*a, divisor); }
+EMSCRIPTEN_KEEPALIVE void rm_double3_negate(RantDouble3 *ret, const RantDouble3 *a) { *ret = rant_double3_negate(*a); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_multiply(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b) { *ret = rant_double3_multiply(*a, *b); }
 EMSCRIPTEN_KEEPALIVE double rm_double3_dot(const RantDouble3 *a, const RantDouble3 *b) { return rant_double3_dot(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_cross(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b) { *ret = rant_double3_cross(*a, *b); }
@@ -310,6 +314,8 @@ EMSCRIPTEN_KEEPALIVE void rm_double3_perpendicular(RantDouble3 *ret, const RantD
 EMSCRIPTEN_KEEPALIVE void rm_double4_add(RantDouble4 *ret, const RantDouble4 *a, const RantDouble4 *b) { *ret = rant_double4_add(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double4_subtract(RantDouble4 *ret, const RantDouble4 *a, const RantDouble4 *b) { *ret = rant_double4_subtract(*a, *b); }
 EMSCRIPTEN_KEEPALIVE void rm_double4_scale(RantDouble4 *ret, const RantDouble4 *a, double k) { *ret = rant_double4_scale(*a, k); }
+EMSCRIPTEN_KEEPALIVE void rm_double4_divide(RantDouble4 *ret, const RantDouble4 *a, double divisor) { *ret = rant_double4_divide(*a, divisor); }
+EMSCRIPTEN_KEEPALIVE void rm_double4_negate(RantDouble4 *ret, const RantDouble4 *a) { *ret = rant_double4_negate(*a); }
 EMSCRIPTEN_KEEPALIVE double rm_double4_dot(const RantDouble4 *a, const RantDouble4 *b) { return rant_double4_dot(*a, *b); }
 EMSCRIPTEN_KEEPALIVE double rm_double4_length(const RantDouble4 *a) { return rant_double4_length(*a); }
 EMSCRIPTEN_KEEPALIVE void rm_double4_normalize(RantDouble4 *ret, const RantDouble4 *a) { *ret = rant_double4_normalize(*a); }
@@ -394,8 +400,8 @@ EMSCRIPTEN_KEEPALIVE void rm_twist2d_transform(RantTwist2D *ret, const RantPose2
 EMSCRIPTEN_KEEPALIVE void rm_wrench2d_transform(RantWrench2D *ret, const RantPose2D *p, const RantWrench2D *w) { *ret = rant_wrench2d_transform(*p, *w); }
 EMSCRIPTEN_KEEPALIVE void rm_pose2d_integrate(RantPose2D *ret, const RantPose2D *p, const RantTwist2D *body, double dt) { *ret = rant_pose2d_integrate(*p, *body, dt); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_twist2d_between(const RantPose2D *a, const RantPose2D *b, double dt, RantTwist2D *out) { return rant_twist2d_between(*a, *b, dt, out); }
-EMSCRIPTEN_KEEPALIVE void rm_covariance3_rotate(const RantQuaternion *q, const RantCovariance3 *in, RantCovariance3 *out) { rant_covariance3_rotate(*q, in, out); }
-EMSCRIPTEN_KEEPALIVE void rm_covariance6_rotate(const RantQuaternion *q, const RantCovariance6 *in, RantCovariance6 *out) { rant_covariance6_rotate(*q, in, out); }
+EMSCRIPTEN_KEEPALIVE void rm_covariance3_rotate(const RantQuaternion *q, const RantCovariance3 *covariance, RantCovariance3 *out) { rant_covariance3_rotate(*q, covariance, out); }
+EMSCRIPTEN_KEEPALIVE void rm_covariance6_rotate(const RantQuaternion *q, const RantCovariance6 *covariance, RantCovariance6 *out) { rant_covariance6_rotate(*q, covariance, out); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_covariance3_ellipsoid(const RantCovariance3 *c, double deviations, RantQuaternion *turn, RantDouble3 *radii) { return rant_covariance3_ellipsoid(c, deviations, turn, radii); }
 EMSCRIPTEN_KEEPALIVE void rm_inertia_transform(RantInertia *ret, const RantInertia *i, const RantPose *p) { *ret = rant_inertia_transform(*i, *p); }
 EMSCRIPTEN_KEEPALIVE void rm_inertia_add(RantInertia *ret, const RantInertia *a, const RantInertia *b) { *ret = rant_inertia_add(*a, *b); }
@@ -416,8 +422,8 @@ EMSCRIPTEN_KEEPALIVE void rm_axes_wrench_to(RantWrench *ret, const RantAxes *axe
 EMSCRIPTEN_KEEPALIVE void rm_axes_wrench_from(RantWrench *ret, const RantAxes *axes, const RantWrench *w) { *ret = rant_axes_wrench_from(*axes, *w); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_accel_to(RantAccel *ret, const RantAxes *axes, const RantAccel *a) { *ret = rant_axes_accel_to(*axes, *a); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_accel_from(RantAccel *ret, const RantAxes *axes, const RantAccel *a) { *ret = rant_axes_accel_from(*axes, *a); }
-EMSCRIPTEN_KEEPALIVE void rm_axes_covariance6_to(const RantAxes *axes, const RantCovariance6 *in, RantCovariance6 *out) { rant_axes_covariance6_to(*axes, in, out); }
-EMSCRIPTEN_KEEPALIVE void rm_axes_covariance6_from(const RantAxes *axes, const RantCovariance6 *in, RantCovariance6 *out) { rant_axes_covariance6_from(*axes, in, out); }
+EMSCRIPTEN_KEEPALIVE void rm_axes_covariance6_to(const RantAxes *axes, const RantCovariance6 *covariance, RantCovariance6 *out) { rant_axes_covariance6_to(*axes, covariance, out); }
+EMSCRIPTEN_KEEPALIVE void rm_axes_covariance6_from(const RantAxes *axes, const RantCovariance6 *covariance, RantCovariance6 *out) { rant_axes_covariance6_from(*axes, covariance, out); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_points_to(const RantAxes *axes, const RantDouble3 *in, RantDouble3 *out, uint32_t count) { rant_axes_points_to(*axes, in, out, count); }
 EMSCRIPTEN_KEEPALIVE void rm_axes_points_from(const RantAxes *axes, const RantDouble3 *in, RantDouble3 *out, uint32_t count) { rant_axes_points_from(*axes, in, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_plane_from_points(const RantDouble3 *a, const RantDouble3 *b, const RantDouble3 *c, RantPlane *out) { return rant_plane_from_points(*a, *b, *c, out); }

@@ -3,6 +3,8 @@ namespace rant { namespace types {
 inline Double2 Double2::add(Double2 b) const { return math::double2_add(*this, b); }
 inline Double2 Double2::subtract(Double2 b) const { return math::double2_subtract(*this, b); }
 inline Double2 Double2::scale(double k) const { return math::double2_scale(*this, k); }
+inline Double2 Double2::divide(double divisor) const { return math::double2_divide(*this, divisor); }
+inline Double2 Double2::negate() const { return math::double2_negate(*this); }
 inline Double2 Double2::multiply(Double2 b) const { return math::double2_multiply(*this, b); }
 inline double Double2::dot(Double2 b) const { return math::double2_dot(*this, b); }
 inline double Double2::cross(Double2 b) const { return math::double2_cross(*this, b); }
@@ -24,6 +26,8 @@ inline Double2 Double2::reflect(Double2 normal) const { return math::double2_ref
 inline Double3 Double3::add(Double3 b) const { return math::double3_add(*this, b); }
 inline Double3 Double3::subtract(Double3 b) const { return math::double3_subtract(*this, b); }
 inline Double3 Double3::scale(double k) const { return math::double3_scale(*this, k); }
+inline Double3 Double3::divide(double divisor) const { return math::double3_divide(*this, divisor); }
+inline Double3 Double3::negate() const { return math::double3_negate(*this); }
 inline Double3 Double3::multiply(Double3 b) const { return math::double3_multiply(*this, b); }
 inline double Double3::dot(Double3 b) const { return math::double3_dot(*this, b); }
 inline Double3 Double3::cross(Double3 b) const { return math::double3_cross(*this, b); }
@@ -42,6 +46,8 @@ inline Double3 Double3::perpendicular() const { return math::double3_perpendicul
 inline Double4 Double4::add(Double4 b) const { return math::double4_add(*this, b); }
 inline Double4 Double4::subtract(Double4 b) const { return math::double4_subtract(*this, b); }
 inline Double4 Double4::scale(double k) const { return math::double4_scale(*this, k); }
+inline Double4 Double4::divide(double divisor) const { return math::double4_divide(*this, divisor); }
+inline Double4 Double4::negate() const { return math::double4_negate(*this); }
 inline double Double4::dot(Double4 b) const { return math::double4_dot(*this, b); }
 inline double Double4::length() const { return math::double4_length(*this); }
 inline Double4 Double4::normalize() const { return math::double4_normalize(*this); }
@@ -420,8 +426,8 @@ inline Wrench Axes::wrench_to(Wrench w) const { return math::axes_wrench_to(*thi
 inline Wrench Axes::wrench_from(Wrench w) const { return math::axes_wrench_from(*this, w); }
 inline Accel Axes::accel_to(Accel a) const { return math::axes_accel_to(*this, a); }
 inline Accel Axes::accel_from(Accel a) const { return math::axes_accel_from(*this, a); }
-inline Covariance6 Axes::covariance6_to(const Covariance6 &points) const { return math::axes_covariance6_to(*this, points); }
-inline Covariance6 Axes::covariance6_from(const Covariance6 &points) const { return math::axes_covariance6_from(*this, points); }
+inline Covariance6 Axes::covariance6_to(const Covariance6 &covariance) const { return math::axes_covariance6_to(*this, covariance); }
+inline Covariance6 Axes::covariance6_from(const Covariance6 &covariance) const { return math::axes_covariance6_from(*this, covariance); }
 inline std::vector<Double3> Axes::points_to(math::Span<const Double3> points) const { return math::axes_points_to(*this, points); }
 inline std::vector<Double3> Axes::points_from(math::Span<const Double3> points) const { return math::axes_points_from(*this, points); }
 inline double Shape::distance(Double3 point) const { return math::shape_distance(*this, point); }

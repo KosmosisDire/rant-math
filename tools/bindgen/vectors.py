@@ -230,6 +230,7 @@ POOLS = {
 # A name says more than its type, where the plain pool would only ever fail.
 NAMED = {
     ("double", "t"): [0.25, 0.5, 1.0, 0.0],
+    ("double", "divisor"): [2.0, -0.5, 49.0, 4.0],
     ("double", "mass"): [2.0, 0.5, 1.0, 0.0],
     ("double", "dt"): [0.1, 0.5, 1.0, 0.0],
     ("double", "margin"): [0.25, 1.0, 0.0, -0.1],

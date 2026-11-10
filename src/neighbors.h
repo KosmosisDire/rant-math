@@ -27,18 +27,18 @@ RANT_MATH_API RantMathResult rant_kdtree_within(const RantKdTree *tree, RantDoub
 
 /* keep gets 1 for one point of each cube of edge voxel, from the frame origin, that points fall
  * in: the one nearest the mean of that cube's points. */
-RANT_MATH_API RantMathResult rant_points_downsample(const RantDouble3 *points, uint32_t count, double voxel, uint8_t *keep);
+RANT_MATH_API RantMathResult rant_points_downsample(const RantDouble3 *points, uint32_t count, double voxel, uint8_t *keep /* (same points) */);
 /* keep gets 0 where a point's mean distance to its neighbors nearest others lies more than deviations
  * standard deviations above the mean of all of them, as PCL's statistical outlier removal does. */
 RANT_MATH_API RantMathResult rant_points_remove_outliers(const RantDouble3 *points, uint32_t count, uint32_t neighbors,
-                                                         double deviations, uint8_t *keep);
+                                                         double deviations, uint8_t *keep /* (same points) */);
 /* keep gets 0 where a point has fewer than neighbors others within radius, else 1. */
 RANT_MATH_API RantMathResult rant_points_remove_isolated(const RantDouble3 *points, uint32_t count, double radius,
-                                                         uint32_t neighbors, uint8_t *keep);
+                                                         uint32_t neighbors, uint8_t *keep /* (same points) */);
 /* The unit normal of the plane through each point's neighbors nearest points, itself among them,
  * facing viewpoint, where the sensor sat. NaN where they fix no plane. */
 RANT_MATH_API RantMathResult rant_points_normals(const RantDouble3 *points, uint32_t count, uint32_t neighbors,
-                                                 RantDouble3 viewpoint, RantDouble3 *normals);
+                                                 RantDouble3 viewpoint, RantDouble3 *normals /* (same points) */);
 /* A point within distance of a cluster's point joins it. labels gets each point's cluster from 1,
  * largest first, or 0 for one under min_points. clusters gets how many have a label. */
 RANT_MATH_API RantMathResult rant_points_clusters(const RantDouble3 *points, uint32_t count, double distance,

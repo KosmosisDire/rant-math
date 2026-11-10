@@ -602,481 +602,487 @@ pub(super) fn dispatch<'js>(ctx: &Ctx<'js>, fail: &Function<'js>, trees: &Trees,
         0 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_add(x0, x1); Ok(r.put(ctx)?) }
         1 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_subtract(x0, x1); Ok(r.put(ctx)?) }
         2 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_scale(x0, x1); Ok(r.put(ctx)?) }
-        3 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_multiply(x0, x1); Ok(r.put(ctx)?) }
-        4 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_dot(x0, x1); Ok(r.put(ctx)?) }
-        5 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_cross(x0, x1); Ok(r.put(ctx)?) }
-        6 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_length(x0); Ok(r.put(ctx)?) }
-        7 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_length_squared(x0); Ok(r.put(ctx)?) }
-        8 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_distance(x0, x1); Ok(r.put(ctx)?) }
-        9 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::double2_is_near(x0, x1, x2))) }
-        10 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_normalize(x0); Ok(r.put(ctx)?) }
-        11 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double2_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
-        12 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_min(x0, x1); Ok(r.put(ctx)?) }
-        13 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_max(x0, x1); Ok(r.put(ctx)?) }
-        14 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_angle(x0, x1); Ok(r.put(ctx)?) }
-        15 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_heading(x0); Ok(r.put(ctx)?) }
-        16 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_heading(x0); Ok(r.put(ctx)?) }
-        17 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_rotate(x0, x1); Ok(r.put(ctx)?) }
-        18 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_perpendicular(x0); Ok(r.put(ctx)?) }
-        19 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_project(x0, x1); Ok(r.put(ctx)?) }
-        20 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_reflect(x0, x1); Ok(r.put(ctx)?) }
-        21 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_add(x0, x1); Ok(r.put(ctx)?) }
-        22 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_subtract(x0, x1); Ok(r.put(ctx)?) }
-        23 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_scale(x0, x1); Ok(r.put(ctx)?) }
-        24 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_multiply(x0, x1); Ok(r.put(ctx)?) }
-        25 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_dot(x0, x1); Ok(r.put(ctx)?) }
-        26 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_cross(x0, x1); Ok(r.put(ctx)?) }
-        27 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_length(x0); Ok(r.put(ctx)?) }
-        28 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_length_squared(x0); Ok(r.put(ctx)?) }
-        29 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_distance(x0, x1); Ok(r.put(ctx)?) }
-        30 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::double3_is_near(x0, x1, x2))) }
-        31 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_normalize(x0); Ok(r.put(ctx)?) }
-        32 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double3_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
-        33 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_min(x0, x1); Ok(r.put(ctx)?) }
-        34 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_max(x0, x1); Ok(r.put(ctx)?) }
-        35 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_angle(x0, x1); Ok(r.put(ctx)?) }
-        36 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_project(x0, x1); Ok(r.put(ctx)?) }
-        37 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_reflect(x0, x1); Ok(r.put(ctx)?) }
-        38 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_perpendicular(x0); Ok(r.put(ctx)?) }
-        39 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_add(x0, x1); Ok(r.put(ctx)?) }
-        40 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_subtract(x0, x1); Ok(r.put(ctx)?) }
-        41 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_scale(x0, x1); Ok(r.put(ctx)?) }
-        42 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_dot(x0, x1); Ok(r.put(ctx)?) }
-        43 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_length(x0); Ok(r.put(ctx)?) }
-        44 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_normalize(x0); Ok(r.put(ctx)?) }
-        45 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double4_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
-        46 => { let x0: Float2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_float2(x0); Ok(r.put(ctx)?) }
-        47 => { let x0: Float3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_from_float3(x0); Ok(r.put(ctx)?) }
-        48 => { let x0: Float4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_from_float4(x0); Ok(r.put(ctx)?) }
-        49 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::float2_from_double2(x0); Ok(r.put(ctx)?) }
-        50 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::float3_from_double3(x0); Ok(r.put(ctx)?) }
-        51 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::float4_from_double4(x0); Ok(r.put(ctx)?) }
-        52 => { let x0: Int2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_int2(x0); Ok(r.put(ctx)?) }
-        53 => { let x0: Int3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_from_int3(x0); Ok(r.put(ctx)?) }
-        54 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::int2_floor(x0); Ok(r.put(ctx)?) }
-        55 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::int3_floor(x0); Ok(r.put(ctx)?) }
-        56 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let x3: EulerOrder = Js::get(ctx, &at(args, 3))?; let r = crate::quaternion_from_euler(x0, x1, x2, x3); Ok(r.put(ctx)?) }
-        57 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: EulerOrder = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_to_euler(x0, x1); Ok(numbers_out(ctx, &r)?) }
-        58 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_from_axis_angle(x0, x1); Ok(r.put(ctx)?) }
-        59 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let (r0, r1) = crate::quaternion_to_axis_angle(x0); pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
-        60 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_from_rotation_vector(x0); Ok(r.put(ctx)?) }
-        61 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_to_rotation_vector(x0); Ok(r.put(ctx)?) }
-        62 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_from_matrix3x3(x0); Ok(r.put(ctx)?) }
-        63 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_from_quaternion(x0); Ok(r.put(ctx)?) }
-        64 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_between(x0, x1); Ok(r.put(ctx)?) }
-        65 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_look(x0, x1); Ok(r.put(ctx)?) }
-        66 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_compose(x0, x1); Ok(r.put(ctx)?) }
-        67 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_inverse(x0); Ok(r.put(ctx)?) }
-        68 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_normalize(x0); Ok(r.put(ctx)?) }
-        69 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_rotate(x0, x1); Ok(r.put(ctx)?) }
-        70 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::quaternion_slerp(x0, x1, x2); Ok(r.put(ctx)?) }
-        71 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_angle(x0, x1); Ok(r.put(ctx)?) }
-        72 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::quaternion_is_near(x0, x1, x2))) }
-        73 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::quaternion_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
-        74 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_yaw(x0); Ok(r.put(ctx)?) }
-        75 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let r = crate::angle_wrap(x0); Ok(r.put(ctx)?) }
-        76 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::angle_difference(x0, x1); Ok(r.put(ctx)?) }
-        77 => { let r = crate::matrix3x3_identity(); Ok(r.put(ctx)?) }
-        78 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let x1: Matrix3x3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix3x3_multiply(x0, x1); Ok(r.put(ctx)?) }
-        79 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_transpose(x0); Ok(r.put(ctx)?) }
-        80 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_determinant(x0); Ok(r.put(ctx)?) }
-        81 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_inverse(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        82 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix3x3_apply(x0, x1); Ok(r.put(ctx)?) }
-        83 => { let r = crate::matrix4x4_identity(); Ok(r.put(ctx)?) }
-        84 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Matrix4x4 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_multiply(x0, x1); Ok(r.put(ctx)?) }
-        85 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_transpose(x0); Ok(r.put(ctx)?) }
-        86 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_determinant(x0); Ok(r.put(ctx)?) }
-        87 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_inverse(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        88 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_apply(x0, x1); Ok(r.put(ctx)?) }
-        89 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_apply_direction(x0, x1); Ok(r.put(ctx)?) }
-        90 => { let x0 = matrix_in(ctx, &at(args, 0))?; let x1 = matrix_in(ctx, &at(args, 1))?; let r = crate::matrix_multiply(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        91 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_transpose(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        92 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_determinant(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        93 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_inverse(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        94 => { let x0 = matrix_in(ctx, &at(args, 0))?; let x1 = matrix_in(ctx, &at(args, 1))?; let r = crate::matrix_solve(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        95 => { let x0 = matrix_in(ctx, &at(args, 0))?; let (r0, r1, r2) = crate::matrix_svd(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, numbers_out(ctx, &r1)?, r2.put(ctx)?]) }
-        96 => { let x0 = matrix_in(ctx, &at(args, 0))?; let (r0, r1) = crate::matrix_eigen(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, r1.put(ctx)?]) }
-        97 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_cholesky(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        98 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::pose_compose(x0, x1); Ok(r.put(ctx)?) }
-        99 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::pose_inverse(x0); Ok(r.put(ctx)?) }
-        100 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::pose_between(x0, x1); Ok(r.put(ctx)?) }
-        101 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::pose_apply(x0, x1); Ok(r.put(ctx)?) }
-        102 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::pose_apply_inverse(x0, x1); Ok(r.put(ctx)?) }
-        103 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::pose_apply_points(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
-        104 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_interpolate(x0, x1, x2); Ok(r.put(ctx)?) }
-        105 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_from_points(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        106 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_look_at(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        107 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_from_pose(x0); Ok(r.put(ctx)?) }
-        108 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::pose_from_matrix4x4(x0); Ok(r.put(ctx)?) }
-        109 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::pose2d_from_pose(x0); Ok(r.put(ctx)?) }
-        110 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let r = crate::pose_from_pose2d(x0); Ok(r.put(ctx)?) }
-        111 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_compose(x0, x1); Ok(r.put(ctx)?) }
-        112 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let r = crate::pose2d_inverse(x0); Ok(r.put(ctx)?) }
-        113 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_between(x0, x1); Ok(r.put(ctx)?) }
-        114 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_apply(x0, x1); Ok(r.put(ctx)?) }
-        115 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_apply_inverse(x0, x1); Ok(r.put(ctx)?) }
-        116 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::pose2d_apply_points(x0, &x1); Ok(list_out(ctx, &r, t1, 2)?) }
-        117 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose2d_interpolate(x0, x1, x2); Ok(r.put(ctx)?) }
-        118 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::twist_transform(x0, x1); Ok(r.put(ctx)?) }
-        119 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::wrench_transform(x0, x1); Ok(r.put(ctx)?) }
-        120 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
-        121 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::twist_between(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        122 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Twist2D = Js::get(ctx, &at(args, 1))?; let r = crate::twist2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        123 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Wrench2D = Js::get(ctx, &at(args, 1))?; let r = crate::wrench2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        124 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Twist2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose2d_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
-        125 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::twist2d_between(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        126 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Covariance3 = Js::get(ctx, &at(args, 1))?; let r = crate::covariance3_rotate(x0, &x1); Ok(r.put(ctx)?) }
-        127 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::covariance6_rotate(x0, &x1); Ok(r.put(ctx)?) }
-        128 => { let x0: Covariance3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let (r0, r1) = crate::covariance3_ellipsoid(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
-        129 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::inertia_transform(x0, x1); Ok(r.put(ctx)?) }
-        130 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let x1: Inertia = Js::get(ctx, &at(args, 1))?; let r = crate::inertia_add(x0, x1); Ok(r.put(ctx)?) }
-        131 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let r = crate::inertia_box(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        132 => { let x0: AxesPreset = Js::get(ctx, &at(args, 0))?; let r = crate::axes_of(x0); Ok(r.put(ctx)?) }
-        133 => { let x0: i32 = Js::get(ctx, &at(args, 0))?; let x1: i32 = Js::get(ctx, &at(args, 1))?; let x2: i32 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; let r = crate::axes_make(x0, x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        134 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_point_to(x0, x1); Ok(r.put(ctx)?) }
-        135 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_point_from(x0, x1); Ok(r.put(ctx)?) }
-        136 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_direction_to(x0, x1); Ok(r.put(ctx)?) }
-        137 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_direction_from(x0, x1); Ok(r.put(ctx)?) }
-        138 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::axes_quaternion_to(x0, x1); Ok(r.put(ctx)?) }
-        139 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::axes_quaternion_from(x0, x1); Ok(r.put(ctx)?) }
-        140 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::axes_pose_to(x0, x1); Ok(r.put(ctx)?) }
-        141 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::axes_pose_from(x0, x1); Ok(r.put(ctx)?) }
-        142 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::axes_twist_to(x0, x1); Ok(r.put(ctx)?) }
-        143 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::axes_twist_from(x0, x1); Ok(r.put(ctx)?) }
-        144 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::axes_wrench_to(x0, x1); Ok(r.put(ctx)?) }
-        145 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::axes_wrench_from(x0, x1); Ok(r.put(ctx)?) }
-        146 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Accel = Js::get(ctx, &at(args, 1))?; let r = crate::axes_accel_to(x0, x1); Ok(r.put(ctx)?) }
-        147 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Accel = Js::get(ctx, &at(args, 1))?; let r = crate::axes_accel_from(x0, x1); Ok(r.put(ctx)?) }
-        148 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_covariance6_to(x0, &x1); Ok(r.put(ctx)?) }
-        149 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_covariance6_from(x0, &x1); Ok(r.put(ctx)?) }
-        150 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::axes_points_to(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
-        151 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::axes_points_from(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
-        152 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::plane_from_points(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        153 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::plane_distance(x0, x1); Ok(r.put(ctx)?) }
-        154 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::plane_closest(x0, x1); Ok(r.put(ctx)?) }
-        155 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::plane_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        156 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::plane_transform(x0, x1); Ok(r.put(ctx)?) }
-        157 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Plane = Js::get(ctx, &at(args, 1))?; let r = crate::plane_intersect(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        158 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Plane = Js::get(ctx, &at(args, 1))?; let x2: Plane = Js::get(ctx, &at(args, 2))?; let r = crate::plane_intersect3(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        159 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let r = crate::segment_length(x0); Ok(r.put(ctx)?) }
-        160 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::segment_closest(x0, x1); Ok(r.put(ctx)?) }
-        161 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::segment_distance(x0, x1); Ok(r.put(ctx)?) }
-        162 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Segment = Js::get(ctx, &at(args, 1))?; let r = crate::segment_closest_segment(x0, x1); Ok(r.put(ctx)?) }
-        163 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::segment_transform(x0, x1); Ok(r.put(ctx)?) }
-        164 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let r = crate::segment_bounds(x0); Ok(r.put(ctx)?) }
-        165 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_at(x0, x1); Ok(r.put(ctx)?) }
-        166 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_closest(x0, x1); Ok(r.put(ctx)?) }
-        167 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_distance(x0, x1); Ok(r.put(ctx)?) }
-        168 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; let r = crate::ray_closest_ray(x0, x1); Ok(r.put(ctx)?) }
-        169 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::ray_transform(x0, x1); Ok(r.put(ctx)?) }
-        170 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_from_points(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        171 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        172 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        173 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::plane2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        174 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        175 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Plane2D = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_intersect(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        176 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let r = crate::segment2d_length(x0); Ok(r.put(ctx)?) }
-        177 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        178 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        179 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Segment2D = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_closest_segment(x0, x1); Ok(r.put(ctx)?) }
-        180 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Segment2D = Js::get(ctx, &at(args, 1))?; match crate::segment2d_intersect(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        181 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::segment2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        182 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        183 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let r = crate::segment2d_bounds(x0); Ok(r.put(ctx)?) }
-        184 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_at(x0, x1); Ok(r.put(ctx)?) }
-        185 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        186 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        187 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        188 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        189 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        190 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::aligned_box2d_contains(x0, x1))) }
-        191 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::aligned_box2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        192 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_centroid(x0); Ok(r.put(ctx)?) }
-        193 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_area(x0); Ok(r.put(ctx)?) }
-        194 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_perimeter(x0); Ok(r.put(ctx)?) }
-        195 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_corners(x0); Ok(list_out(ctx, &r, false, 2)?) }
-        196 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_edges(x0); Ok(list_out(ctx, &r, false, 4)?) }
-        197 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_planes(x0); Ok(list_out(ctx, &r, false, 4)?) }
-        198 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        199 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_merge(x0, x1); Ok(r.put(ctx)?) }
-        200 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; match crate::aligned_box2d_overlap(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        201 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_grow(x0, x1); Ok(r.put(ctx)?) }
-        202 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_iou(x0, x1); Ok(r.put(ctx)?) }
-        203 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        204 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        205 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::oriented_box2d_contains(x0, x1))) }
-        206 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::oriented_box2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        207 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_bounds(x0); Ok(r.put(ctx)?) }
-        208 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_area(x0); Ok(r.put(ctx)?) }
-        209 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_perimeter(x0); Ok(r.put(ctx)?) }
-        210 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_corners(x0); Ok(list_out(ctx, &r, false, 2)?) }
-        211 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_edges(x0); Ok(list_out(ctx, &r, false, 4)?) }
-        212 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_planes(x0); Ok(list_out(ctx, &r, false, 4)?) }
-        213 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        214 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_from_aligned_box2d(x0); Ok(r.put(ctx)?) }
-        215 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: OrientedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_iou(x0, x1); Ok(r.put(ctx)?) }
-        216 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::circle_distance(x0, x1); Ok(r.put(ctx)?) }
-        217 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::circle_closest(x0, x1); Ok(r.put(ctx)?) }
-        218 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::circle_contains(x0, x1))) }
-        219 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::circle_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        220 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_bounds(x0); Ok(r.put(ctx)?) }
-        221 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_area(x0); Ok(r.put(ctx)?) }
-        222 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_perimeter(x0); Ok(r.put(ctx)?) }
-        223 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::circle_transform(x0, x1); Ok(r.put(ctx)?) }
-        224 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_distance(x0, x1); Ok(r.put(ctx)?) }
-        225 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_closest(x0, x1); Ok(r.put(ctx)?) }
-        226 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::capsule2d_contains(x0, x1))) }
-        227 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::capsule2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        228 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_bounds(x0); Ok(r.put(ctx)?) }
-        229 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_area(x0); Ok(r.put(ctx)?) }
-        230 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_perimeter(x0); Ok(r.put(ctx)?) }
-        231 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_transform(x0, x1); Ok(r.put(ctx)?) }
-        232 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon2d_distance(&x0, x1); Ok(r.put(ctx)?) }
-        233 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon2d_closest(&x0, x1); Ok(r.put(ctx)?) }
-        234 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::polygon2d_contains(&x0, x1))) }
-        235 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::polygon2d_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        236 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_bounds(&x0); Ok(r.put(ctx)?) }
-        237 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_centroid(&x0); Ok(r.put(ctx)?) }
-        238 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_area(&x0); Ok(r.put(ctx)?) }
-        239 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_signed_area(&x0); Ok(r.put(ctx)?) }
-        240 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_perimeter(&x0); Ok(r.put(ctx)?) }
-        241 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; Ok(Value::new_bool(ctx.clone(), crate::polygon2d_is_convex(&x0))) }
-        242 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
-        243 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
-        244 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_triangulate(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        245 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_distance(x0, x1); Ok(r.put(ctx)?) }
-        246 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_closest(x0, x1); Ok(r.put(ctx)?) }
-        247 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::aligned_box_contains(x0, x1))) }
-        248 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::aligned_box_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        249 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_centroid(x0); Ok(r.put(ctx)?) }
-        250 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_volume(x0); Ok(r.put(ctx)?) }
-        251 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_area(x0); Ok(r.put(ctx)?) }
-        252 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_inertia(x0, x1); Ok(r.put(ctx)?) }
-        253 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_corners(x0); Ok(list_out(ctx, &r, false, 3)?) }
-        254 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_edges(x0); Ok(list_out(ctx, &r, false, 6)?) }
-        255 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_planes(x0); Ok(list_out(ctx, &r, false, 6)?) }
-        256 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_transform(x0, x1); Ok(r.put(ctx)?) }
-        257 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_merge(x0, x1); Ok(r.put(ctx)?) }
-        258 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; match crate::aligned_box_overlap(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        259 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_grow(x0, x1); Ok(r.put(ctx)?) }
-        260 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_iou(x0, x1); Ok(r.put(ctx)?) }
-        261 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_distance(x0, x1); Ok(r.put(ctx)?) }
-        262 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_closest(x0, x1); Ok(r.put(ctx)?) }
-        263 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::oriented_box_contains(x0, x1))) }
-        264 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::oriented_box_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        265 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_bounds(x0); Ok(r.put(ctx)?) }
-        266 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_volume(x0); Ok(r.put(ctx)?) }
-        267 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_area(x0); Ok(r.put(ctx)?) }
-        268 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_inertia(x0, x1); Ok(r.put(ctx)?) }
-        269 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_corners(x0); Ok(list_out(ctx, &r, false, 3)?) }
-        270 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_edges(x0); Ok(list_out(ctx, &r, false, 6)?) }
-        271 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_planes(x0); Ok(list_out(ctx, &r, false, 6)?) }
-        272 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_transform(x0, x1); Ok(r.put(ctx)?) }
-        273 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_from_aligned_box(x0); Ok(r.put(ctx)?) }
-        274 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: OrientedBox = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_iou(x0, x1); Ok(r.put(ctx)?) }
-        275 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_distance(x0, x1); Ok(r.put(ctx)?) }
-        276 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_closest(x0, x1); Ok(r.put(ctx)?) }
-        277 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::sphere_contains(x0, x1))) }
-        278 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::sphere_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        279 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_bounds(x0); Ok(r.put(ctx)?) }
-        280 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_volume(x0); Ok(r.put(ctx)?) }
-        281 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_area(x0); Ok(r.put(ctx)?) }
-        282 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_inertia(x0, x1); Ok(r.put(ctx)?) }
-        283 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_transform(x0, x1); Ok(r.put(ctx)?) }
-        284 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_distance(x0, x1); Ok(r.put(ctx)?) }
-        285 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_closest(x0, x1); Ok(r.put(ctx)?) }
-        286 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::capsule_contains(x0, x1))) }
-        287 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::capsule_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        288 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_bounds(x0); Ok(r.put(ctx)?) }
-        289 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_centroid(x0); Ok(r.put(ctx)?) }
-        290 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_volume(x0); Ok(r.put(ctx)?) }
-        291 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_area(x0); Ok(r.put(ctx)?) }
-        292 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_inertia(x0, x1); Ok(r.put(ctx)?) }
-        293 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_transform(x0, x1); Ok(r.put(ctx)?) }
-        294 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_distance(x0, x1); Ok(r.put(ctx)?) }
-        295 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_closest(x0, x1); Ok(r.put(ctx)?) }
-        296 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::cylinder_contains(x0, x1))) }
-        297 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::cylinder_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        298 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_bounds(x0); Ok(r.put(ctx)?) }
-        299 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_centroid(x0); Ok(r.put(ctx)?) }
-        300 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_volume(x0); Ok(r.put(ctx)?) }
-        301 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_area(x0); Ok(r.put(ctx)?) }
-        302 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_inertia(x0, x1); Ok(r.put(ctx)?) }
-        303 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_transform(x0, x1); Ok(r.put(ctx)?) }
-        304 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_distance(x0, x1); Ok(r.put(ctx)?) }
-        305 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_closest(x0, x1); Ok(r.put(ctx)?) }
-        306 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::cone_contains(x0, x1))) }
-        307 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::cone_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        308 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_bounds(x0); Ok(r.put(ctx)?) }
-        309 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_centroid(x0); Ok(r.put(ctx)?) }
-        310 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_volume(x0); Ok(r.put(ctx)?) }
-        311 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_area(x0); Ok(r.put(ctx)?) }
-        312 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_inertia(x0, x1); Ok(r.put(ctx)?) }
-        313 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::cone_transform(x0, x1); Ok(r.put(ctx)?) }
-        314 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_distance(&x0, x1); Ok(r.put(ctx)?) }
-        315 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_closest(&x0, x1); Ok(r.put(ctx)?) }
-        316 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::prism_contains(&x0, x1))) }
-        317 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::prism_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        318 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_bounds(&x0); Ok(r.put(ctx)?) }
-        319 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_centroid(&x0); Ok(r.put(ctx)?) }
-        320 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_volume(&x0); Ok(r.put(ctx)?) }
-        321 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_area(&x0); Ok(r.put(ctx)?) }
-        322 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_inertia(&x0, x1); Ok(r.put(ctx)?) }
-        323 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_corners(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        324 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 6)?) }
-        325 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 6)?) }
-        326 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::prism_transform(&x0, x1); Ok(r.put(ctx)?) }
-        327 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_length(&x0); Ok(r.put(ctx)?) }
-        328 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_distance(&x0, x1); Ok(r.put(ctx)?) }
-        329 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_closest(&x0, x1); Ok(r.put(ctx)?) }
-        330 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_at(&x0, x1); Ok(r.put(ctx)?) }
-        331 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_bounds(&x0); Ok(r.put(ctx)?) }
-        332 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 6)?) }
-        333 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
-        334 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_simplify(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
-        335 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_length(&x0); Ok(r.put(ctx)?) }
-        336 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_distance(&x0, x1); Ok(r.put(ctx)?) }
-        337 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_closest(&x0, x1); Ok(r.put(ctx)?) }
-        338 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_at(&x0, x1); Ok(r.put(ctx)?) }
-        339 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_bounds(&x0); Ok(r.put(ctx)?) }
-        340 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
-        341 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
-        342 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
-        343 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_simplify(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
-        344 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path_length(&x0); Ok(r.put(ctx)?) }
-        345 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::path_distance(&x0, x1); Ok(r.put(ctx)?) }
-        346 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::path_closest(&x0, x1); Ok(r.put(ctx)?) }
-        347 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::path_at(&x0, x1); Ok(r.put(ctx)?) }
-        348 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path_bounds(&x0); Ok(r.put(ctx)?) }
-        349 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::path_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 7)?) }
-        350 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path2d_length(&x0); Ok(r.put(ctx)?) }
-        351 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_distance(&x0, x1); Ok(r.put(ctx)?) }
-        352 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_closest(&x0, x1); Ok(r.put(ctx)?) }
-        353 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_at(&x0, x1); Ok(r.put(ctx)?) }
-        354 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path2d_bounds(&x0); Ok(r.put(ctx)?) }
-        355 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
-        356 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_plane(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        357 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (r0, r1) = crate::polygon_flatten(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, list_out(ctx, &r1, t0, 2)?]) }
-        358 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon_distance(&x0, x1); Ok(r.put(ctx)?) }
-        359 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon_closest(&x0, x1); Ok(r.put(ctx)?) }
-        360 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::polygon_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        361 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_bounds(&x0); Ok(r.put(ctx)?) }
-        362 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_centroid(&x0); Ok(r.put(ctx)?) }
-        363 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_area(&x0); Ok(r.put(ctx)?) }
-        364 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_perimeter(&x0); Ok(r.put(ctx)?) }
-        365 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 6)?) }
-        366 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; crate::mesh_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
-        367 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_distance(&x0, x1); Ok(r.put(ctx)?) }
-        368 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_closest(&x0, x1); Ok(r.put(ctx)?) }
-        369 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_bool(ctx.clone(), crate::mesh_contains(&x0, x1))) }
-        370 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; match crate::mesh_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        371 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_bounds(&x0); Ok(r.put(ctx)?) }
-        372 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_area(&x0); Ok(r.put(ctx)?) }
-        373 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_volume(&x0); Ok(r.put(ctx)?) }
-        374 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_centroid(&x0); Ok(r.put(ctx)?) }
-        375 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_inertia(&x0, x1); Ok(r.put(ctx)?) }
-        376 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_normals(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        377 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_bounds(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        378 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_mean(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        379 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_covariance(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        380 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_oriented_box(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        381 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_enclosing_sphere(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        382 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_bounds(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        383 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_mean(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        384 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_hull(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
-        385 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_oriented_box(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        386 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_enclosing_circle(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        387 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::shape_distance(&x0, x1); Ok(r.put(ctx)?) }
-        388 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::shape_closest(&x0, x1); Ok(r.put(ctx)?) }
-        389 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::shape_contains(&x0, x1))) }
-        390 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::shape_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        391 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let r = crate::shape_bounds(&x0); Ok(r.put(ctx)?) }
-        392 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::shape_distances(&x0, &x1); Ok(numbers_out(ctx, &r)?) }
-        393 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = ShapeHold::new(ctx, fail, &at(args, 1))?; let x1 = h1.shape(ctx)?; let (r0, r1) = crate::shape_gap(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
-        394 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = ShapeHold::new(ctx, fail, &at(args, 1))?; let x1 = h1.shape(ctx)?; Ok(Value::new_bool(ctx.clone(), crate::shape_overlaps(&x0, &x1))) }
-        395 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_sample_inside(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        396 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_sample_surface(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        397 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_mesh(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        398 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::shape2d_distance(&x0, x1); Ok(r.put(ctx)?) }
-        399 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::shape2d_closest(&x0, x1); Ok(r.put(ctx)?) }
-        400 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::shape2d_contains(&x0, x1))) }
-        401 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::shape2d_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
-        402 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let r = crate::shape2d_bounds(&x0); Ok(r.put(ctx)?) }
-        403 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::shape2d_distances(&x0, &x1); Ok(numbers_out(ctx, &r)?) }
-        404 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; let (r0, r1) = crate::shape2d_gap(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
-        405 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; Ok(Value::new_bool(ctx.clone(), crate::shape2d_overlaps(&x0, &x1))) }
-        406 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape2d_sample_inside(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
-        407 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape2d_sample_surface(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
-        408 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_plane(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
-        409 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_line(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
-        410 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_sphere(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
-        411 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h2 = FitHold::new(ctx, &at(args, 2))?; let mut x2 = h2.options(); let r = crate::points_fit_pose(&x0, &x1, x2.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x2); h2.done(&at(args, 2))?; answer }
-        412 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points2d_fit_line(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
-        413 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points2d_fit_circle(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
-        414 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h2 = FitHold::new(ctx, &at(args, 2))?; let mut x2 = h2.options(); let r = crate::points2d_fit_pose(&x0, &x1, x2.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x2); h2.done(&at(args, 2))?; answer }
-        415 => { let x0: Vec<f64> = numbers(ctx, &at(args, 0))?; let x1: Vec<f64> = numbers(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let mut h3 = FitHold::new(ctx, &at(args, 3))?; let mut x3 = h3.options(); let r = crate::polynomial_fit(&x0, &x1, x2, x3.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(numbers_out(ctx, &r)?); drop(x3); h3.done(&at(args, 3))?; answer }
-        416 => { let x0: Vec<f64> = numbers(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; if x0.is_empty() { return Err(math_error(ctx, fail, MathError::Argument)); } let r = crate::polynomial_at(&x0, x1); Ok(r.put(ctx)?) }
-        417 => { let x0: Color = Js::get(ctx, &at(args, 0))?; let x1: Color = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::color_mix(x0, x1, x2); Ok(r.put(ctx)?) }
-        418 => { let x0: Color = Js::get(ctx, &at(args, 0))?; let r = crate::color_to_linear(x0); Ok(r.put(ctx)?) }
-        419 => { let x0: Float4 = Js::get(ctx, &at(args, 0))?; let r = crate::color_from_linear(x0); Ok(r.put(ctx)?) }
-        420 => { let x0: Colormap = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::colormap_at(x0, x1); Ok(r.put(ctx)?) }
-        421 => { let x0: Colormap = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::colormap_ramp(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
-        422 => { let (x0, t0): (Vec<Color>, bool) = list(ctx, &at(args, 0), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::color_ramp(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 0)?) }
-        423 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::camera_project(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        424 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::camera_project_points(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t1, 2)?) }
-        425 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::camera_ray(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        426 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_unproject(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        427 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_scale(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        428 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let x4: u32 = Js::get(ctx, &at(args, 4))?; let r = crate::camera_crop(&x0, x1, x2, x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        429 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let r = crate::camera_fov(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        430 => { let x0: u32 = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: Double2 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_from_fov(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        431 => { let x0: ImageFormat = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_bytes(x0, x1, x2); Ok(r.put(ctx)?) }
-        432 => { let x0 = image_in(ctx, &at(args, 0))?; crate::image_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
-        433 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_color_at(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        434 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_value_at(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        435 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: ImageFormat = Js::get(ctx, &at(args, 1))?; let r = crate::image_convert(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        436 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let (x3, t3): (Vec<Color>, bool) = list(ctx, &at(args, 3), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x4: ImageFormat = Js::get(ctx, &at(args, 4))?; let r = crate::image_colorize(&x0, x1, x2, &x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        437 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let x4: u32 = Js::get(ctx, &at(args, 4))?; let r = crate::image_crop(&x0, x1, x2, x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        438 => { let x0 = image_in(ctx, &at(args, 0))?; let r = crate::image_flip_horizontal(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        439 => { let x0 = image_in(ctx, &at(args, 0))?; let r = crate::image_flip_vertical(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        440 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: i32 = Js::get(ctx, &at(args, 1))?; let r = crate::image_rotate(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        441 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: ImageFilter = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let r = crate::image_resize(&x0, x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        442 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: CameraIntrinsics = Js::get(ctx, &at(args, 1))?; let x2: Option<CameraIntrinsics> = maybe(ctx, &at(args, 2))?; let x3: ImageFilter = Js::get(ctx, &at(args, 3))?; let r = crate::image_undistort(&x0, &x1, x2.as_ref(), x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        443 => { let mut x0 = image_in(ctx, &at(args, 0))?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; let x2: Color = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::image_draw(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; image_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        444 => { let x0: PointCloudLayout = Js::get(ctx, &at(args, 0))?; let r = crate::point_cloud_layout(x0); Ok(r.put(ctx)?) }
-        445 => { let x0 = cloud_in(ctx, &at(args, 0))?; crate::point_cloud_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
-        446 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::point_cloud_field(&x0, &x1); Ok(r.put(ctx)?) }
-        447 => { let x0 = cloud_in(ctx, &at(args, 0))?; let r = crate::point_cloud_read_points(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        448 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; crate::point_cloud_write_points(&mut x0, &x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        449 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::point_cloud_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        450 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Vec<f64> = numbers(ctx, &at(args, 2))?; crate::point_cloud_write_values(&mut x0, &x1, &x2).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        451 => { let x0 = cloud_in(ctx, &at(args, 0))?; let r = crate::point_cloud_read_colors(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
-        452 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let (x1, t1): (Vec<Color>, bool) = list(ctx, &at(args, 1), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; crate::point_cloud_write_colors(&mut x0, &x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        453 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; crate::point_cloud_transform(&mut x0, x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        454 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: Vec<u8> = numbers(ctx, &at(args, 1))?; let r = crate::point_cloud_select(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        455 => { let x0 = scan_in(ctx, &at(args, 0))?; let r = crate::laser_scan_points(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
-        456 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: CameraIntrinsics = Js::get(ctx, &at(args, 1))?; let r = crate::image_depth_points(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
-        457 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::kdtree_create(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_number(ctx.clone(), trees.borrow_mut().insert(r) as f64)) }
-        458 => { let x0 = tree_of(ctx, trees, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::kdtree_nearest(&*x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, numbers_out(ctx, &r1)?]) }
-        459 => { let x0 = tree_of(ctx, trees, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::kdtree_within(&*x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, numbers_out(ctx, &r1)?]) }
-        460 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::points_downsample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        461 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::points_remove_outliers(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        462 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::points_remove_isolated(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        463 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::points_normals(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
-        464 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::points_clusters(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, r1.put(ctx)?]) }
-        465 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x2: Pose = Js::get(ctx, &at(args, 2))?; let mut h3 = AlignHold::new(ctx, &at(args, 3))?; let mut x3 = h3.options(); let r = crate::points_align(&x0, &x1, x2, x3.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x3); h3.done(&at(args, 3))?; answer }
-        466 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_cell(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        467 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Int3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_center(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        468 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let r = crate::grid_read_value(&x0, &x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
-        469 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::grid_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        470 => { let x0 = grid_in(ctx, &at(args, 0))?; let r = crate::grid_read_colors(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
-        471 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
-        472 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
-        473 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
-        474 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
-        475 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
-        476 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
-        477 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        3 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_divide(x0, x1); Ok(r.put(ctx)?) }
+        4 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_negate(x0); Ok(r.put(ctx)?) }
+        5 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_multiply(x0, x1); Ok(r.put(ctx)?) }
+        6 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_dot(x0, x1); Ok(r.put(ctx)?) }
+        7 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_cross(x0, x1); Ok(r.put(ctx)?) }
+        8 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_length(x0); Ok(r.put(ctx)?) }
+        9 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_length_squared(x0); Ok(r.put(ctx)?) }
+        10 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_distance(x0, x1); Ok(r.put(ctx)?) }
+        11 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::double2_is_near(x0, x1, x2))) }
+        12 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_normalize(x0); Ok(r.put(ctx)?) }
+        13 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double2_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
+        14 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_min(x0, x1); Ok(r.put(ctx)?) }
+        15 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_max(x0, x1); Ok(r.put(ctx)?) }
+        16 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_angle(x0, x1); Ok(r.put(ctx)?) }
+        17 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_heading(x0); Ok(r.put(ctx)?) }
+        18 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_heading(x0); Ok(r.put(ctx)?) }
+        19 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_rotate(x0, x1); Ok(r.put(ctx)?) }
+        20 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_perpendicular(x0); Ok(r.put(ctx)?) }
+        21 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_project(x0, x1); Ok(r.put(ctx)?) }
+        22 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::double2_reflect(x0, x1); Ok(r.put(ctx)?) }
+        23 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_add(x0, x1); Ok(r.put(ctx)?) }
+        24 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_subtract(x0, x1); Ok(r.put(ctx)?) }
+        25 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_scale(x0, x1); Ok(r.put(ctx)?) }
+        26 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_divide(x0, x1); Ok(r.put(ctx)?) }
+        27 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_negate(x0); Ok(r.put(ctx)?) }
+        28 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_multiply(x0, x1); Ok(r.put(ctx)?) }
+        29 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_dot(x0, x1); Ok(r.put(ctx)?) }
+        30 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_cross(x0, x1); Ok(r.put(ctx)?) }
+        31 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_length(x0); Ok(r.put(ctx)?) }
+        32 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_length_squared(x0); Ok(r.put(ctx)?) }
+        33 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_distance(x0, x1); Ok(r.put(ctx)?) }
+        34 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::double3_is_near(x0, x1, x2))) }
+        35 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_normalize(x0); Ok(r.put(ctx)?) }
+        36 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double3_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
+        37 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_min(x0, x1); Ok(r.put(ctx)?) }
+        38 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_max(x0, x1); Ok(r.put(ctx)?) }
+        39 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_angle(x0, x1); Ok(r.put(ctx)?) }
+        40 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_project(x0, x1); Ok(r.put(ctx)?) }
+        41 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::double3_reflect(x0, x1); Ok(r.put(ctx)?) }
+        42 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_perpendicular(x0); Ok(r.put(ctx)?) }
+        43 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_add(x0, x1); Ok(r.put(ctx)?) }
+        44 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_subtract(x0, x1); Ok(r.put(ctx)?) }
+        45 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_scale(x0, x1); Ok(r.put(ctx)?) }
+        46 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_divide(x0, x1); Ok(r.put(ctx)?) }
+        47 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_negate(x0); Ok(r.put(ctx)?) }
+        48 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let r = crate::double4_dot(x0, x1); Ok(r.put(ctx)?) }
+        49 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_length(x0); Ok(r.put(ctx)?) }
+        50 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_normalize(x0); Ok(r.put(ctx)?) }
+        51 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let x1: Double4 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::double4_lerp(x0, x1, x2); Ok(r.put(ctx)?) }
+        52 => { let x0: Float2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_float2(x0); Ok(r.put(ctx)?) }
+        53 => { let x0: Float3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_from_float3(x0); Ok(r.put(ctx)?) }
+        54 => { let x0: Float4 = Js::get(ctx, &at(args, 0))?; let r = crate::double4_from_float4(x0); Ok(r.put(ctx)?) }
+        55 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::float2_from_double2(x0); Ok(r.put(ctx)?) }
+        56 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::float3_from_double3(x0); Ok(r.put(ctx)?) }
+        57 => { let x0: Double4 = Js::get(ctx, &at(args, 0))?; let r = crate::float4_from_double4(x0); Ok(r.put(ctx)?) }
+        58 => { let x0: Int2 = Js::get(ctx, &at(args, 0))?; let r = crate::double2_from_int2(x0); Ok(r.put(ctx)?) }
+        59 => { let x0: Int3 = Js::get(ctx, &at(args, 0))?; let r = crate::double3_from_int3(x0); Ok(r.put(ctx)?) }
+        60 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let r = crate::int2_floor(x0); Ok(r.put(ctx)?) }
+        61 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::int3_floor(x0); Ok(r.put(ctx)?) }
+        62 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let x3: EulerOrder = Js::get(ctx, &at(args, 3))?; let r = crate::quaternion_from_euler(x0, x1, x2, x3); Ok(r.put(ctx)?) }
+        63 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: EulerOrder = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_to_euler(x0, x1); Ok(numbers_out(ctx, &r)?) }
+        64 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_from_axis_angle(x0, x1); Ok(r.put(ctx)?) }
+        65 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let (r0, r1) = crate::quaternion_to_axis_angle(x0); pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
+        66 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_from_rotation_vector(x0); Ok(r.put(ctx)?) }
+        67 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_to_rotation_vector(x0); Ok(r.put(ctx)?) }
+        68 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_from_matrix3x3(x0); Ok(r.put(ctx)?) }
+        69 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_from_quaternion(x0); Ok(r.put(ctx)?) }
+        70 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_between(x0, x1); Ok(r.put(ctx)?) }
+        71 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_look(x0, x1); Ok(r.put(ctx)?) }
+        72 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_compose(x0, x1); Ok(r.put(ctx)?) }
+        73 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_inverse(x0); Ok(r.put(ctx)?) }
+        74 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_normalize(x0); Ok(r.put(ctx)?) }
+        75 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_rotate(x0, x1); Ok(r.put(ctx)?) }
+        76 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::quaternion_slerp(x0, x1, x2); Ok(r.put(ctx)?) }
+        77 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::quaternion_angle(x0, x1); Ok(r.put(ctx)?) }
+        78 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; Ok(Value::new_bool(ctx.clone(), crate::quaternion_is_near(x0, x1, x2))) }
+        79 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::quaternion_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
+        80 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let r = crate::quaternion_yaw(x0); Ok(r.put(ctx)?) }
+        81 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let r = crate::angle_wrap(x0); Ok(r.put(ctx)?) }
+        82 => { let x0: f64 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::angle_difference(x0, x1); Ok(r.put(ctx)?) }
+        83 => { let r = crate::matrix3x3_identity(); Ok(r.put(ctx)?) }
+        84 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let x1: Matrix3x3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix3x3_multiply(x0, x1); Ok(r.put(ctx)?) }
+        85 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_transpose(x0); Ok(r.put(ctx)?) }
+        86 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_determinant(x0); Ok(r.put(ctx)?) }
+        87 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix3x3_inverse(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        88 => { let x0: Matrix3x3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix3x3_apply(x0, x1); Ok(r.put(ctx)?) }
+        89 => { let r = crate::matrix4x4_identity(); Ok(r.put(ctx)?) }
+        90 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Matrix4x4 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_multiply(x0, x1); Ok(r.put(ctx)?) }
+        91 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_transpose(x0); Ok(r.put(ctx)?) }
+        92 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_determinant(x0); Ok(r.put(ctx)?) }
+        93 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_inverse(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        94 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_apply(x0, x1); Ok(r.put(ctx)?) }
+        95 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::matrix4x4_apply_direction(x0, x1); Ok(r.put(ctx)?) }
+        96 => { let x0 = matrix_in(ctx, &at(args, 0))?; let x1 = matrix_in(ctx, &at(args, 1))?; let r = crate::matrix_multiply(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        97 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_transpose(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        98 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_determinant(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        99 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_inverse(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        100 => { let x0 = matrix_in(ctx, &at(args, 0))?; let x1 = matrix_in(ctx, &at(args, 1))?; let r = crate::matrix_solve(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        101 => { let x0 = matrix_in(ctx, &at(args, 0))?; let (r0, r1, r2) = crate::matrix_svd(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, numbers_out(ctx, &r1)?, r2.put(ctx)?]) }
+        102 => { let x0 = matrix_in(ctx, &at(args, 0))?; let (r0, r1) = crate::matrix_eigen(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, r1.put(ctx)?]) }
+        103 => { let x0 = matrix_in(ctx, &at(args, 0))?; let r = crate::matrix_cholesky(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        104 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::pose_compose(x0, x1); Ok(r.put(ctx)?) }
+        105 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::pose_inverse(x0); Ok(r.put(ctx)?) }
+        106 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::pose_between(x0, x1); Ok(r.put(ctx)?) }
+        107 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::pose_apply(x0, x1); Ok(r.put(ctx)?) }
+        108 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::pose_apply_inverse(x0, x1); Ok(r.put(ctx)?) }
+        109 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::pose_apply_points(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
+        110 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_interpolate(x0, x1, x2); Ok(r.put(ctx)?) }
+        111 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_from_points(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        112 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_look_at(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        113 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::matrix4x4_from_pose(x0); Ok(r.put(ctx)?) }
+        114 => { let x0: Matrix4x4 = Js::get(ctx, &at(args, 0))?; let r = crate::pose_from_matrix4x4(x0); Ok(r.put(ctx)?) }
+        115 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let r = crate::pose2d_from_pose(x0); Ok(r.put(ctx)?) }
+        116 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let r = crate::pose_from_pose2d(x0); Ok(r.put(ctx)?) }
+        117 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_compose(x0, x1); Ok(r.put(ctx)?) }
+        118 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let r = crate::pose2d_inverse(x0); Ok(r.put(ctx)?) }
+        119 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_between(x0, x1); Ok(r.put(ctx)?) }
+        120 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_apply(x0, x1); Ok(r.put(ctx)?) }
+        121 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::pose2d_apply_inverse(x0, x1); Ok(r.put(ctx)?) }
+        122 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::pose2d_apply_points(x0, &x1); Ok(list_out(ctx, &r, t1, 2)?) }
+        123 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose2d_interpolate(x0, x1, x2); Ok(r.put(ctx)?) }
+        124 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::twist_transform(x0, x1); Ok(r.put(ctx)?) }
+        125 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::wrench_transform(x0, x1); Ok(r.put(ctx)?) }
+        126 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
+        127 => { let x0: Pose = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::twist_between(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        128 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Twist2D = Js::get(ctx, &at(args, 1))?; let r = crate::twist2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        129 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Wrench2D = Js::get(ctx, &at(args, 1))?; let r = crate::wrench2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        130 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Twist2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::pose2d_integrate(x0, x1, x2); Ok(r.put(ctx)?) }
+        131 => { let x0: Pose2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::twist2d_between(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        132 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Covariance3 = Js::get(ctx, &at(args, 1))?; let r = crate::covariance3_rotate(x0, &x1); Ok(r.put(ctx)?) }
+        133 => { let x0: Quaternion = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::covariance6_rotate(x0, &x1); Ok(r.put(ctx)?) }
+        134 => { let x0: Covariance3 = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let (r0, r1) = crate::covariance3_ellipsoid(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
+        135 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::inertia_transform(x0, x1); Ok(r.put(ctx)?) }
+        136 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let x1: Inertia = Js::get(ctx, &at(args, 1))?; let r = crate::inertia_add(x0, x1); Ok(r.put(ctx)?) }
+        137 => { let x0: Inertia = Js::get(ctx, &at(args, 0))?; let r = crate::inertia_box(x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        138 => { let x0: AxesPreset = Js::get(ctx, &at(args, 0))?; let r = crate::axes_of(x0); Ok(r.put(ctx)?) }
+        139 => { let x0: i32 = Js::get(ctx, &at(args, 0))?; let x1: i32 = Js::get(ctx, &at(args, 1))?; let x2: i32 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; let r = crate::axes_make(x0, x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        140 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_point_to(x0, x1); Ok(r.put(ctx)?) }
+        141 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_point_from(x0, x1); Ok(r.put(ctx)?) }
+        142 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_direction_to(x0, x1); Ok(r.put(ctx)?) }
+        143 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_direction_from(x0, x1); Ok(r.put(ctx)?) }
+        144 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::axes_quaternion_to(x0, x1); Ok(r.put(ctx)?) }
+        145 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Quaternion = Js::get(ctx, &at(args, 1))?; let r = crate::axes_quaternion_from(x0, x1); Ok(r.put(ctx)?) }
+        146 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::axes_pose_to(x0, x1); Ok(r.put(ctx)?) }
+        147 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::axes_pose_from(x0, x1); Ok(r.put(ctx)?) }
+        148 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::axes_twist_to(x0, x1); Ok(r.put(ctx)?) }
+        149 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Twist = Js::get(ctx, &at(args, 1))?; let r = crate::axes_twist_from(x0, x1); Ok(r.put(ctx)?) }
+        150 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::axes_wrench_to(x0, x1); Ok(r.put(ctx)?) }
+        151 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Wrench = Js::get(ctx, &at(args, 1))?; let r = crate::axes_wrench_from(x0, x1); Ok(r.put(ctx)?) }
+        152 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Accel = Js::get(ctx, &at(args, 1))?; let r = crate::axes_accel_to(x0, x1); Ok(r.put(ctx)?) }
+        153 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Accel = Js::get(ctx, &at(args, 1))?; let r = crate::axes_accel_from(x0, x1); Ok(r.put(ctx)?) }
+        154 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_covariance6_to(x0, &x1); Ok(r.put(ctx)?) }
+        155 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let x1: Covariance6 = Js::get(ctx, &at(args, 1))?; let r = crate::axes_covariance6_from(x0, &x1); Ok(r.put(ctx)?) }
+        156 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::axes_points_to(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
+        157 => { let x0: Axes = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::axes_points_from(x0, &x1); Ok(list_out(ctx, &r, t1, 3)?) }
+        158 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::plane_from_points(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        159 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::plane_distance(x0, x1); Ok(r.put(ctx)?) }
+        160 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::plane_closest(x0, x1); Ok(r.put(ctx)?) }
+        161 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::plane_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        162 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::plane_transform(x0, x1); Ok(r.put(ctx)?) }
+        163 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Plane = Js::get(ctx, &at(args, 1))?; let r = crate::plane_intersect(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        164 => { let x0: Plane = Js::get(ctx, &at(args, 0))?; let x1: Plane = Js::get(ctx, &at(args, 1))?; let x2: Plane = Js::get(ctx, &at(args, 2))?; let r = crate::plane_intersect3(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        165 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let r = crate::segment_length(x0); Ok(r.put(ctx)?) }
+        166 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::segment_closest(x0, x1); Ok(r.put(ctx)?) }
+        167 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::segment_distance(x0, x1); Ok(r.put(ctx)?) }
+        168 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Segment = Js::get(ctx, &at(args, 1))?; let r = crate::segment_closest_segment(x0, x1); Ok(r.put(ctx)?) }
+        169 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::segment_transform(x0, x1); Ok(r.put(ctx)?) }
+        170 => { let x0: Segment = Js::get(ctx, &at(args, 0))?; let r = crate::segment_bounds(x0); Ok(r.put(ctx)?) }
+        171 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_at(x0, x1); Ok(r.put(ctx)?) }
+        172 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_closest(x0, x1); Ok(r.put(ctx)?) }
+        173 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::ray_distance(x0, x1); Ok(r.put(ctx)?) }
+        174 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; let r = crate::ray_closest_ray(x0, x1); Ok(r.put(ctx)?) }
+        175 => { let x0: Ray = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::ray_transform(x0, x1); Ok(r.put(ctx)?) }
+        176 => { let x0: Double2 = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_from_points(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        177 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        178 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        179 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::plane2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        180 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        181 => { let x0: Plane2D = Js::get(ctx, &at(args, 0))?; let x1: Plane2D = Js::get(ctx, &at(args, 1))?; let r = crate::plane2d_intersect(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        182 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let r = crate::segment2d_length(x0); Ok(r.put(ctx)?) }
+        183 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        184 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        185 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Segment2D = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_closest_segment(x0, x1); Ok(r.put(ctx)?) }
+        186 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Segment2D = Js::get(ctx, &at(args, 1))?; match crate::segment2d_intersect(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        187 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::segment2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        188 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::segment2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        189 => { let x0: Segment2D = Js::get(ctx, &at(args, 0))?; let r = crate::segment2d_bounds(x0); Ok(r.put(ctx)?) }
+        190 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_at(x0, x1); Ok(r.put(ctx)?) }
+        191 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        192 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        193 => { let x0: Ray2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::ray2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        194 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        195 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        196 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::aligned_box2d_contains(x0, x1))) }
+        197 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::aligned_box2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        198 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_centroid(x0); Ok(r.put(ctx)?) }
+        199 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_area(x0); Ok(r.put(ctx)?) }
+        200 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_perimeter(x0); Ok(r.put(ctx)?) }
+        201 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_corners(x0); Ok(list_out(ctx, &r, false, 2)?) }
+        202 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_edges(x0); Ok(list_out(ctx, &r, false, 4)?) }
+        203 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box2d_planes(x0); Ok(list_out(ctx, &r, false, 4)?) }
+        204 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        205 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_merge(x0, x1); Ok(r.put(ctx)?) }
+        206 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; match crate::aligned_box2d_overlap(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        207 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_grow(x0, x1); Ok(r.put(ctx)?) }
+        208 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box2d_iou(x0, x1); Ok(r.put(ctx)?) }
+        209 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        210 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        211 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::oriented_box2d_contains(x0, x1))) }
+        212 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::oriented_box2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        213 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_bounds(x0); Ok(r.put(ctx)?) }
+        214 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_area(x0); Ok(r.put(ctx)?) }
+        215 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_perimeter(x0); Ok(r.put(ctx)?) }
+        216 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_corners(x0); Ok(list_out(ctx, &r, false, 2)?) }
+        217 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_edges(x0); Ok(list_out(ctx, &r, false, 4)?) }
+        218 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_planes(x0); Ok(list_out(ctx, &r, false, 4)?) }
+        219 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        220 => { let x0: AlignedBox2D = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box2d_from_aligned_box2d(x0); Ok(r.put(ctx)?) }
+        221 => { let x0: OrientedBox2D = Js::get(ctx, &at(args, 0))?; let x1: OrientedBox2D = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box2d_iou(x0, x1); Ok(r.put(ctx)?) }
+        222 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::circle_distance(x0, x1); Ok(r.put(ctx)?) }
+        223 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::circle_closest(x0, x1); Ok(r.put(ctx)?) }
+        224 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::circle_contains(x0, x1))) }
+        225 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::circle_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        226 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_bounds(x0); Ok(r.put(ctx)?) }
+        227 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_area(x0); Ok(r.put(ctx)?) }
+        228 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let r = crate::circle_perimeter(x0); Ok(r.put(ctx)?) }
+        229 => { let x0: Circle = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::circle_transform(x0, x1); Ok(r.put(ctx)?) }
+        230 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_distance(x0, x1); Ok(r.put(ctx)?) }
+        231 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_closest(x0, x1); Ok(r.put(ctx)?) }
+        232 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::capsule2d_contains(x0, x1))) }
+        233 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::capsule2d_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        234 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_bounds(x0); Ok(r.put(ctx)?) }
+        235 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_area(x0); Ok(r.put(ctx)?) }
+        236 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let r = crate::capsule2d_perimeter(x0); Ok(r.put(ctx)?) }
+        237 => { let x0: Capsule2D = Js::get(ctx, &at(args, 0))?; let x1: Pose2D = Js::get(ctx, &at(args, 1))?; let r = crate::capsule2d_transform(x0, x1); Ok(r.put(ctx)?) }
+        238 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon2d_distance(&x0, x1); Ok(r.put(ctx)?) }
+        239 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon2d_closest(&x0, x1); Ok(r.put(ctx)?) }
+        240 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::polygon2d_contains(&x0, x1))) }
+        241 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::polygon2d_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        242 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_bounds(&x0); Ok(r.put(ctx)?) }
+        243 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_centroid(&x0); Ok(r.put(ctx)?) }
+        244 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_area(&x0); Ok(r.put(ctx)?) }
+        245 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_signed_area(&x0); Ok(r.put(ctx)?) }
+        246 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_perimeter(&x0); Ok(r.put(ctx)?) }
+        247 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; Ok(Value::new_bool(ctx.clone(), crate::polygon2d_is_convex(&x0))) }
+        248 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
+        249 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
+        250 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon2d_triangulate(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        251 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_distance(x0, x1); Ok(r.put(ctx)?) }
+        252 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_closest(x0, x1); Ok(r.put(ctx)?) }
+        253 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::aligned_box_contains(x0, x1))) }
+        254 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::aligned_box_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        255 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_centroid(x0); Ok(r.put(ctx)?) }
+        256 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_volume(x0); Ok(r.put(ctx)?) }
+        257 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_area(x0); Ok(r.put(ctx)?) }
+        258 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_inertia(x0, x1); Ok(r.put(ctx)?) }
+        259 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_corners(x0); Ok(list_out(ctx, &r, false, 3)?) }
+        260 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_edges(x0); Ok(list_out(ctx, &r, false, 6)?) }
+        261 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::aligned_box_planes(x0); Ok(list_out(ctx, &r, false, 6)?) }
+        262 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_transform(x0, x1); Ok(r.put(ctx)?) }
+        263 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_merge(x0, x1); Ok(r.put(ctx)?) }
+        264 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; match crate::aligned_box_overlap(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        265 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_grow(x0, x1); Ok(r.put(ctx)?) }
+        266 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let x1: AlignedBox = Js::get(ctx, &at(args, 1))?; let r = crate::aligned_box_iou(x0, x1); Ok(r.put(ctx)?) }
+        267 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_distance(x0, x1); Ok(r.put(ctx)?) }
+        268 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_closest(x0, x1); Ok(r.put(ctx)?) }
+        269 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::oriented_box_contains(x0, x1))) }
+        270 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::oriented_box_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        271 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_bounds(x0); Ok(r.put(ctx)?) }
+        272 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_volume(x0); Ok(r.put(ctx)?) }
+        273 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_area(x0); Ok(r.put(ctx)?) }
+        274 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_inertia(x0, x1); Ok(r.put(ctx)?) }
+        275 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_corners(x0); Ok(list_out(ctx, &r, false, 3)?) }
+        276 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_edges(x0); Ok(list_out(ctx, &r, false, 6)?) }
+        277 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_planes(x0); Ok(list_out(ctx, &r, false, 6)?) }
+        278 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_transform(x0, x1); Ok(r.put(ctx)?) }
+        279 => { let x0: AlignedBox = Js::get(ctx, &at(args, 0))?; let r = crate::oriented_box_from_aligned_box(x0); Ok(r.put(ctx)?) }
+        280 => { let x0: OrientedBox = Js::get(ctx, &at(args, 0))?; let x1: OrientedBox = Js::get(ctx, &at(args, 1))?; let r = crate::oriented_box_iou(x0, x1); Ok(r.put(ctx)?) }
+        281 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_distance(x0, x1); Ok(r.put(ctx)?) }
+        282 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_closest(x0, x1); Ok(r.put(ctx)?) }
+        283 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::sphere_contains(x0, x1))) }
+        284 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::sphere_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        285 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_bounds(x0); Ok(r.put(ctx)?) }
+        286 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_volume(x0); Ok(r.put(ctx)?) }
+        287 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let r = crate::sphere_area(x0); Ok(r.put(ctx)?) }
+        288 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_inertia(x0, x1); Ok(r.put(ctx)?) }
+        289 => { let x0: Sphere = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::sphere_transform(x0, x1); Ok(r.put(ctx)?) }
+        290 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_distance(x0, x1); Ok(r.put(ctx)?) }
+        291 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_closest(x0, x1); Ok(r.put(ctx)?) }
+        292 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::capsule_contains(x0, x1))) }
+        293 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::capsule_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        294 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_bounds(x0); Ok(r.put(ctx)?) }
+        295 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_centroid(x0); Ok(r.put(ctx)?) }
+        296 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_volume(x0); Ok(r.put(ctx)?) }
+        297 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let r = crate::capsule_area(x0); Ok(r.put(ctx)?) }
+        298 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_inertia(x0, x1); Ok(r.put(ctx)?) }
+        299 => { let x0: Capsule = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::capsule_transform(x0, x1); Ok(r.put(ctx)?) }
+        300 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_distance(x0, x1); Ok(r.put(ctx)?) }
+        301 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_closest(x0, x1); Ok(r.put(ctx)?) }
+        302 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::cylinder_contains(x0, x1))) }
+        303 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::cylinder_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        304 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_bounds(x0); Ok(r.put(ctx)?) }
+        305 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_centroid(x0); Ok(r.put(ctx)?) }
+        306 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_volume(x0); Ok(r.put(ctx)?) }
+        307 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let r = crate::cylinder_area(x0); Ok(r.put(ctx)?) }
+        308 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_inertia(x0, x1); Ok(r.put(ctx)?) }
+        309 => { let x0: Cylinder = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::cylinder_transform(x0, x1); Ok(r.put(ctx)?) }
+        310 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_distance(x0, x1); Ok(r.put(ctx)?) }
+        311 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_closest(x0, x1); Ok(r.put(ctx)?) }
+        312 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::cone_contains(x0, x1))) }
+        313 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::cone_raycast(x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        314 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_bounds(x0); Ok(r.put(ctx)?) }
+        315 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_centroid(x0); Ok(r.put(ctx)?) }
+        316 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_volume(x0); Ok(r.put(ctx)?) }
+        317 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let r = crate::cone_area(x0); Ok(r.put(ctx)?) }
+        318 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::cone_inertia(x0, x1); Ok(r.put(ctx)?) }
+        319 => { let x0: Cone = Js::get(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::cone_transform(x0, x1); Ok(r.put(ctx)?) }
+        320 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_distance(&x0, x1); Ok(r.put(ctx)?) }
+        321 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_closest(&x0, x1); Ok(r.put(ctx)?) }
+        322 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::prism_contains(&x0, x1))) }
+        323 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::prism_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        324 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_bounds(&x0); Ok(r.put(ctx)?) }
+        325 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_centroid(&x0); Ok(r.put(ctx)?) }
+        326 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_volume(&x0); Ok(r.put(ctx)?) }
+        327 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_area(&x0); Ok(r.put(ctx)?) }
+        328 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::prism_inertia(&x0, x1); Ok(r.put(ctx)?) }
+        329 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_corners(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        330 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 6)?) }
+        331 => { let x0 = prism_in(ctx, &at(args, 0))?; let r = crate::prism_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 6)?) }
+        332 => { let x0 = prism_in(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; let r = crate::prism_transform(&x0, x1); Ok(r.put(ctx)?) }
+        333 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_length(&x0); Ok(r.put(ctx)?) }
+        334 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_distance(&x0, x1); Ok(r.put(ctx)?) }
+        335 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_closest(&x0, x1); Ok(r.put(ctx)?) }
+        336 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_at(&x0, x1); Ok(r.put(ctx)?) }
+        337 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_bounds(&x0); Ok(r.put(ctx)?) }
+        338 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 6)?) }
+        339 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
+        340 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline_simplify(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
+        341 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_length(&x0); Ok(r.put(ctx)?) }
+        342 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_distance(&x0, x1); Ok(r.put(ctx)?) }
+        343 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_closest(&x0, x1); Ok(r.put(ctx)?) }
+        344 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_at(&x0, x1); Ok(r.put(ctx)?) }
+        345 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_bounds(&x0); Ok(r.put(ctx)?) }
+        346 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
+        347 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polyline2d_planes(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 4)?) }
+        348 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
+        349 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::polyline2d_simplify(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
+        350 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path_length(&x0); Ok(r.put(ctx)?) }
+        351 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::path_distance(&x0, x1); Ok(r.put(ctx)?) }
+        352 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::path_closest(&x0, x1); Ok(r.put(ctx)?) }
+        353 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::path_at(&x0, x1); Ok(r.put(ctx)?) }
+        354 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path_bounds(&x0); Ok(r.put(ctx)?) }
+        355 => { let (x0, t0): (Vec<Pose>, bool) = list(ctx, &at(args, 0), 7).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::path_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 7)?) }
+        356 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path2d_length(&x0); Ok(r.put(ctx)?) }
+        357 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_distance(&x0, x1); Ok(r.put(ctx)?) }
+        358 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_closest(&x0, x1); Ok(r.put(ctx)?) }
+        359 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_at(&x0, x1); Ok(r.put(ctx)?) }
+        360 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::path2d_bounds(&x0); Ok(r.put(ctx)?) }
+        361 => { let (x0, t0): (Vec<Pose2D>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::path2d_resample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
+        362 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_plane(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        363 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (r0, r1) = crate::polygon_flatten(&x0).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, list_out(ctx, &r1, t0, 2)?]) }
+        364 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon_distance(&x0, x1); Ok(r.put(ctx)?) }
+        365 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::polygon_closest(&x0, x1); Ok(r.put(ctx)?) }
+        366 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::polygon_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        367 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_bounds(&x0); Ok(r.put(ctx)?) }
+        368 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_centroid(&x0); Ok(r.put(ctx)?) }
+        369 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_area(&x0); Ok(r.put(ctx)?) }
+        370 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_perimeter(&x0); Ok(r.put(ctx)?) }
+        371 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::polygon_edges(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 6)?) }
+        372 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; crate::mesh_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
+        373 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_distance(&x0, x1); Ok(r.put(ctx)?) }
+        374 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_closest(&x0, x1); Ok(r.put(ctx)?) }
+        375 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_bool(ctx.clone(), crate::mesh_contains(&x0, x1))) }
+        376 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: Ray = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; match crate::mesh_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        377 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_bounds(&x0); Ok(r.put(ctx)?) }
+        378 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_area(&x0); Ok(r.put(ctx)?) }
+        379 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_volume(&x0); Ok(r.put(ctx)?) }
+        380 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_centroid(&x0); Ok(r.put(ctx)?) }
+        381 => { let x0 = mesh_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_inertia(&x0, x1); Ok(r.put(ctx)?) }
+        382 => { let x0 = mesh_in(ctx, &at(args, 0))?; crate::MeshRaw::new(&x0).map_err(|e| math_error(ctx, fail, e))?; let r = crate::mesh_normals(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        383 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_bounds(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        384 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_mean(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        385 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_covariance(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        386 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_oriented_box(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        387 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points_enclosing_sphere(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        388 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_bounds(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        389 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_mean(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        390 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_hull(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 2)?) }
+        391 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_oriented_box(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        392 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::points2d_enclosing_circle(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        393 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::shape_distance(&x0, x1); Ok(r.put(ctx)?) }
+        394 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::shape_closest(&x0, x1); Ok(r.put(ctx)?) }
+        395 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::shape_contains(&x0, x1))) }
+        396 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Ray = Js::get(ctx, &at(args, 1))?; match crate::shape_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        397 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let r = crate::shape_bounds(&x0); Ok(r.put(ctx)?) }
+        398 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::shape_distances(&x0, &x1); Ok(numbers_out(ctx, &r)?) }
+        399 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = ShapeHold::new(ctx, fail, &at(args, 1))?; let x1 = h1.shape(ctx)?; let (r0, r1) = crate::shape_gap(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
+        400 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = ShapeHold::new(ctx, fail, &at(args, 1))?; let x1 = h1.shape(ctx)?; Ok(Value::new_bool(ctx.clone(), crate::shape_overlaps(&x0, &x1))) }
+        401 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_sample_inside(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        402 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_sample_surface(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        403 => { let h0 = ShapeHold::new(ctx, fail, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::shape_mesh(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        404 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::shape2d_distance(&x0, x1); Ok(r.put(ctx)?) }
+        405 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::shape2d_closest(&x0, x1); Ok(r.put(ctx)?) }
+        406 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; Ok(Value::new_bool(ctx.clone(), crate::shape2d_contains(&x0, x1))) }
+        407 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: Ray2D = Js::get(ctx, &at(args, 1))?; match crate::shape2d_raycast(&x0, x1) { None => Ok(Value::new_null(ctx.clone())), Some(r) => Ok(r.put(ctx)?) } }
+        408 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let r = crate::shape2d_bounds(&x0); Ok(r.put(ctx)?) }
+        409 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::shape2d_distances(&x0, &x1); Ok(numbers_out(ctx, &r)?) }
+        410 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; let (r0, r1) = crate::shape2d_gap(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![r0.put(ctx)?, r1.put(ctx)?]) }
+        411 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; Ok(Value::new_bool(ctx.clone(), crate::shape2d_overlaps(&x0, &x1))) }
+        412 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape2d_sample_inside(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
+        413 => { let h0 = Shape2DHold::new(ctx, &at(args, 0))?; let x0 = h0.shape(ctx)?; let x1: u64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::shape2d_sample_surface(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
+        414 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_plane(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
+        415 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_line(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
+        416 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points_fit_sphere(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
+        417 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h2 = FitHold::new(ctx, &at(args, 2))?; let mut x2 = h2.options(); let r = crate::points_fit_pose(&x0, &x1, x2.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x2); h2.done(&at(args, 2))?; answer }
+        418 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points2d_fit_line(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
+        419 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h1 = FitHold::new(ctx, &at(args, 1))?; let mut x1 = h1.options(); let r = crate::points2d_fit_circle(&x0, x1.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x1); h1.done(&at(args, 1))?; answer }
+        420 => { let (x0, t0): (Vec<Double2>, bool) = list(ctx, &at(args, 0), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double2>, bool) = list(ctx, &at(args, 1), 2).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let mut h2 = FitHold::new(ctx, &at(args, 2))?; let mut x2 = h2.options(); let r = crate::points2d_fit_pose(&x0, &x1, x2.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x2); h2.done(&at(args, 2))?; answer }
+        421 => { let x0: Vec<f64> = numbers(ctx, &at(args, 0))?; let x1: Vec<f64> = numbers(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let mut h3 = FitHold::new(ctx, &at(args, 3))?; let mut x3 = h3.options(); let r = crate::polynomial_fit(&x0, &x1, x2, x3.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(numbers_out(ctx, &r)?); drop(x3); h3.done(&at(args, 3))?; answer }
+        422 => { let x0: Vec<f64> = numbers(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; if x0.is_empty() { return Err(math_error(ctx, fail, MathError::Argument)); } let r = crate::polynomial_at(&x0, x1); Ok(r.put(ctx)?) }
+        423 => { let x0: Color = Js::get(ctx, &at(args, 0))?; let x1: Color = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::color_mix(x0, x1, x2); Ok(r.put(ctx)?) }
+        424 => { let x0: Color = Js::get(ctx, &at(args, 0))?; let r = crate::color_to_linear(x0); Ok(r.put(ctx)?) }
+        425 => { let x0: Float4 = Js::get(ctx, &at(args, 0))?; let r = crate::color_from_linear(x0); Ok(r.put(ctx)?) }
+        426 => { let x0: Colormap = Js::get(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::colormap_at(x0, x1); Ok(r.put(ctx)?) }
+        427 => { let x0: Colormap = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::colormap_ramp(x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
+        428 => { let (x0, t0): (Vec<Color>, bool) = list(ctx, &at(args, 0), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let r = crate::color_ramp(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 0)?) }
+        429 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::camera_project(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        430 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::camera_project_points(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t1, 2)?) }
+        431 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let r = crate::camera_ray(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        432 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: Double2 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_unproject(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        433 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_scale(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        434 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let x4: u32 = Js::get(ctx, &at(args, 4))?; let r = crate::camera_crop(&x0, x1, x2, x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        435 => { let x0: CameraIntrinsics = Js::get(ctx, &at(args, 0))?; let r = crate::camera_fov(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        436 => { let x0: u32 = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: Double2 = Js::get(ctx, &at(args, 2))?; let r = crate::camera_from_fov(x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        437 => { let x0: ImageFormat = Js::get(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_bytes(x0, x1, x2); Ok(r.put(ctx)?) }
+        438 => { let x0 = image_in(ctx, &at(args, 0))?; crate::image_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
+        439 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_color_at(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        440 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::image_value_at(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        441 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: ImageFormat = Js::get(ctx, &at(args, 1))?; let r = crate::image_convert(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        442 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let (x3, t3): (Vec<Color>, bool) = list(ctx, &at(args, 3), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x4: ImageFormat = Js::get(ctx, &at(args, 4))?; let r = crate::image_colorize(&x0, x1, x2, &x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        443 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let x4: u32 = Js::get(ctx, &at(args, 4))?; let r = crate::image_crop(&x0, x1, x2, x3, x4).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        444 => { let x0 = image_in(ctx, &at(args, 0))?; let r = crate::image_flip_horizontal(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        445 => { let x0 = image_in(ctx, &at(args, 0))?; let r = crate::image_flip_vertical(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        446 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: i32 = Js::get(ctx, &at(args, 1))?; let r = crate::image_rotate(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        447 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: ImageFilter = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let x3: u32 = Js::get(ctx, &at(args, 3))?; let r = crate::image_resize(&x0, x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        448 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: CameraIntrinsics = Js::get(ctx, &at(args, 1))?; let x2: Option<CameraIntrinsics> = maybe(ctx, &at(args, 2))?; let x3: ImageFilter = Js::get(ctx, &at(args, 3))?; let r = crate::image_undistort(&x0, &x1, x2.as_ref(), x3).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        449 => { let mut x0 = image_in(ctx, &at(args, 0))?; let h1 = Shape2DHold::new(ctx, &at(args, 1))?; let x1 = h1.shape(ctx)?; let x2: Color = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::image_draw(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; image_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        450 => { let x0: PointCloudLayout = Js::get(ctx, &at(args, 0))?; let r = crate::point_cloud_layout(x0); Ok(r.put(ctx)?) }
+        451 => { let x0 = cloud_in(ctx, &at(args, 0))?; crate::point_cloud_check(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_undefined(ctx.clone())) }
+        452 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::point_cloud_field(&x0, &x1); Ok(r.put(ctx)?) }
+        453 => { let x0 = cloud_in(ctx, &at(args, 0))?; let r = crate::point_cloud_read_points(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        454 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; crate::point_cloud_write_points(&mut x0, &x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        455 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::point_cloud_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        456 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Vec<f64> = numbers(ctx, &at(args, 2))?; crate::point_cloud_write_values(&mut x0, &x1, &x2).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        457 => { let x0 = cloud_in(ctx, &at(args, 0))?; let r = crate::point_cloud_read_colors(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
+        458 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let (x1, t1): (Vec<Color>, bool) = list(ctx, &at(args, 1), 0).map_err(|_| math_error(ctx, fail, MathError::Argument))?; crate::point_cloud_write_colors(&mut x0, &x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        459 => { let mut x0 = cloud_in(ctx, &at(args, 0))?; let x1: Pose = Js::get(ctx, &at(args, 1))?; crate::point_cloud_transform(&mut x0, x1).map_err(|e| math_error(ctx, fail, e))?; cloud_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        460 => { let x0 = cloud_in(ctx, &at(args, 0))?; let x1: Vec<u8> = numbers(ctx, &at(args, 1))?; let r = crate::point_cloud_select(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        461 => { let x0 = scan_in(ctx, &at(args, 0))?; let r = crate::laser_scan_points(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 2)?) }
+        462 => { let x0 = image_in(ctx, &at(args, 0))?; let x1: CameraIntrinsics = Js::get(ctx, &at(args, 1))?; let r = crate::image_depth_points(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 3)?) }
+        463 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let r = crate::kdtree_create(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(Value::new_number(ctx.clone(), trees.borrow_mut().insert(r) as f64)) }
+        464 => { let x0 = tree_of(ctx, trees, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::kdtree_nearest(&*x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, numbers_out(ctx, &r1)?]) }
+        465 => { let x0 = tree_of(ctx, trees, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::kdtree_within(&*x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, numbers_out(ctx, &r1)?]) }
+        466 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::points_downsample(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        467 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: f64 = Js::get(ctx, &at(args, 2))?; let r = crate::points_remove_outliers(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        468 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let r = crate::points_remove_isolated(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        469 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: u32 = Js::get(ctx, &at(args, 1))?; let x2: Double3 = Js::get(ctx, &at(args, 2))?; let r = crate::points_normals(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, t0, 3)?) }
+        470 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let x2: u32 = Js::get(ctx, &at(args, 2))?; let (r0, r1) = crate::points_clusters(&x0, x1, x2).map_err(|e| math_error(ctx, fail, e))?; pair(ctx, vec![numbers_out(ctx, &r0)?, r1.put(ctx)?]) }
+        471 => { let (x0, t0): (Vec<Double3>, bool) = list(ctx, &at(args, 0), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let (x1, t1): (Vec<Double3>, bool) = list(ctx, &at(args, 1), 3).map_err(|_| math_error(ctx, fail, MathError::Argument))?; let x2: Pose = Js::get(ctx, &at(args, 2))?; let mut h3 = AlignHold::new(ctx, &at(args, 3))?; let mut x3 = h3.options(); let r = crate::points_align(&x0, &x1, x2, x3.as_mut()).map_err(|e| math_error(ctx, fail, e))?; let answer = Ok(r.put(ctx)?); drop(x3); h3.done(&at(args, 3))?; answer }
+        472 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_cell(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        473 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: Int3 = Js::get(ctx, &at(args, 1))?; let r = crate::grid_center(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        474 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let r = crate::grid_read_value(&x0, &x1, x2).map_err(|e| math_error(ctx, fail, e))?; Ok(r.put(ctx)?) }
+        475 => { let x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let r = crate::grid_read_values(&x0, &x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        476 => { let x0 = grid_in(ctx, &at(args, 0))?; let r = crate::grid_read_colors(&x0).map_err(|e| math_error(ctx, fail, e))?; Ok(list_out(ctx, &r, false, 0)?) }
+        477 => { let mut x0 = grid_in(ctx, &at(args, 0))?; let x1: std::string::String = text(ctx, &at(args, 1))?; let x2: Int3 = Js::get(ctx, &at(args, 2))?; let x3: f64 = Js::get(ctx, &at(args, 3))?; crate::grid_write_value(&mut x0, &x1, x2, x3).map_err(|e| math_error(ctx, fail, e))?; grid_back(&at(args, 0), &x0)?; Ok(Value::new_undefined(ctx.clone())) }
+        478 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_to_ecef(x0); Ok(r.put(ctx)?) }
+        479 => { let x0: Double3 = Js::get(ctx, &at(args, 0))?; let r = crate::geo_point_from_ecef(x0); Ok(r.put(ctx)?) }
+        480 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: GeoPoint = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_to_enu(x0, x1); Ok(r.put(ctx)?) }
+        481 => { let x0: GeoPoint = Js::get(ctx, &at(args, 0))?; let x1: Double3 = Js::get(ctx, &at(args, 1))?; let r = crate::geo_point_from_enu(x0, x1); Ok(r.put(ctx)?) }
+        482 => { let x0 = detections2d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections2d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
+        483 => { let x0 = detections3d_in(ctx, &at(args, 0))?; let x1: f64 = Js::get(ctx, &at(args, 1))?; let r = crate::detections3d_suppress(&x0, x1).map_err(|e| math_error(ctx, fail, e))?; Ok(numbers_out(ctx, &r)?) }
         _ => Err(fail_argument(ctx)),
     }
 }

@@ -446,6 +446,7 @@ def method_tests():
     a = d3(3, 4, 0)
     check(a.length() == 5.0 and (a + a - a) == a and 2 * a == a * 2 == d3(6, 8, 0) and a / 2 == d3(1.5, 2, 0) and -a == d3(-3, -4, 0),
           "vector operators")
+    check(d3(49, 0, 0) / 49 == d3(1, 0, 0) and (d3(1, 0, 0) / 0).x == math.inf, "division is true division and never raises")
     check(q.is_near(m.Quaternion(-q.x, -q.y, -q.z, -q.w), 1e-12) and (q * q * d3(1, 0, 0)).is_near(d3(-1, 0, 0), 1e-12), "quaternion")
     check(m.Twist(d3(1, 0, 0), d3()).transform(p).linear.is_near(d3(0, 1, 0), 1e-12), "the value need not come first in C")
     check(m.Sphere(d3(), 2.0).to_shape().distance(d3(5, 0, 0)) == 3.0, "to a shape and its methods")

@@ -250,6 +250,10 @@ class _Double2:
         return double2_subtract(self, b)
     def scale(self, k: float) -> Double2:
         return double2_scale(self, k)
+    def divide(self, divisor: float) -> Double2:
+        return double2_divide(self, divisor)
+    def negate(self) -> Double2:
+        return double2_negate(self)
     def multiply(self, b: Double2) -> Double2:
         return double2_multiply(self, b)
     def dot(self, b: Double2) -> float:
@@ -301,12 +305,12 @@ class _Double2:
         return NotImplemented
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            return double2_scale(self, 1.0 / other)
+            return double2_divide(self, other)
         return NotImplemented
     def __rmul__(self, other: float) -> Double2:
         return double2_scale(self, other) if isinstance(other, (int, float)) else NotImplemented
     def __neg__(self) -> Double2:
-        return double2_scale(self, -1.0)
+        return double2_negate(self)
 
 
 class _Double3:
@@ -316,6 +320,10 @@ class _Double3:
         return double3_subtract(self, b)
     def scale(self, k: float) -> Double3:
         return double3_scale(self, k)
+    def divide(self, divisor: float) -> Double3:
+        return double3_divide(self, divisor)
+    def negate(self) -> Double3:
+        return double3_negate(self)
     def multiply(self, b: Double3) -> Double3:
         return double3_multiply(self, b)
     def dot(self, b: Double3) -> float:
@@ -360,12 +368,12 @@ class _Double3:
         return NotImplemented
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            return double3_scale(self, 1.0 / other)
+            return double3_divide(self, other)
         return NotImplemented
     def __rmul__(self, other: float) -> Double3:
         return double3_scale(self, other) if isinstance(other, (int, float)) else NotImplemented
     def __neg__(self) -> Double3:
-        return double3_scale(self, -1.0)
+        return double3_negate(self)
 
 
 class _Double4:
@@ -375,6 +383,10 @@ class _Double4:
         return double4_subtract(self, b)
     def scale(self, k: float) -> Double4:
         return double4_scale(self, k)
+    def divide(self, divisor: float) -> Double4:
+        return double4_divide(self, divisor)
+    def negate(self) -> Double4:
+        return double4_negate(self)
     def dot(self, b: Double4) -> float:
         return double4_dot(self, b)
     def length(self) -> float:
@@ -397,12 +409,12 @@ class _Double4:
         return NotImplemented
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            return double4_scale(self, 1.0 / other)
+            return double4_divide(self, other)
         return NotImplemented
     def __rmul__(self, other: float) -> Double4:
         return double4_scale(self, other) if isinstance(other, (int, float)) else NotImplemented
     def __neg__(self) -> Double4:
-        return double4_scale(self, -1.0)
+        return double4_negate(self)
 
 
 class _GeoPoint:

@@ -54,8 +54,13 @@ const KIND: Record<number, string> = {
 
 export type ErrorKind = "Argument" | "Degenerate" | "Space" | "Format" | "Memory" | "Outside";
 
-/** The key a value a call hands back holds its type's name under, as Pose. Object.keys and JSON skip it. */
+/** The key a value a call hands back holds its type's name under, as Pose. Object.keys, a spread and JSON skip it. */
 export const TYPE: unique symbol = Symbol.for("rant.type") as never;
+
+/** Names the type of o under TYPE, apart from its keys so a spread or an equality check never sees it. */
+export function typed<T extends object>(name: string, o: T): T {
+    return Object.defineProperty(o, TYPE, { value: name });
+}
 
 /** A call that could not answer. kind says why. */
 export class MathError extends Error {

@@ -326,10 +326,10 @@ class Axes:
         return axes_accel_to(self, a)
     def accel_from(self, a: Accel) -> Accel:
         return axes_accel_from(self, a)
-    def covariance6_to(self, points: Covariance6) -> Covariance6:
-        return axes_covariance6_to(self, points)
-    def covariance6_from(self, points: Covariance6) -> Covariance6:
-        return axes_covariance6_from(self, points)
+    def covariance6_to(self, covariance: Covariance6) -> Covariance6:
+        return axes_covariance6_to(self, covariance)
+    def covariance6_from(self, covariance: Covariance6) -> Covariance6:
+        return axes_covariance6_from(self, covariance)
     def points_to(self, points: Sequence[Double3]) -> List[Double3]:
         return axes_points_to(self, points)
     def points_from(self, points: Sequence[Double3]) -> List[Double3]:
@@ -663,6 +663,10 @@ _lib.rant_double2_subtract.argtypes = [_RantDouble2, _RantDouble2]
 _lib.rant_double2_subtract.restype = _RantDouble2
 _lib.rant_double2_scale.argtypes = [_RantDouble2, c_double]
 _lib.rant_double2_scale.restype = _RantDouble2
+_lib.rant_double2_divide.argtypes = [_RantDouble2, c_double]
+_lib.rant_double2_divide.restype = _RantDouble2
+_lib.rant_double2_negate.argtypes = [_RantDouble2]
+_lib.rant_double2_negate.restype = _RantDouble2
 _lib.rant_double2_multiply.argtypes = [_RantDouble2, _RantDouble2]
 _lib.rant_double2_multiply.restype = _RantDouble2
 _lib.rant_double2_dot.argtypes = [_RantDouble2, _RantDouble2]
@@ -705,6 +709,10 @@ _lib.rant_double3_subtract.argtypes = [_RantDouble3, _RantDouble3]
 _lib.rant_double3_subtract.restype = _RantDouble3
 _lib.rant_double3_scale.argtypes = [_RantDouble3, c_double]
 _lib.rant_double3_scale.restype = _RantDouble3
+_lib.rant_double3_divide.argtypes = [_RantDouble3, c_double]
+_lib.rant_double3_divide.restype = _RantDouble3
+_lib.rant_double3_negate.argtypes = [_RantDouble3]
+_lib.rant_double3_negate.restype = _RantDouble3
 _lib.rant_double3_multiply.argtypes = [_RantDouble3, _RantDouble3]
 _lib.rant_double3_multiply.restype = _RantDouble3
 _lib.rant_double3_dot.argtypes = [_RantDouble3, _RantDouble3]
@@ -741,6 +749,10 @@ _lib.rant_double4_subtract.argtypes = [_RantDouble4, _RantDouble4]
 _lib.rant_double4_subtract.restype = _RantDouble4
 _lib.rant_double4_scale.argtypes = [_RantDouble4, c_double]
 _lib.rant_double4_scale.restype = _RantDouble4
+_lib.rant_double4_divide.argtypes = [_RantDouble4, c_double]
+_lib.rant_double4_divide.restype = _RantDouble4
+_lib.rant_double4_negate.argtypes = [_RantDouble4]
+_lib.rant_double4_negate.restype = _RantDouble4
 _lib.rant_double4_dot.argtypes = [_RantDouble4, _RantDouble4]
 _lib.rant_double4_dot.restype = c_double
 _lib.rant_double4_length.argtypes = [_RantDouble4]
@@ -2052,6 +2064,15 @@ def double2_scale(a: Double2, k: float) -> Double2:
     r = _lib.rant_double2_scale(_c_Double2(a), k)
     return _py_Double2(r)
 
+def double2_divide(a: Double2, divisor: float) -> Double2:
+    """true division, 0 gives inf or nan"""
+    r = _lib.rant_double2_divide(_c_Double2(a), divisor)
+    return _py_Double2(r)
+
+def double2_negate(a: Double2) -> Double2:
+    r = _lib.rant_double2_negate(_c_Double2(a))
+    return _py_Double2(r)
+
 def double2_multiply(a: Double2, b: Double2) -> Double2:
     """component by component"""
     r = _lib.rant_double2_multiply(_c_Double2(a), _c_Double2(b))
@@ -2142,6 +2163,15 @@ def double3_scale(a: Double3, k: float) -> Double3:
     r = _lib.rant_double3_scale(_c_Double3(a), k)
     return _py_Double3(r)
 
+def double3_divide(a: Double3, divisor: float) -> Double3:
+    """true division, 0 gives inf or nan"""
+    r = _lib.rant_double3_divide(_c_Double3(a), divisor)
+    return _py_Double3(r)
+
+def double3_negate(a: Double3) -> Double3:
+    r = _lib.rant_double3_negate(_c_Double3(a))
+    return _py_Double3(r)
+
 def double3_multiply(a: Double3, b: Double3) -> Double3:
     """component by component"""
     r = _lib.rant_double3_multiply(_c_Double3(a), _c_Double3(b))
@@ -2216,6 +2246,15 @@ def double4_subtract(a: Double4, b: Double4) -> Double4:
 
 def double4_scale(a: Double4, k: float) -> Double4:
     r = _lib.rant_double4_scale(_c_Double4(a), k)
+    return _py_Double4(r)
+
+def double4_divide(a: Double4, divisor: float) -> Double4:
+    """true division, 0 gives inf or nan"""
+    r = _lib.rant_double4_divide(_c_Double4(a), divisor)
+    return _py_Double4(r)
+
+def double4_negate(a: Double4) -> Double4:
+    r = _lib.rant_double4_negate(_c_Double4(a))
     return _py_Double4(r)
 
 def double4_dot(a: Double4, b: Double4) -> float:
@@ -2628,18 +2667,18 @@ def twist2d_between(a: Pose2D, b: Pose2D, dt: float) -> Twist2D:
     _check(_lib.rant_twist2d_between(_c_Pose2D(a), _c_Pose2D(b), dt, byref(o0)))
     return _py_Twist2D(o0)
 
-def covariance3_rotate(q: Quaternion, points: Covariance3) -> Covariance3:
+def covariance3_rotate(q: Quaternion, covariance: Covariance3) -> Covariance3:
     """A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of a pose or
     twist."""
-    c_points = _c_Covariance3(points)
+    c_covariance = _c_Covariance3(covariance)
     o0 = _RantCovariance3()
-    _lib.rant_covariance3_rotate(_c_Quaternion(q), byref(c_points), byref(o0))
+    _lib.rant_covariance3_rotate(_c_Quaternion(q), byref(c_covariance), byref(o0))
     return _py_Covariance3(o0)
 
-def covariance6_rotate(q: Quaternion, points: Covariance6) -> Covariance6:
-    c_points = _c_Covariance6(points)
+def covariance6_rotate(q: Quaternion, covariance: Covariance6) -> Covariance6:
+    c_covariance = _c_Covariance6(covariance)
     o0 = _RantCovariance6()
-    _lib.rant_covariance6_rotate(_c_Quaternion(q), byref(c_points), byref(o0))
+    _lib.rant_covariance6_rotate(_c_Quaternion(q), byref(c_covariance), byref(o0))
     return _py_Covariance6(o0)
 
 def covariance3_ellipsoid(c: Covariance3, deviations: float) -> Tuple[Quaternion, Double3]:
@@ -2736,17 +2775,17 @@ def axes_accel_from(axes: Axes, a: Accel) -> Accel:
     r = _lib.rant_axes_accel_from(_c_Axes(axes), _c_Accel(a))
     return _py_Accel(r)
 
-def axes_covariance6_to(axes: Axes, points: Covariance6) -> Covariance6:
+def axes_covariance6_to(axes: Axes, covariance: Covariance6) -> Covariance6:
     """The Covariance6 of a pose or twist."""
-    c_points = _c_Covariance6(points)
+    c_covariance = _c_Covariance6(covariance)
     o0 = _RantCovariance6()
-    _lib.rant_axes_covariance6_to(_c_Axes(axes), byref(c_points), byref(o0))
+    _lib.rant_axes_covariance6_to(_c_Axes(axes), byref(c_covariance), byref(o0))
     return _py_Covariance6(o0)
 
-def axes_covariance6_from(axes: Axes, points: Covariance6) -> Covariance6:
-    c_points = _c_Covariance6(points)
+def axes_covariance6_from(axes: Axes, covariance: Covariance6) -> Covariance6:
+    c_covariance = _c_Covariance6(covariance)
     o0 = _RantCovariance6()
-    _lib.rant_axes_covariance6_from(_c_Axes(axes), byref(c_points), byref(o0))
+    _lib.rant_axes_covariance6_from(_c_Axes(axes), byref(c_covariance), byref(o0))
     return _py_Covariance6(o0)
 
 def axes_points_to(axes: Axes, points: Sequence[Double3]) -> List[Double3]:
@@ -4790,6 +4829,7 @@ __all__ = [
     "double2_angle",
     "double2_cross",
     "double2_distance",
+    "double2_divide",
     "double2_dot",
     "double2_from_float2",
     "double2_from_heading",
@@ -4802,6 +4842,7 @@ __all__ = [
     "double2_max",
     "double2_min",
     "double2_multiply",
+    "double2_negate",
     "double2_normalize",
     "double2_perpendicular",
     "double2_project",
@@ -4813,6 +4854,7 @@ __all__ = [
     "double3_angle",
     "double3_cross",
     "double3_distance",
+    "double3_divide",
     "double3_dot",
     "double3_from_float3",
     "double3_from_int3",
@@ -4823,6 +4865,7 @@ __all__ = [
     "double3_max",
     "double3_min",
     "double3_multiply",
+    "double3_negate",
     "double3_normalize",
     "double3_perpendicular",
     "double3_project",
@@ -4830,10 +4873,12 @@ __all__ = [
     "double3_scale",
     "double3_subtract",
     "double4_add",
+    "double4_divide",
     "double4_dot",
     "double4_from_float4",
     "double4_length",
     "double4_lerp",
+    "double4_negate",
     "double4_normalize",
     "double4_scale",
     "double4_subtract",

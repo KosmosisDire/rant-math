@@ -26,9 +26,9 @@ typedef struct {
 /* Non maximum suppression: keep gets 0 for each detection whose IoU with a kept one of the same
  * label and a higher score, or as high and earlier, is above iou. Labels left empty all match. */
 RANT_MATH_API RantMathResult rant_detections2d_suppress(const RantDetection2DView *detections, uint32_t count, double iou,
-                                                        uint8_t *keep);
+                                                        uint8_t *keep /* (same detections) */);
 RANT_MATH_API RantMathResult rant_detections3d_suppress(const RantDetection3DView *detections, uint32_t count, double iou,
-                                                        uint8_t *keep);
+                                                        uint8_t *keep /* (same detections) */);
 
 #ifdef __cplusplus
 }

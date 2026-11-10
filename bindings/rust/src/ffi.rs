@@ -196,6 +196,8 @@ unsafe extern "C" {
     pub fn rant_double2_add(a: Double2, b: Double2) -> Double2;
     pub fn rant_double2_subtract(a: Double2, b: Double2) -> Double2;
     pub fn rant_double2_scale(a: Double2, k: f64) -> Double2;
+    pub fn rant_double2_divide(a: Double2, divisor: f64) -> Double2;
+    pub fn rant_double2_negate(a: Double2) -> Double2;
     pub fn rant_double2_multiply(a: Double2, b: Double2) -> Double2;
     pub fn rant_double2_dot(a: Double2, b: Double2) -> f64;
     pub fn rant_double2_cross(a: Double2, b: Double2) -> f64;
@@ -217,6 +219,8 @@ unsafe extern "C" {
     pub fn rant_double3_add(a: Double3, b: Double3) -> Double3;
     pub fn rant_double3_subtract(a: Double3, b: Double3) -> Double3;
     pub fn rant_double3_scale(a: Double3, k: f64) -> Double3;
+    pub fn rant_double3_divide(a: Double3, divisor: f64) -> Double3;
+    pub fn rant_double3_negate(a: Double3) -> Double3;
     pub fn rant_double3_multiply(a: Double3, b: Double3) -> Double3;
     pub fn rant_double3_dot(a: Double3, b: Double3) -> f64;
     pub fn rant_double3_cross(a: Double3, b: Double3) -> Double3;
@@ -235,6 +239,8 @@ unsafe extern "C" {
     pub fn rant_double4_add(a: Double4, b: Double4) -> Double4;
     pub fn rant_double4_subtract(a: Double4, b: Double4) -> Double4;
     pub fn rant_double4_scale(a: Double4, k: f64) -> Double4;
+    pub fn rant_double4_divide(a: Double4, divisor: f64) -> Double4;
+    pub fn rant_double4_negate(a: Double4) -> Double4;
     pub fn rant_double4_dot(a: Double4, b: Double4) -> f64;
     pub fn rant_double4_length(a: Double4) -> f64;
     pub fn rant_double4_normalize(a: Double4) -> Double4;
@@ -319,8 +325,8 @@ unsafe extern "C" {
     pub fn rant_wrench2d_transform(p: Pose2D, w: Wrench2D) -> Wrench2D;
     pub fn rant_pose2d_integrate(p: Pose2D, body: Twist2D, dt: f64) -> Pose2D;
     pub fn rant_twist2d_between(a: Pose2D, b: Pose2D, dt: f64, out: *mut Twist2D) -> c_int;
-    pub fn rant_covariance3_rotate(q: Quaternion, r#in: *const Covariance3, out: *mut Covariance3);
-    pub fn rant_covariance6_rotate(q: Quaternion, r#in: *const Covariance6, out: *mut Covariance6);
+    pub fn rant_covariance3_rotate(q: Quaternion, covariance: *const Covariance3, out: *mut Covariance3);
+    pub fn rant_covariance6_rotate(q: Quaternion, covariance: *const Covariance6, out: *mut Covariance6);
     pub fn rant_covariance3_ellipsoid(c: *const Covariance3, deviations: f64, turn: *mut Quaternion, radii: *mut Double3) -> c_int;
     pub fn rant_inertia_transform(i: Inertia, p: Pose) -> Inertia;
     pub fn rant_inertia_add(a: Inertia, b: Inertia) -> Inertia;
@@ -341,8 +347,8 @@ unsafe extern "C" {
     pub fn rant_axes_wrench_from(axes: Axes, w: Wrench) -> Wrench;
     pub fn rant_axes_accel_to(axes: Axes, a: Accel) -> Accel;
     pub fn rant_axes_accel_from(axes: Axes, a: Accel) -> Accel;
-    pub fn rant_axes_covariance6_to(axes: Axes, r#in: *const Covariance6, out: *mut Covariance6);
-    pub fn rant_axes_covariance6_from(axes: Axes, r#in: *const Covariance6, out: *mut Covariance6);
+    pub fn rant_axes_covariance6_to(axes: Axes, covariance: *const Covariance6, out: *mut Covariance6);
+    pub fn rant_axes_covariance6_from(axes: Axes, covariance: *const Covariance6, out: *mut Covariance6);
     pub fn rant_axes_points_to(axes: Axes, r#in: *const Double3, out: *mut Double3, count: u32);
     pub fn rant_axes_points_from(axes: Axes, r#in: *const Double3, out: *mut Double3, count: u32);
     pub fn rant_plane_from_points(a: Double3, b: Double3, c: Double3, out: *mut Plane) -> c_int;

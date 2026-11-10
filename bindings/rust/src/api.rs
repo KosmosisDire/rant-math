@@ -54,6 +54,17 @@ pub fn double2_scale(a: Double2, k: f64) -> Double2 {
     r
 }
 
+/// true division, 0 gives inf or nan
+pub fn double2_divide(a: Double2, divisor: f64) -> Double2 {
+    let r = unsafe { ffi::rant_double2_divide(a, divisor) };
+    r
+}
+
+pub fn double2_negate(a: Double2) -> Double2 {
+    let r = unsafe { ffi::rant_double2_negate(a) };
+    r
+}
+
 /// component by component
 pub fn double2_multiply(a: Double2, b: Double2) -> Double2 {
     let r = unsafe { ffi::rant_double2_multiply(a, b) };
@@ -165,6 +176,17 @@ pub fn double3_scale(a: Double3, k: f64) -> Double3 {
     r
 }
 
+/// true division, 0 gives inf or nan
+pub fn double3_divide(a: Double3, divisor: f64) -> Double3 {
+    let r = unsafe { ffi::rant_double3_divide(a, divisor) };
+    r
+}
+
+pub fn double3_negate(a: Double3) -> Double3 {
+    let r = unsafe { ffi::rant_double3_negate(a) };
+    r
+}
+
 /// component by component
 pub fn double3_multiply(a: Double3, b: Double3) -> Double3 {
     let r = unsafe { ffi::rant_double3_multiply(a, b) };
@@ -256,6 +278,17 @@ pub fn double4_subtract(a: Double4, b: Double4) -> Double4 {
 
 pub fn double4_scale(a: Double4, k: f64) -> Double4 {
     let r = unsafe { ffi::rant_double4_scale(a, k) };
+    r
+}
+
+/// true division, 0 gives inf or nan
+pub fn double4_divide(a: Double4, divisor: f64) -> Double4 {
+    let r = unsafe { ffi::rant_double4_divide(a, divisor) };
+    r
+}
+
+pub fn double4_negate(a: Double4) -> Double4 {
+    let r = unsafe { ffi::rant_double4_negate(a) };
     r
 }
 
@@ -753,15 +786,15 @@ pub fn twist2d_between(a: Pose2D, b: Pose2D, dt: f64) -> Result<Twist2D, MathErr
 
 /// A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of a pose or
 /// twist.
-pub fn covariance3_rotate(q: Quaternion, points: &Covariance3) -> Covariance3 {
+pub fn covariance3_rotate(q: Quaternion, covariance: &Covariance3) -> Covariance3 {
     let mut o0 = Covariance3::default();
-    unsafe { ffi::rant_covariance3_rotate(q, points, &mut o0) };
+    unsafe { ffi::rant_covariance3_rotate(q, covariance, &mut o0) };
     o0
 }
 
-pub fn covariance6_rotate(q: Quaternion, points: &Covariance6) -> Covariance6 {
+pub fn covariance6_rotate(q: Quaternion, covariance: &Covariance6) -> Covariance6 {
     let mut o0 = Covariance6::default();
-    unsafe { ffi::rant_covariance6_rotate(q, points, &mut o0) };
+    unsafe { ffi::rant_covariance6_rotate(q, covariance, &mut o0) };
     o0
 }
 
@@ -879,15 +912,15 @@ pub fn axes_accel_from(axes: Axes, a: Accel) -> Accel {
 }
 
 /// The Covariance6 of a pose or twist.
-pub fn axes_covariance6_to(axes: Axes, points: &Covariance6) -> Covariance6 {
+pub fn axes_covariance6_to(axes: Axes, covariance: &Covariance6) -> Covariance6 {
     let mut o0 = Covariance6::default();
-    unsafe { ffi::rant_axes_covariance6_to(axes, points, &mut o0) };
+    unsafe { ffi::rant_axes_covariance6_to(axes, covariance, &mut o0) };
     o0
 }
 
-pub fn axes_covariance6_from(axes: Axes, points: &Covariance6) -> Covariance6 {
+pub fn axes_covariance6_from(axes: Axes, covariance: &Covariance6) -> Covariance6 {
     let mut o0 = Covariance6::default();
-    unsafe { ffi::rant_axes_covariance6_from(axes, points, &mut o0) };
+    unsafe { ffi::rant_axes_covariance6_from(axes, covariance, &mut o0) };
     o0
 }
 

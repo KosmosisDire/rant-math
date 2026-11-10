@@ -12,6 +12,8 @@ extern "C" {
 RANT_MATH_API RantDouble2 rant_double2_add(RantDouble2 a, RantDouble2 b);
 RANT_MATH_API RantDouble2 rant_double2_subtract(RantDouble2 a, RantDouble2 b);
 RANT_MATH_API RantDouble2 rant_double2_scale(RantDouble2 a, double k);
+RANT_MATH_API RantDouble2 rant_double2_divide(RantDouble2 a, double divisor);    /* true division, 0 gives inf or nan */
+RANT_MATH_API RantDouble2 rant_double2_negate(RantDouble2 a);
 RANT_MATH_API RantDouble2 rant_double2_multiply(RantDouble2 a, RantDouble2 b);   /* component by component */
 RANT_MATH_API double      rant_double2_dot(RantDouble2 a, RantDouble2 b);
 RANT_MATH_API double      rant_double2_cross(RantDouble2 a, RantDouble2 b);      /* the z of the 3D cross */
@@ -36,6 +38,8 @@ RANT_MATH_API RantDouble2 rant_double2_reflect(RantDouble2 a, RantDouble2 normal
 RANT_MATH_API RantDouble3 rant_double3_add(RantDouble3 a, RantDouble3 b);
 RANT_MATH_API RantDouble3 rant_double3_subtract(RantDouble3 a, RantDouble3 b);
 RANT_MATH_API RantDouble3 rant_double3_scale(RantDouble3 a, double k);
+RANT_MATH_API RantDouble3 rant_double3_divide(RantDouble3 a, double divisor);    /* true division, 0 gives inf or nan */
+RANT_MATH_API RantDouble3 rant_double3_negate(RantDouble3 a);
 RANT_MATH_API RantDouble3 rant_double3_multiply(RantDouble3 a, RantDouble3 b);   /* component by component */
 RANT_MATH_API double      rant_double3_dot(RantDouble3 a, RantDouble3 b);
 RANT_MATH_API RantDouble3 rant_double3_cross(RantDouble3 a, RantDouble3 b);
@@ -56,6 +60,8 @@ RANT_MATH_API RantDouble3 rant_double3_perpendicular(RantDouble3 a);
 RANT_MATH_API RantDouble4 rant_double4_add(RantDouble4 a, RantDouble4 b);
 RANT_MATH_API RantDouble4 rant_double4_subtract(RantDouble4 a, RantDouble4 b);
 RANT_MATH_API RantDouble4 rant_double4_scale(RantDouble4 a, double k);
+RANT_MATH_API RantDouble4 rant_double4_divide(RantDouble4 a, double divisor);    /* true division, 0 gives inf or nan */
+RANT_MATH_API RantDouble4 rant_double4_negate(RantDouble4 a);
 RANT_MATH_API double      rant_double4_dot(RantDouble4 a, RantDouble4 b);
 RANT_MATH_API double      rant_double4_length(RantDouble4 a);
 RANT_MATH_API RantDouble4 rant_double4_normalize(RantDouble4 a);

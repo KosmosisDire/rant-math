@@ -4,6 +4,8 @@ _rm_result_text
 _rm_double2_add
 _rm_double2_subtract
 _rm_double2_scale
+_rm_double2_divide
+_rm_double2_negate
 _rm_double2_multiply
 _rm_double2_dot
 _rm_double2_cross
@@ -25,6 +27,8 @@ _rm_double2_reflect
 _rm_double3_add
 _rm_double3_subtract
 _rm_double3_scale
+_rm_double3_divide
+_rm_double3_negate
 _rm_double3_multiply
 _rm_double3_dot
 _rm_double3_cross
@@ -43,6 +47,8 @@ _rm_double3_perpendicular
 _rm_double4_add
 _rm_double4_subtract
 _rm_double4_scale
+_rm_double4_divide
+_rm_double4_negate
 _rm_double4_dot
 _rm_double4_length
 _rm_double4_normalize

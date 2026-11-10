@@ -8,9 +8,9 @@ inline Double2 &operator-=(Double2 &a, Double2 b) { return a = a - b; }
 inline Double2 operator*(Double2 a, double b) { return math::double2_scale(a, b); }
 inline Double2 &operator*=(Double2 &a, double b) { return a = a * b; }
 inline Double2 operator*(double a, Double2 b) { return math::double2_scale(b, a); }
-inline Double2 operator/(Double2 a, double b) { return math::double2_scale(a, 1.0 / b); }
+inline Double2 operator/(Double2 a, double b) { return math::double2_divide(a, b); }
 inline Double2 &operator/=(Double2 &a, double b) { return a = a / b; }
-inline Double2 operator-(Double2 a) { return math::double2_scale(a, -1.0); }
+inline Double2 operator-(Double2 a) { return math::double2_negate(a); }
 inline Double3 operator+(Double3 a, Double3 b) { return math::double3_add(a, b); }
 inline Double3 &operator+=(Double3 &a, Double3 b) { return a = a + b; }
 inline Double3 operator-(Double3 a, Double3 b) { return math::double3_subtract(a, b); }
@@ -18,9 +18,9 @@ inline Double3 &operator-=(Double3 &a, Double3 b) { return a = a - b; }
 inline Double3 operator*(Double3 a, double b) { return math::double3_scale(a, b); }
 inline Double3 &operator*=(Double3 &a, double b) { return a = a * b; }
 inline Double3 operator*(double a, Double3 b) { return math::double3_scale(b, a); }
-inline Double3 operator/(Double3 a, double b) { return math::double3_scale(a, 1.0 / b); }
+inline Double3 operator/(Double3 a, double b) { return math::double3_divide(a, b); }
 inline Double3 &operator/=(Double3 &a, double b) { return a = a / b; }
-inline Double3 operator-(Double3 a) { return math::double3_scale(a, -1.0); }
+inline Double3 operator-(Double3 a) { return math::double3_negate(a); }
 inline Double4 operator+(Double4 a, Double4 b) { return math::double4_add(a, b); }
 inline Double4 &operator+=(Double4 &a, Double4 b) { return a = a + b; }
 inline Double4 operator-(Double4 a, Double4 b) { return math::double4_subtract(a, b); }
@@ -28,9 +28,9 @@ inline Double4 &operator-=(Double4 &a, Double4 b) { return a = a - b; }
 inline Double4 operator*(Double4 a, double b) { return math::double4_scale(a, b); }
 inline Double4 &operator*=(Double4 &a, double b) { return a = a * b; }
 inline Double4 operator*(double a, Double4 b) { return math::double4_scale(b, a); }
-inline Double4 operator/(Double4 a, double b) { return math::double4_scale(a, 1.0 / b); }
+inline Double4 operator/(Double4 a, double b) { return math::double4_divide(a, b); }
 inline Double4 &operator/=(Double4 &a, double b) { return a = a / b; }
-inline Double4 operator-(Double4 a) { return math::double4_scale(a, -1.0); }
+inline Double4 operator-(Double4 a) { return math::double4_negate(a); }
 inline Quaternion operator*(Quaternion a, Quaternion b) { return math::quaternion_compose(a, b); }
 inline Quaternion &operator*=(Quaternion &a, Quaternion b) { return a = a * b; }
 inline Double3 operator*(Quaternion a, Double3 b) { return math::quaternion_rotate(a, b); }

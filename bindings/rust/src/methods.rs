@@ -10,6 +10,9 @@ pub trait Double2Ext {
     fn add(&self, b: Double2) -> Double2;
     fn subtract(&self, b: Double2) -> Double2;
     fn scale(&self, k: f64) -> Double2;
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double2;
+    fn negate(&self) -> Double2;
     /// component by component
     fn multiply(&self, b: Double2) -> Double2;
     fn dot(&self, b: Double2) -> f64;
@@ -46,6 +49,13 @@ impl Double2Ext for Double2 {
     }
     fn scale(&self, k: f64) -> Double2 {
         crate::double2_scale(*self, k)
+    }
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double2 {
+        crate::double2_divide(*self, divisor)
+    }
+    fn negate(&self) -> Double2 {
+        crate::double2_negate(*self)
     }
     /// component by component
     fn multiply(&self, b: Double2) -> Double2 {
@@ -115,6 +125,9 @@ pub trait Double3Ext {
     fn add(&self, b: Double3) -> Double3;
     fn subtract(&self, b: Double3) -> Double3;
     fn scale(&self, k: f64) -> Double3;
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double3;
+    fn negate(&self) -> Double3;
     /// component by component
     fn multiply(&self, b: Double3) -> Double3;
     fn dot(&self, b: Double3) -> f64;
@@ -146,6 +159,13 @@ impl Double3Ext for Double3 {
     }
     fn scale(&self, k: f64) -> Double3 {
         crate::double3_scale(*self, k)
+    }
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double3 {
+        crate::double3_divide(*self, divisor)
+    }
+    fn negate(&self) -> Double3 {
+        crate::double3_negate(*self)
     }
     /// component by component
     fn multiply(&self, b: Double3) -> Double3 {
@@ -204,6 +224,9 @@ pub trait Double4Ext {
     fn add(&self, b: Double4) -> Double4;
     fn subtract(&self, b: Double4) -> Double4;
     fn scale(&self, k: f64) -> Double4;
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double4;
+    fn negate(&self) -> Double4;
     fn dot(&self, b: Double4) -> f64;
     fn length(&self) -> f64;
     fn normalize(&self) -> Double4;
@@ -219,6 +242,13 @@ impl Double4Ext for Double4 {
     }
     fn scale(&self, k: f64) -> Double4 {
         crate::double4_scale(*self, k)
+    }
+    /// true division, 0 gives inf or nan
+    fn divide(&self, divisor: f64) -> Double4 {
+        crate::double4_divide(*self, divisor)
+    }
+    fn negate(&self) -> Double4 {
+        crate::double4_negate(*self)
     }
     fn dot(&self, b: Double4) -> f64 {
         crate::double4_dot(*self, b)
@@ -741,11 +771,11 @@ impl Axes {
         crate::axes_accel_from(*self, a)
     }
     /// The Covariance6 of a pose or twist.
-    pub fn covariance6_to(&self, points: &Covariance6) -> Covariance6 {
-        crate::axes_covariance6_to(*self, points)
+    pub fn covariance6_to(&self, covariance: &Covariance6) -> Covariance6 {
+        crate::axes_covariance6_to(*self, covariance)
     }
-    pub fn covariance6_from(&self, points: &Covariance6) -> Covariance6 {
-        crate::axes_covariance6_from(*self, points)
+    pub fn covariance6_from(&self, covariance: &Covariance6) -> Covariance6 {
+        crate::axes_covariance6_from(*self, covariance)
     }
     pub fn points_to(&self, points: &[Double3]) -> Vec<Double3> {
         crate::axes_points_to(*self, points)

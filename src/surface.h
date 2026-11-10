@@ -41,7 +41,7 @@ RANT_MATH_API RantDouble3      rant_mesh_centroid(RantMeshView m);
 RANT_MATH_API RantInertia      rant_mesh_inertia(RantMeshView m, double mass);
 /* The unit normal at each vertex, the sum of its triangles' normals by their area, NaN for a
  * vertex in none. normals holds vertex_count. */
-RANT_MATH_API RantMathResult   rant_mesh_normals(RantMeshView m, RantDouble3 *normals);
+RANT_MATH_API RantMathResult   rant_mesh_normals(RantMeshView m, RantDouble3 *normals /* (same m) */);
 
 #ifdef __cplusplus
 }

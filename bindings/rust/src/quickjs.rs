@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use rquickjs::function::Rest;
+use rquickjs::object::Property;
 use rquickjs::{Array, Ctx, Exception, Function, Object, Result as JsResult, Symbol, TypedArray, Value};
 
 use crate::*;
@@ -15,39 +16,9 @@ mod glue {
 }
 
 /// Every call by name in JavaScript with what it takes, as a module that exports `NAMES`, for
-/// completion and hints. It is the library's table, as the TypeScript binding's names.js reads it.
+/// completion and hints. The generator writes it from the library's table, as the TypeScript binding's names.js.
 pub fn names() -> std::string::String {
-    let quote = |s: &str| format!("\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\""));
-    let rows: Vec<std::string::String> = crate::table::functions()
-        .iter()
-        .map(|f| {
-            let takes: Vec<std::string::String> = f
-                .inputs
-                .iter()
-                .map(|i| {
-                    let word = camel(i.name);
-                    quote(&if matches!(i.kind, "fit_options" | "align_options" | "opt_ref") { word + "?" } else { word })
-                })
-                .collect();
-            let words = if f.doc.is_empty() { f.name.replace('_', " ") } else { f.doc.split(". ").next().unwrap_or("").trim_end_matches('.').to_string() };
-            format!("  {{\"name\": {}, \"takes\": [{}], \"words\": {}}}", quote(&camel(f.name)), takes.join(", "), quote(&words))
-        })
-        .collect();
-    format!("export const NAMES = [\n{},\n];\n", rows.join(",\n"))
-}
-
-/// pose2d_apply as JavaScript spells it, pose2dApply.
-fn camel(name: &str) -> std::string::String {
-    let mut parts = name.split('_').filter(|p| !p.is_empty());
-    let mut out = parts.next().unwrap_or("").to_string();
-    for p in parts {
-        let mut c = p.chars();
-        if let Some(first) = c.next() {
-            out.extend(first.to_uppercase());
-            out.push_str(c.as_str());
-        }
-    }
-    out
+    include_str!("quickjs_names.js").to_string()
 }
 
 const PRELUDE: &str = include_str!("quickjs_prelude.js");
@@ -331,7 +302,7 @@ impl<'js> Js<'js> for Value<'js> {
 /// A new object naming its type under Symbol.for("rant.type"), as every value a call hands back.
 fn tagged<'js>(ctx: &Ctx<'js>, name: &str) -> JsResult<Object<'js>> {
     let o = Object::new(ctx.clone())?;
-    o.set(Symbol::new_global(ctx.clone(), "rant.type")?.as_atom(), name)?;
+    o.prop(Symbol::new_global(ctx.clone(), "rant.type")?.as_atom(), Property::from(name))?;
     Ok(o)
 }
 

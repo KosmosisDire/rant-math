@@ -147,6 +147,17 @@ inline Double2 double2_scale(Double2 a, double k) {
     return impl::bits<Double2>(r);
 }
 
+/* true division, 0 gives inf or nan */
+inline Double2 double2_divide(Double2 a, double divisor) {
+    auto r = detail::rant_double2_divide(impl::bits<detail::RantDouble2>(a), divisor);
+    return impl::bits<Double2>(r);
+}
+
+inline Double2 double2_negate(Double2 a) {
+    auto r = detail::rant_double2_negate(impl::bits<detail::RantDouble2>(a));
+    return impl::bits<Double2>(r);
+}
+
 /* component by component */
 inline Double2 double2_multiply(Double2 a, Double2 b) {
     auto r = detail::rant_double2_multiply(impl::bits<detail::RantDouble2>(a), impl::bits<detail::RantDouble2>(b));
@@ -258,6 +269,17 @@ inline Double3 double3_scale(Double3 a, double k) {
     return impl::bits<Double3>(r);
 }
 
+/* true division, 0 gives inf or nan */
+inline Double3 double3_divide(Double3 a, double divisor) {
+    auto r = detail::rant_double3_divide(impl::bits<detail::RantDouble3>(a), divisor);
+    return impl::bits<Double3>(r);
+}
+
+inline Double3 double3_negate(Double3 a) {
+    auto r = detail::rant_double3_negate(impl::bits<detail::RantDouble3>(a));
+    return impl::bits<Double3>(r);
+}
+
 /* component by component */
 inline Double3 double3_multiply(Double3 a, Double3 b) {
     auto r = detail::rant_double3_multiply(impl::bits<detail::RantDouble3>(a), impl::bits<detail::RantDouble3>(b));
@@ -349,6 +371,17 @@ inline Double4 double4_subtract(Double4 a, Double4 b) {
 
 inline Double4 double4_scale(Double4 a, double k) {
     auto r = detail::rant_double4_scale(impl::bits<detail::RantDouble4>(a), k);
+    return impl::bits<Double4>(r);
+}
+
+/* true division, 0 gives inf or nan */
+inline Double4 double4_divide(Double4 a, double divisor) {
+    auto r = detail::rant_double4_divide(impl::bits<detail::RantDouble4>(a), divisor);
+    return impl::bits<Double4>(r);
+}
+
+inline Double4 double4_negate(Double4 a) {
+    auto r = detail::rant_double4_negate(impl::bits<detail::RantDouble4>(a));
     return impl::bits<Double4>(r);
 }
 
@@ -836,15 +869,15 @@ inline Twist2D twist2d_between(Pose2D a, Pose2D b, double dt) {
 
 /* A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of a pose or */
 /* twist. */
-inline Covariance3 covariance3_rotate(Quaternion q, const Covariance3 &points) {
+inline Covariance3 covariance3_rotate(Quaternion q, const Covariance3 &covariance) {
     Covariance3 o0{};
-    detail::rant_covariance3_rotate(impl::bits<detail::RantQuaternion>(q), impl::mut<const detail::RantCovariance3>(&points), impl::mut<detail::RantCovariance3>(&o0));
+    detail::rant_covariance3_rotate(impl::bits<detail::RantQuaternion>(q), impl::mut<const detail::RantCovariance3>(&covariance), impl::mut<detail::RantCovariance3>(&o0));
     return o0;
 }
 
-inline Covariance6 covariance6_rotate(Quaternion q, const Covariance6 &points) {
+inline Covariance6 covariance6_rotate(Quaternion q, const Covariance6 &covariance) {
     Covariance6 o0{};
-    detail::rant_covariance6_rotate(impl::bits<detail::RantQuaternion>(q), impl::mut<const detail::RantCovariance6>(&points), impl::mut<detail::RantCovariance6>(&o0));
+    detail::rant_covariance6_rotate(impl::bits<detail::RantQuaternion>(q), impl::mut<const detail::RantCovariance6>(&covariance), impl::mut<detail::RantCovariance6>(&o0));
     return o0;
 }
 
@@ -962,15 +995,15 @@ inline Accel axes_accel_from(Axes axes, Accel a) {
 }
 
 /* The Covariance6 of a pose or twist. */
-inline Covariance6 axes_covariance6_to(Axes axes, const Covariance6 &points) {
+inline Covariance6 axes_covariance6_to(Axes axes, const Covariance6 &covariance) {
     Covariance6 o0{};
-    detail::rant_axes_covariance6_to(impl::bits<detail::RantAxes>(axes), impl::mut<const detail::RantCovariance6>(&points), impl::mut<detail::RantCovariance6>(&o0));
+    detail::rant_axes_covariance6_to(impl::bits<detail::RantAxes>(axes), impl::mut<const detail::RantCovariance6>(&covariance), impl::mut<detail::RantCovariance6>(&o0));
     return o0;
 }
 
-inline Covariance6 axes_covariance6_from(Axes axes, const Covariance6 &points) {
+inline Covariance6 axes_covariance6_from(Axes axes, const Covariance6 &covariance) {
     Covariance6 o0{};
-    detail::rant_axes_covariance6_from(impl::bits<detail::RantAxes>(axes), impl::mut<const detail::RantCovariance6>(&points), impl::mut<detail::RantCovariance6>(&o0));
+    detail::rant_axes_covariance6_from(impl::bits<detail::RantAxes>(axes), impl::mut<const detail::RantCovariance6>(&covariance), impl::mut<detail::RantCovariance6>(&o0));
     return o0;
 }
 

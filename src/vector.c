@@ -3,6 +3,8 @@
 RantDouble2 rant_double2_add(RantDouble2 a, RantDouble2 b){ return rant_double2(a.x + b.x, a.y + b.y); }
 RantDouble2 rant_double2_subtract(RantDouble2 a, RantDouble2 b){ return rant_double2(a.x - b.x, a.y - b.y); }
 RantDouble2 rant_double2_scale(RantDouble2 a, double k){ return rant_double2(a.x * k, a.y * k); }
+RantDouble2 rant_double2_divide(RantDouble2 a, double divisor){ return rant_double2(a.x / divisor, a.y / divisor); }
+RantDouble2 rant_double2_negate(RantDouble2 a){ return rant_double2(-a.x, -a.y); }
 RantDouble2 rant_double2_multiply(RantDouble2 a, RantDouble2 b){ return rant_double2(a.x * b.x, a.y * b.y); }
 double rant_double2_dot(RantDouble2 a, RantDouble2 b){ return a.x * b.x + a.y * b.y; }
 double rant_double2_cross(RantDouble2 a, RantDouble2 b){ return a.x * b.y - a.y * b.x; }
@@ -47,6 +49,8 @@ RantDouble2 rant_double2_reflect(RantDouble2 a, RantDouble2 normal){
 RantDouble3 rant_double3_add(RantDouble3 a, RantDouble3 b){ return rant_double3(a.x + b.x, a.y + b.y, a.z + b.z); }
 RantDouble3 rant_double3_subtract(RantDouble3 a, RantDouble3 b){ return rant_double3(a.x - b.x, a.y - b.y, a.z - b.z); }
 RantDouble3 rant_double3_scale(RantDouble3 a, double k){ return rant_double3(a.x * k, a.y * k, a.z * k); }
+RantDouble3 rant_double3_divide(RantDouble3 a, double divisor){ return rant_double3(a.x / divisor, a.y / divisor, a.z / divisor); }
+RantDouble3 rant_double3_negate(RantDouble3 a){ return rant_double3(-a.x, -a.y, -a.z); }
 RantDouble3 rant_double3_multiply(RantDouble3 a, RantDouble3 b){ return rant_double3(a.x * b.x, a.y * b.y, a.z * b.z); }
 double rant_double3_dot(RantDouble3 a, RantDouble3 b){ return a.x * b.x + a.y * b.y + a.z * b.z; }
 
@@ -100,6 +104,8 @@ RantDouble3 rant_double3_perpendicular(RantDouble3 a){
 RantDouble4 rant_double4_add(RantDouble4 a, RantDouble4 b){ return rant_double4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
 RantDouble4 rant_double4_subtract(RantDouble4 a, RantDouble4 b){ return rant_double4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
 RantDouble4 rant_double4_scale(RantDouble4 a, double k){ return rant_double4(a.x * k, a.y * k, a.z * k, a.w * k); }
+RantDouble4 rant_double4_divide(RantDouble4 a, double divisor){ return rant_double4(a.x / divisor, a.y / divisor, a.z / divisor, a.w / divisor); }
+RantDouble4 rant_double4_negate(RantDouble4 a){ return rant_double4(-a.x, -a.y, -a.z, -a.w); }
 double rant_double4_dot(RantDouble4 a, RantDouble4 b){ return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
 double rant_double4_length(RantDouble4 a){ return sqrt(rant_double4_dot(a, a)); }
 

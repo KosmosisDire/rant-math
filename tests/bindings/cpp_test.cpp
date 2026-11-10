@@ -746,6 +746,7 @@ static void operators() {
     CHECK(a * 2.0 == (Double3{ 2, 4, 6 }));
     CHECK(2.0 * a == (Double3{ 2, 4, 6 }));
     CHECK(b / 2.0 == (Double3{ 2, 2.5, 3 }));
+    CHECK((Double3{ 49, 0, 0 } / 49.0) == (Double3{ 1, 0, 0 }));
     Double3 c = a;
     c += b;
     c -= a;

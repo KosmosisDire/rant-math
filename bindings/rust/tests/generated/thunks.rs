@@ -538,6 +538,8 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "double2_add" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_add(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double2_subtract" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_subtract(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double2_scale" => { let x0: Double2 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double2_scale(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double2_divide" => { let x0: Double2 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double2_divide(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double2_negate" => { let x0: Double2 = Json::get(&a[0]); let mut out = rant_math::double2_negate(x0).put();  let _ = &mut out; Ok(out) }
         "double2_multiply" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_multiply(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double2_dot" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_dot(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double2_cross" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_cross(x0, x1).put();  let _ = &mut out; Ok(out) }
@@ -559,6 +561,8 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "double3_add" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_add(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double3_subtract" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_subtract(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double3_scale" => { let x0: Double3 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double3_scale(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double3_divide" => { let x0: Double3 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double3_divide(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double3_negate" => { let x0: Double3 = Json::get(&a[0]); let mut out = rant_math::double3_negate(x0).put();  let _ = &mut out; Ok(out) }
         "double3_multiply" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_multiply(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double3_dot" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_dot(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double3_cross" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_cross(x0, x1).put();  let _ = &mut out; Ok(out) }
@@ -577,6 +581,8 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "double4_add" => { let x0: Double4 = Json::get(&a[0]); let x1: Double4 = Json::get(&a[1]); let mut out = rant_math::double4_add(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double4_subtract" => { let x0: Double4 = Json::get(&a[0]); let x1: Double4 = Json::get(&a[1]); let mut out = rant_math::double4_subtract(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double4_scale" => { let x0: Double4 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double4_scale(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double4_divide" => { let x0: Double4 = Json::get(&a[0]); let x1: f64 = Json::get(&a[1]); let mut out = rant_math::double4_divide(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double4_negate" => { let x0: Double4 = Json::get(&a[0]); let mut out = rant_math::double4_negate(x0).put();  let _ = &mut out; Ok(out) }
         "double4_dot" => { let x0: Double4 = Json::get(&a[0]); let x1: Double4 = Json::get(&a[1]); let mut out = rant_math::double4_dot(x0, x1).put();  let _ = &mut out; Ok(out) }
         "double4_length" => { let x0: Double4 = Json::get(&a[0]); let mut out = rant_math::double4_length(x0).put();  let _ = &mut out; Ok(out) }
         "double4_normalize" => { let x0: Double4 = Json::get(&a[0]); let mut out = rant_math::double4_normalize(x0).put();  let _ = &mut out; Ok(out) }

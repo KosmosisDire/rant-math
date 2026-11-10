@@ -28,8 +28,8 @@ RANT_MATH_API RantMathResult rant_twist2d_between(RantPose2D a, RantPose2D b, do
 
 /* A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of
  * a pose or twist. out may be in. */
-RANT_MATH_API void rant_covariance3_rotate(RantQuaternion q, const RantCovariance3 *in, RantCovariance3 *out);
-RANT_MATH_API void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *in, RantCovariance6 *out);
+RANT_MATH_API void rant_covariance3_rotate(RantQuaternion q, const RantCovariance3 *covariance, RantCovariance3 *out);
+RANT_MATH_API void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *covariance, RantCovariance6 *out);
 /* The ellipsoid c spans at deviations standard deviations: turn takes x, y and z onto its axes, longest first, and
  * radii holds its half lengths along them. ERR_ARGUMENT for a negative spread, as the -1 of a value not measured. */
 RANT_MATH_API RantMathResult rant_covariance3_ellipsoid(const RantCovariance3 *c, double deviations, RantQuaternion *turn,

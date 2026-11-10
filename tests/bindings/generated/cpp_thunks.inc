@@ -854,6 +854,19 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::double2_scale(x0, x1));
         return out;
     }},
+    {"double2_divide", [](const std::vector<J> &a) {
+        (void)a;
+        Double2 x0 = get<Double2>(a[0]);
+        double x1 = get<double>(a[1]);
+        J out = put(rant::math::double2_divide(x0, x1));
+        return out;
+    }},
+    {"double2_negate", [](const std::vector<J> &a) {
+        (void)a;
+        Double2 x0 = get<Double2>(a[0]);
+        J out = put(rant::math::double2_negate(x0));
+        return out;
+    }},
     {"double2_multiply", [](const std::vector<J> &a) {
         (void)a;
         Double2 x0 = get<Double2>(a[0]);
@@ -997,6 +1010,19 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::double3_scale(x0, x1));
         return out;
     }},
+    {"double3_divide", [](const std::vector<J> &a) {
+        (void)a;
+        Double3 x0 = get<Double3>(a[0]);
+        double x1 = get<double>(a[1]);
+        J out = put(rant::math::double3_divide(x0, x1));
+        return out;
+    }},
+    {"double3_negate", [](const std::vector<J> &a) {
+        (void)a;
+        Double3 x0 = get<Double3>(a[0]);
+        J out = put(rant::math::double3_negate(x0));
+        return out;
+    }},
     {"double3_multiply", [](const std::vector<J> &a) {
         (void)a;
         Double3 x0 = get<Double3>(a[0]);
@@ -1119,6 +1145,19 @@ const std::map<std::string, Thunk> thunks = {
         Double4 x0 = get<Double4>(a[0]);
         double x1 = get<double>(a[1]);
         J out = put(rant::math::double4_scale(x0, x1));
+        return out;
+    }},
+    {"double4_divide", [](const std::vector<J> &a) {
+        (void)a;
+        Double4 x0 = get<Double4>(a[0]);
+        double x1 = get<double>(a[1]);
+        J out = put(rant::math::double4_divide(x0, x1));
+        return out;
+    }},
+    {"double4_negate", [](const std::vector<J> &a) {
+        (void)a;
+        Double4 x0 = get<Double4>(a[0]);
+        J out = put(rant::math::double4_negate(x0));
         return out;
     }},
     {"double4_dot", [](const std::vector<J> &a) {

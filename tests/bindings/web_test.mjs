@@ -18,6 +18,13 @@ if (!(p[math.TYPE] === "Pose" && p.position[math.TYPE] === "Double3" && Object.k
     console.log("FAILED type tags");
     failures++;
 }
+// A group takes the value first, and a spread or an equality check never sees the type.
+const twist = { linear: { x: 1, y: 0, z: 0 }, angular: { x: 0, y: 0, z: 0 } };
+const pose = { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 1 } };
+if (!(math.Twist.transform(twist, pose).linear.x === 1 && Object.getOwnPropertySymbols({ ...p }).length === 0)) {
+    console.log("FAILED group receiver or spread");
+    failures++;
+}
 const { NAMES } = await import("../../bindings/web/names.js");
 if (!NAMES.some((n) => n.name === "poseInverse" && n.takes.join() === "p")) {
     console.log("FAILED names from the table");

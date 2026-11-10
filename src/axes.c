@@ -183,14 +183,14 @@ static void i_covariance6(const i_Axes *a, int inverse, double k, const RantCova
     memcpy(out->m, o, sizeof o);
 }
 
-void rant_axes_covariance6_to(RantAxes axes, const RantCovariance6 *in, RantCovariance6 *out){
+void rant_axes_covariance6_to(RantAxes axes, const RantCovariance6 *covariance, RantCovariance6 *out){
     i_Axes a = i_axes(axes);
-    if (in && out) i_covariance6(&a, 0, axes.scale, in, out);
+    if (covariance && out) i_covariance6(&a, 0, axes.scale, covariance, out);
 }
 
-void rant_axes_covariance6_from(RantAxes axes, const RantCovariance6 *in, RantCovariance6 *out){
+void rant_axes_covariance6_from(RantAxes axes, const RantCovariance6 *covariance, RantCovariance6 *out){
     i_Axes a = i_axes(axes);
-    if (in && out) i_covariance6(&a, 1, i_inverse_scale(axes), in, out);
+    if (covariance && out) i_covariance6(&a, 1, i_inverse_scale(axes), covariance, out);
 }
 
 void rant_axes_points_to(RantAxes axes, const RantDouble3 *in, RantDouble3 *out, uint32_t count){

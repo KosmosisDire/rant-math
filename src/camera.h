@@ -22,9 +22,9 @@ RANT_MATH_API RantMathResult rant_camera_unproject(const RantCameraIntrinsics *c
                                                    RantDouble3 *out);
 
 /* The intrinsics of the image resized to width by height, and of the part a crop keeps. */
-RANT_MATH_API RantMathResult rant_camera_scale(const RantCameraIntrinsics *camera, uint32_t width, uint32_t height,
+RANT_MATH_API RantMathResult rant_camera_scale(const RantCameraIntrinsics *camera /* (one) */, uint32_t width, uint32_t height,
                                                RantCameraIntrinsics *out);
-RANT_MATH_API RantMathResult rant_camera_crop(const RantCameraIntrinsics *camera, uint32_t x, uint32_t y,
+RANT_MATH_API RantMathResult rant_camera_crop(const RantCameraIntrinsics *camera /* (one) */, uint32_t x, uint32_t y,
                                               uint32_t width, uint32_t height, RantCameraIntrinsics *out);
 /* The angle the image spans edge to edge through the principal point: x across, y down. */
 RANT_MATH_API RantMathResult rant_camera_fov(const RantCameraIntrinsics *camera, RantDouble2 *out);

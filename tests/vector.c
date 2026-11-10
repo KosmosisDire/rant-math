@@ -8,6 +8,13 @@ void test_vector(void){
     CHECK(near2(rant_double2_add(a2, b2), rant_double2(2.0, 6.0), 0.0), "double2 add");
     CHECK(near2(rant_double2_subtract(a2, b2), rant_double2(4.0, 2.0), 0.0), "double2 subtract");
     CHECK(near2(rant_double2_scale(a2, -2.0), rant_double2(-6.0, -8.0), 0.0), "double2 scale");
+    CHECK(near2(rant_double2_divide(a2, 2.0), rant_double2(1.5, 2.0), 0.0) && isinf(rant_double2_divide(a2, 0.0).x),
+          "double2 divide is true division");
+    CHECK(near3(rant_double3_divide(rant_double3(49, 0, 0), 49.0), rant_double3(1, 0, 0), 0.0), "double3 divide is exact");
+    CHECK(rant_double4_divide(rant_double4(1, 2, 3, 4), 4.0).w == 1.0, "double4 divide");
+    CHECK(near2(rant_double2_negate(a2), rant_double2(-3, -4), 0.0) && near3(rant_double3_negate(a3), rant_double3(-1, -2, -3), 0.0),
+          "double2 and double3 negate");
+    CHECK(rant_double4_negate(rant_double4(1, 0, 0, -2)).w == 2.0, "double4 negate");
     CHECK(near2(rant_double2_multiply(a2, b2), rant_double2(-3.0, 8.0), 0.0), "double2 multiply");
     CHECK(rant_double2_dot(a2, b2) == 5.0, "double2 dot");
     CHECK(rant_double2_cross(rant_double2(1, 0), rant_double2(0, 1)) == 1.0, "double2 cross is +1 for x then y");

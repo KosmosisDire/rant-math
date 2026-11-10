@@ -23,8 +23,12 @@ LIST_VIEWS = {
     "RantPath2DView": ("RantPose2D", "poses"),
 }
 
-# Words C may use for a parameter that some language keeps for itself.
+# Words C may use for a list of points that some language keeps for itself.
 RENAMES = {"in": "points", "l": "points"}
+
+
+def renamed(p):
+    return RENAMES.get(p.name, p.name) if p.type in ("RantDouble2", "RantDouble3") or p.type.endswith("View") else p.name
 
 # Pointer parameters that stand for one value by their type alone.
 OBJECT_KINDS = {
@@ -165,7 +169,7 @@ class Operator:
     left: str
     right: str              # "" for neg, double for a scale
     func: Func
-    how: str                # call, scale (a k), scale_left (k a), divide (a by 1 / k), negate (a by -1)
+    how: str                # call, scale (a k) or scale_left (k a)
 
 
 @dataclass
@@ -443,7 +447,7 @@ def classify(f, m):
     if f.c in HAND:
         f.hand = True
         f.vector = False
-    if f.ret != "void" or f.c not in HAND:
+    if f.c not in HAND:
         auto(f, m)
     if f.ret == "RantMathResult":
         f.errors = "throw"
@@ -461,7 +465,7 @@ def auto(f, m):
     last_list = None
     while i < len(ps):
         p = ps[i]
-        name = RENAMES.get(p.name, p.name)
+        name = renamed(p)
         nxt = ps[i + 1] if i + 1 < len(ps) else None
         counted = nxt is not None and nxt.type == "uint32_t" and not nxt.pointer
         if p.dim:                                                    # T out[N]
@@ -514,8 +518,8 @@ def auto(f, m):
             f.args += [Arg("list_ptr", inp), Arg("degree", inp)]
             last_list = inp
             i += 1
-        elif p.pointer and p.const and counted and "count" in nxt.name:
-            inp = by_c[p.name] = Input(name, "list", p.type)        # const T *a, uint32_t count
+        elif p.pointer and p.const and counted and tag(p, "one") is None:  # const T *a, uint32_t count
+            inp = by_c[p.name] = Input(name, "list", p.type)
             f.inputs.append(inp)
             f.args.append(Arg("list_ptr", inp))
             f.args.append(Arg("list_count", inp))
@@ -537,7 +541,7 @@ def auto(f, m):
                 continue
             if nxt is not None and nxt.pointer and nxt.const and i + 2 < len(ps) and ps[i + 2].type == "uint32_t" and not ps[i + 2].pointer:
                 a = Input(name, "list", p.type)                      # const T *a, const T *b, uint32_t count
-                b = Input(RENAMES.get(nxt.name, nxt.name), "list", nxt.type)
+                b = Input(renamed(nxt), "list", nxt.type)
                 f.inputs += [a, b]
                 f.args += [Arg("list_ptr", a), Arg("list_ptr", b), Arg("list_count", a, b)]
                 last_list = a
@@ -616,17 +620,13 @@ def auto(f, m):
                 i += 2
                 continue
             elif counted:
-                count = Input(RENAMES.get(nxt.name, nxt.name), "value", "uint32_t")
+                count = Input(renamed(nxt), "value", "uint32_t")
                 out = Output(p.name, "sized", p.type, count)         # T *out, uint32_t count
                 f.inputs.append(count)
                 f.outputs.append(out)
                 f.args += [Arg("out", out), Arg("value", count)]
                 i += 2
                 continue
-            elif p.type == "uint8_t" or p.name in ("normals", "labels"):
-                out = Output(p.name, "same", p.type, last_list)      # one for each of the points before
-                f.outputs.append(out)
-                f.args.append(Arg("out", out))
             else:
                 out = Output(p.name, "out", p.type)                  # T *out
                 f.outputs.append(out)
@@ -674,6 +674,10 @@ PREFIXES = {"CameraIntrinsics": "camera", "KdTree": "kdtree"}
 
 # A method spelled as an operator by its name, with a value of a struct on the right.
 OPERATOR_VERBS = {"add": "+", "subtract": "-", "compose": "*", "rotate": "*", "apply": "*"}
+
+
+def short(t):
+    return t[4:] if t.startswith("Rant") else t
 
 
 def prefix(t):
@@ -740,12 +744,19 @@ def find_operators(m):
     ops = []
     for me in m.methods:
         f = me.func
-        if me.static or f.errors != "none" or len(f.inputs) != 2 or len(f.outputs) != 1 or f.inputs[1].kind != "value":
+        if me.static or f.errors != "none" or len(f.outputs) != 1:
+            continue
+        if me.name == "negate" and len(f.inputs) == 1 and f.outputs[0].type == f.inputs[0].type:
+            ops.append(Operator("neg", me.type, "", f, "call"))
+            continue
+        if len(f.inputs) != 2 or f.inputs[1].kind != "value":
             continue
         right = f.inputs[1].type
         if me.name == "scale" and right == "double" and f.outputs[0].type == f.inputs[0].type:
-            ops += [Operator("*", me.type, "double", f, "scale"), Operator("*", "double", me.type, f, "scale_left"),
-                    Operator("/", me.type, "double", f, "divide"), Operator("neg", me.type, "", f, "negate")]
+            ops += [Operator("*", me.type, "double", f, "scale"), Operator("*", "double", me.type, f, "scale_left")]
+            continue
+        if me.name == "divide" and right == "double" and f.outputs[0].type == f.inputs[0].type:
+            ops.append(Operator("/", me.type, "double", f, "call"))
             continue
         op = OPERATOR_VERBS.get(me.name) or ("*" if me.name == "multiply" and me.type.startswith("Matrix") else None)
         if op and right in m.structs:

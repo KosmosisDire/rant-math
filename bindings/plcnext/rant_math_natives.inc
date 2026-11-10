@@ -24,6 +24,52 @@ template <typename T> void Out(UIntPtr p, const T& v)
 
 } // namespace
 
+static_assert(sizeof(RantAccel) == 48, "RantAccel is not the size of its IEC type");
+static_assert(sizeof(RantAlignedBox) == 48, "RantAlignedBox is not the size of its IEC type");
+static_assert(sizeof(RantAlignedBox2D) == 32, "RantAlignedBox2D is not the size of its IEC type");
+static_assert(sizeof(RantAxes) == 16, "RantAxes is not the size of its IEC type");
+static_assert(sizeof(RantCameraIntrinsics) == 112, "RantCameraIntrinsics is not the size of its IEC type");
+static_assert(sizeof(RantCapsule) == 56, "RantCapsule is not the size of its IEC type");
+static_assert(sizeof(RantCapsule2D) == 40, "RantCapsule2D is not the size of its IEC type");
+static_assert(sizeof(RantCircle) == 24, "RantCircle is not the size of its IEC type");
+static_assert(sizeof(RantColor) == 4, "RantColor is not the size of its IEC type");
+static_assert(sizeof(RantCone) == 56, "RantCone is not the size of its IEC type");
+static_assert(sizeof(RantCovariance3) == 72, "RantCovariance3 is not the size of its IEC type");
+static_assert(sizeof(RantCovariance6) == 288, "RantCovariance6 is not the size of its IEC type");
+static_assert(sizeof(RantCylinder) == 56, "RantCylinder is not the size of its IEC type");
+static_assert(sizeof(RantDouble2) == 16, "RantDouble2 is not the size of its IEC type");
+static_assert(sizeof(RantDouble3) == 24, "RantDouble3 is not the size of its IEC type");
+static_assert(sizeof(RantDouble4) == 32, "RantDouble4 is not the size of its IEC type");
+static_assert(sizeof(RantFloat2) == 8, "RantFloat2 is not the size of its IEC type");
+static_assert(sizeof(RantFloat3) == 12, "RantFloat3 is not the size of its IEC type");
+static_assert(sizeof(RantFloat4) == 16, "RantFloat4 is not the size of its IEC type");
+static_assert(sizeof(RantGeoPoint) == 24, "RantGeoPoint is not the size of its IEC type");
+static_assert(sizeof(RantInertia) == 80, "RantInertia is not the size of its IEC type");
+static_assert(sizeof(RantInt2) == 8, "RantInt2 is not the size of its IEC type");
+static_assert(sizeof(RantInt3) == 12, "RantInt3 is not the size of its IEC type");
+static_assert(sizeof(RantMatrix3x3) == 36, "RantMatrix3x3 is not the size of its IEC type");
+static_assert(sizeof(RantMatrix4x4) == 64, "RantMatrix4x4 is not the size of its IEC type");
+static_assert(sizeof(RantOrientedBox) == 80, "RantOrientedBox is not the size of its IEC type");
+static_assert(sizeof(RantOrientedBox2D) == 40, "RantOrientedBox2D is not the size of its IEC type");
+static_assert(sizeof(RantPlane) == 48, "RantPlane is not the size of its IEC type");
+static_assert(sizeof(RantPlane2D) == 32, "RantPlane2D is not the size of its IEC type");
+static_assert(sizeof(RantPose) == 56, "RantPose is not the size of its IEC type");
+static_assert(sizeof(RantPose2D) == 24, "RantPose2D is not the size of its IEC type");
+static_assert(sizeof(RantQuaternion) == 32, "RantQuaternion is not the size of its IEC type");
+static_assert(sizeof(RantRay) == 48, "RantRay is not the size of its IEC type");
+static_assert(sizeof(RantRay2D) == 32, "RantRay2D is not the size of its IEC type");
+static_assert(sizeof(RantRayHit) == 56, "RantRayHit is not the size of its IEC type");
+static_assert(sizeof(RantRayHit2D) == 40, "RantRayHit2D is not the size of its IEC type");
+static_assert(sizeof(RantSegment) == 48, "RantSegment is not the size of its IEC type");
+static_assert(sizeof(RantSegment2D) == 32, "RantSegment2D is not the size of its IEC type");
+static_assert(sizeof(RantSphere) == 32, "RantSphere is not the size of its IEC type");
+static_assert(sizeof(RantSurfacePoint) == 48, "RantSurfacePoint is not the size of its IEC type");
+static_assert(sizeof(RantSurfacePoint2D) == 32, "RantSurfacePoint2D is not the size of its IEC type");
+static_assert(sizeof(RantTwist) == 48, "RantTwist is not the size of its IEC type");
+static_assert(sizeof(RantTwist2D) == 24, "RantTwist2D is not the size of its IEC type");
+static_assert(sizeof(RantWrench) == 48, "RantWrench is not the size of its IEC type");
+static_assert(sizeof(RantWrench2D) == 24, "RantWrench2D is not the size of its IEC type");
+
 void __PInvoke__ Rant::RantMath::Double2Add(UIntPtr p0, UIntPtr p1, UIntPtr p2)
 {
     const auto v1 = In<RantDouble2>(p1);
@@ -43,6 +89,19 @@ void __PInvoke__ Rant::RantMath::Double2Scale(UIntPtr p0, UIntPtr p1, UIntPtr p2
     const auto v1 = In<RantDouble2>(p1);
     const auto v2 = In<double>(p2);
     Out(p0, rant_double2_scale(v1, v2));
+}
+
+void __PInvoke__ Rant::RantMath::Double2Divide(UIntPtr p0, UIntPtr p1, UIntPtr p2)
+{
+    const auto v1 = In<RantDouble2>(p1);
+    const auto v2 = In<double>(p2);
+    Out(p0, rant_double2_divide(v1, v2));
+}
+
+void __PInvoke__ Rant::RantMath::Double2Negate(UIntPtr p0, UIntPtr p1)
+{
+    const auto v1 = In<RantDouble2>(p1);
+    Out(p0, rant_double2_negate(v1));
 }
 
 void __PInvoke__ Rant::RantMath::Double2Multiply(UIntPtr p0, UIntPtr p1, UIntPtr p2)
@@ -189,6 +248,19 @@ void __PInvoke__ Rant::RantMath::Double3Scale(UIntPtr p0, UIntPtr p1, UIntPtr p2
     Out(p0, rant_double3_scale(v1, v2));
 }
 
+void __PInvoke__ Rant::RantMath::Double3Divide(UIntPtr p0, UIntPtr p1, UIntPtr p2)
+{
+    const auto v1 = In<RantDouble3>(p1);
+    const auto v2 = In<double>(p2);
+    Out(p0, rant_double3_divide(v1, v2));
+}
+
+void __PInvoke__ Rant::RantMath::Double3Negate(UIntPtr p0, UIntPtr p1)
+{
+    const auto v1 = In<RantDouble3>(p1);
+    Out(p0, rant_double3_negate(v1));
+}
+
 void __PInvoke__ Rant::RantMath::Double3Multiply(UIntPtr p0, UIntPtr p1, UIntPtr p2)
 {
     const auto v1 = In<RantDouble3>(p1);
@@ -312,6 +384,19 @@ void __PInvoke__ Rant::RantMath::Double4Scale(UIntPtr p0, UIntPtr p1, UIntPtr p2
     const auto v1 = In<RantDouble4>(p1);
     const auto v2 = In<double>(p2);
     Out(p0, rant_double4_scale(v1, v2));
+}
+
+void __PInvoke__ Rant::RantMath::Double4Divide(UIntPtr p0, UIntPtr p1, UIntPtr p2)
+{
+    const auto v1 = In<RantDouble4>(p1);
+    const auto v2 = In<double>(p2);
+    Out(p0, rant_double4_divide(v1, v2));
+}
+
+void __PInvoke__ Rant::RantMath::Double4Negate(UIntPtr p0, UIntPtr p1)
+{
+    const auto v1 = In<RantDouble4>(p1);
+    Out(p0, rant_double4_negate(v1));
 }
 
 void __PInvoke__ Rant::RantMath::Double4Dot(UIntPtr p0, UIntPtr p1, UIntPtr p2)

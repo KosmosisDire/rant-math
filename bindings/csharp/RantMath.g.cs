@@ -427,6 +427,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_add(Double2 a, Double2 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_subtract(Double2 a, Double2 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_scale(Double2 a, double k);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_divide(Double2 a, double divisor);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_negate(Double2 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_multiply(Double2 a, Double2 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double2_dot(Double2 a, Double2 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double2_cross(Double2 a, Double2 b);
@@ -448,6 +450,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_add(Double3 a, Double3 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_subtract(Double3 a, Double3 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_scale(Double3 a, double k);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_divide(Double3 a, double divisor);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_negate(Double3 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_multiply(Double3 a, Double3 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double3_dot(Double3 a, Double3 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_cross(Double3 a, Double3 b);
@@ -466,6 +470,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_add(Double4 a, Double4 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_subtract(Double4 a, Double4 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_scale(Double4 a, double k);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_divide(Double4 a, double divisor);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_negate(Double4 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double4_dot(Double4 a, Double4 b);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double4_length(Double4 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double4 rant_double4_normalize(Double4 a);
@@ -550,8 +556,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Wrench2D rant_wrench2d_transform(Pose2D p, Wrench2D w);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Pose2D rant_pose2d_integrate(Pose2D p, Twist2D body, double dt);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_twist2d_between(Pose2D a, Pose2D b, double dt, Twist2D* @out);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance3_rotate(Quaternion q, RawCovariance3* @in, RawCovariance3* @out);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance6_rotate(Quaternion q, RawCovariance6* @in, RawCovariance6* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance3_rotate(Quaternion q, RawCovariance3* covariance, RawCovariance3* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_covariance6_rotate(Quaternion q, RawCovariance6* covariance, RawCovariance6* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_covariance3_ellipsoid(RawCovariance3* c, double deviations, Quaternion* turn, Double3* radii);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_transform(Inertia i, Pose p);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Inertia rant_inertia_add(Inertia a, Inertia b);
@@ -572,8 +578,8 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Wrench rant_axes_wrench_from(Axes axes, Wrench w);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Accel rant_axes_accel_to(Axes axes, Accel a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Accel rant_axes_accel_from(Axes axes, Accel a);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_covariance6_to(Axes axes, RawCovariance6* @in, RawCovariance6* @out);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_covariance6_from(Axes axes, RawCovariance6* @in, RawCovariance6* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_covariance6_to(Axes axes, RawCovariance6* covariance, RawCovariance6* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_covariance6_from(Axes axes, RawCovariance6* covariance, RawCovariance6* @out);
         [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_points_to(Axes axes, Double3* @in, Double3* @out, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern void rant_axes_points_from(Axes axes, Double3* @in, Double3* @out, uint count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_plane_from_points(Double3 a, Double3 b, Double3 c, Plane* @out);
@@ -943,6 +949,19 @@ namespace Rant.Math
             return r;
         }
 
+        /// <summary>true division, 0 gives inf or nan</summary>
+        public static unsafe Double2 Double2Divide(Double2 a, double divisor)
+        {
+            var r = Native.rant_double2_divide(a, divisor);
+            return r;
+        }
+
+        public static unsafe Double2 Double2Negate(Double2 a)
+        {
+            var r = Native.rant_double2_negate(a);
+            return r;
+        }
+
         /// <summary>component by component</summary>
         public static unsafe Double2 Double2Multiply(Double2 a, Double2 b)
         {
@@ -1075,6 +1094,19 @@ namespace Rant.Math
             return r;
         }
 
+        /// <summary>true division, 0 gives inf or nan</summary>
+        public static unsafe Double3 Double3Divide(Double3 a, double divisor)
+        {
+            var r = Native.rant_double3_divide(a, divisor);
+            return r;
+        }
+
+        public static unsafe Double3 Double3Negate(Double3 a)
+        {
+            var r = Native.rant_double3_negate(a);
+            return r;
+        }
+
         /// <summary>component by component</summary>
         public static unsafe Double3 Double3Multiply(Double3 a, Double3 b)
         {
@@ -1184,6 +1216,19 @@ namespace Rant.Math
         public static unsafe Double4 Double4Scale(Double4 a, double k)
         {
             var r = Native.rant_double4_scale(a, k);
+            return r;
+        }
+
+        /// <summary>true division, 0 gives inf or nan</summary>
+        public static unsafe Double4 Double4Divide(Double4 a, double divisor)
+        {
+            var r = Native.rant_double4_divide(a, divisor);
+            return r;
+        }
+
+        public static unsafe Double4 Double4Negate(Double4 a)
+        {
+            var r = Native.rant_double4_negate(a);
             return r;
         }
 
@@ -1812,19 +1857,19 @@ namespace Rant.Math
 
         /// <summary>A covariance measured in axes turned by q: R C R^T, block by block for the Covariance6 of a pose
         /// or twist.</summary>
-        public static unsafe double[][] Covariance3Rotate(Quaternion q, double[][] points)
+        public static unsafe double[][] Covariance3Rotate(Quaternion q, double[][] covariance)
         {
-            var c_points = RawCovariance3.From(points);
+            var c_covariance = RawCovariance3.From(covariance);
             RawCovariance3 o0 = default;
-            Native.rant_covariance3_rotate(q, &c_points, &o0);
+            Native.rant_covariance3_rotate(q, &c_covariance, &o0);
             return o0.To();
         }
 
-        public static unsafe double[][] Covariance6Rotate(Quaternion q, double[][] points)
+        public static unsafe double[][] Covariance6Rotate(Quaternion q, double[][] covariance)
         {
-            var c_points = RawCovariance6.From(points);
+            var c_covariance = RawCovariance6.From(covariance);
             RawCovariance6 o0 = default;
-            Native.rant_covariance6_rotate(q, &c_points, &o0);
+            Native.rant_covariance6_rotate(q, &c_covariance, &o0);
             return o0.To();
         }
 
@@ -1963,19 +2008,19 @@ namespace Rant.Math
         }
 
         /// <summary>The Covariance6 of a pose or twist.</summary>
-        public static unsafe double[][] AxesCovariance6To(Axes axes, double[][] points)
+        public static unsafe double[][] AxesCovariance6To(Axes axes, double[][] covariance)
         {
-            var c_points = RawCovariance6.From(points);
+            var c_covariance = RawCovariance6.From(covariance);
             RawCovariance6 o0 = default;
-            Native.rant_axes_covariance6_to(axes, &c_points, &o0);
+            Native.rant_axes_covariance6_to(axes, &c_covariance, &o0);
             return o0.To();
         }
 
-        public static unsafe double[][] AxesCovariance6From(Axes axes, double[][] points)
+        public static unsafe double[][] AxesCovariance6From(Axes axes, double[][] covariance)
         {
-            var c_points = RawCovariance6.From(points);
+            var c_covariance = RawCovariance6.From(covariance);
             RawCovariance6 o0 = default;
-            Native.rant_axes_covariance6_from(axes, &c_points, &o0);
+            Native.rant_axes_covariance6_from(axes, &c_covariance, &o0);
             return o0.To();
         }
 
@@ -5116,6 +5161,8 @@ namespace Rant.Math
         public static Double2 Add(this Double2 self, Double2 b) => RantMath.Double2Add(a: self, b: b);
         public static Double2 Subtract(this Double2 self, Double2 b) => RantMath.Double2Subtract(a: self, b: b);
         public static Double2 Scale(this Double2 self, double k) => RantMath.Double2Scale(a: self, k: k);
+        public static Double2 Divide(this Double2 self, double divisor) => RantMath.Double2Divide(a: self, divisor: divisor);
+        public static Double2 Negate(this Double2 self) => RantMath.Double2Negate(a: self);
         public static Double2 Multiply(this Double2 self, Double2 b) => RantMath.Double2Multiply(a: self, b: b);
         public static double Dot(this Double2 self, Double2 b) => RantMath.Double2Dot(a: self, b: b);
         public static double Cross(this Double2 self, Double2 b) => RantMath.Double2Cross(a: self, b: b);
@@ -5141,6 +5188,8 @@ namespace Rant.Math
         public static Double3 Add(this Double3 self, Double3 b) => RantMath.Double3Add(a: self, b: b);
         public static Double3 Subtract(this Double3 self, Double3 b) => RantMath.Double3Subtract(a: self, b: b);
         public static Double3 Scale(this Double3 self, double k) => RantMath.Double3Scale(a: self, k: k);
+        public static Double3 Divide(this Double3 self, double divisor) => RantMath.Double3Divide(a: self, divisor: divisor);
+        public static Double3 Negate(this Double3 self) => RantMath.Double3Negate(a: self);
         public static Double3 Multiply(this Double3 self, Double3 b) => RantMath.Double3Multiply(a: self, b: b);
         public static double Dot(this Double3 self, Double3 b) => RantMath.Double3Dot(a: self, b: b);
         public static Double3 Cross(this Double3 self, Double3 b) => RantMath.Double3Cross(a: self, b: b);
@@ -5164,6 +5213,8 @@ namespace Rant.Math
         public static Double4 Add(this Double4 self, Double4 b) => RantMath.Double4Add(a: self, b: b);
         public static Double4 Subtract(this Double4 self, Double4 b) => RantMath.Double4Subtract(a: self, b: b);
         public static Double4 Scale(this Double4 self, double k) => RantMath.Double4Scale(a: self, k: k);
+        public static Double4 Divide(this Double4 self, double divisor) => RantMath.Double4Divide(a: self, divisor: divisor);
+        public static Double4 Negate(this Double4 self) => RantMath.Double4Negate(a: self);
         public static double Dot(this Double4 self, Double4 b) => RantMath.Double4Dot(a: self, b: b);
         public static double Length(this Double4 self) => RantMath.Double4Length(a: self);
         public static Double4 Normalize(this Double4 self) => RantMath.Double4Normalize(a: self);
@@ -5266,8 +5317,8 @@ namespace Rant.Math
         public static Wrench WrenchFrom(this Axes self, Wrench w) => RantMath.AxesWrenchFrom(axes: self, w: w);
         public static Accel AccelTo(this Axes self, Accel a) => RantMath.AxesAccelTo(axes: self, a: a);
         public static Accel AccelFrom(this Axes self, Accel a) => RantMath.AxesAccelFrom(axes: self, a: a);
-        public static double[][] Covariance6To(this Axes self, double[][] points) => RantMath.AxesCovariance6To(axes: self, points: points);
-        public static double[][] Covariance6From(this Axes self, double[][] points) => RantMath.AxesCovariance6From(axes: self, points: points);
+        public static double[][] Covariance6To(this Axes self, double[][] covariance) => RantMath.AxesCovariance6To(axes: self, covariance: covariance);
+        public static double[][] Covariance6From(this Axes self, double[][] covariance) => RantMath.AxesCovariance6From(axes: self, covariance: covariance);
         public static Double3[] PointsTo(this Axes self, ReadOnlySpan<Double3> points) => RantMath.AxesPointsTo(axes: self, points: points);
         public static Double3[] PointsFrom(this Axes self, ReadOnlySpan<Double3> points) => RantMath.AxesPointsFrom(axes: self, points: points);
     }

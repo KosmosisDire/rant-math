@@ -47,8 +47,8 @@ RANT_MATH_API RantWrench     rant_axes_wrench_from(RantAxes axes, RantWrench w);
 RANT_MATH_API RantAccel      rant_axes_accel_to(RantAxes axes, RantAccel a);
 RANT_MATH_API RantAccel      rant_axes_accel_from(RantAxes axes, RantAccel a);
 /* The Covariance6 of a pose or twist. out may be in. */
-RANT_MATH_API void rant_axes_covariance6_to(RantAxes axes, const RantCovariance6 *in, RantCovariance6 *out);
-RANT_MATH_API void rant_axes_covariance6_from(RantAxes axes, const RantCovariance6 *in, RantCovariance6 *out);
+RANT_MATH_API void rant_axes_covariance6_to(RantAxes axes, const RantCovariance6 *covariance, RantCovariance6 *out);
+RANT_MATH_API void rant_axes_covariance6_from(RantAxes axes, const RantCovariance6 *covariance, RantCovariance6 *out);
 /* rant_axes_point_to over count points. out may be in. */
 RANT_MATH_API void rant_axes_points_to(RantAxes axes, const RantDouble3 *in, RantDouble3 *out, uint32_t count);
 RANT_MATH_API void rant_axes_points_from(RantAxes axes, const RantDouble3 *in, RantDouble3 *out, uint32_t count);

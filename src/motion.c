@@ -126,23 +126,23 @@ static void i_rotate_block(const i_MathMat3 *r, const double *src, double *dst, 
         }
 }
 
-void rant_covariance3_rotate(RantQuaternion q, const RantCovariance3 *in, RantCovariance3 *out){
+void rant_covariance3_rotate(RantQuaternion q, const RantCovariance3 *covariance, RantCovariance3 *out){
     i_MathMat3 r;
     RantCovariance3 t;
-    if (!in || !out) return;
+    if (!covariance || !out) return;
     r = i_math_mat3_from_quaternion(q);
-    i_rotate_block(&r, &in->m[0][0], &t.m[0][0], 3, 0, 0);
+    i_rotate_block(&r, &covariance->m[0][0], &t.m[0][0], 3, 0, 0);
     *out = t;
 }
 
-void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *in, RantCovariance6 *out){
+void rant_covariance6_rotate(RantQuaternion q, const RantCovariance6 *covariance, RantCovariance6 *out){
     i_MathMat3 r;
     RantCovariance6 t;
     int bi, bj;
-    if (!in || !out) return;
+    if (!covariance || !out) return;
     r = i_math_mat3_from_quaternion(q);
     for (bi = 0; bi < 2; bi++)
-        for (bj = 0; bj < 2; bj++) i_rotate_block(&r, &in->m[0][0], &t.m[0][0], 6, bi * 3, bj * 3);
+        for (bj = 0; bj < 2; bj++) i_rotate_block(&r, &covariance->m[0][0], &t.m[0][0], 6, bi * 3, bj * 3);
     *out = t;
 }
 
