@@ -22,6 +22,18 @@ C `rant_pose_inverse` is:
 
 `rant_pose2d_apply` is `Pose2DApply` in C# and `pose2dApply` in TypeScript.
 
+## Methods
+
+Prefer a call as a method of its first value: `pose.inverse()`, `q.rotate(v)`, `box.contains(p)`.
+
+- C++ and Python also have operators: `+ -` on vectors, `* k`, `/ k`, and `*` to compose and apply.
+- C# has extension methods (`p.Inverse()`, under `using Rant.Math;`) and no operators.
+- Rust needs `use rant_math::prelude::*;` and has no operators.
+- TypeScript groups each type's calls by its name: `Pose.inverse(p)`, `Quaternion.fromAxisAngle(a, t)`.
+- A maker is a static: `Quaternion::from_axis_angle(a, t)` in C++ and Rust, `Quaternion.from_axis_angle` in Python.
+- `<other>_from_<type>` is `to_<other>`: `sphere.to_shape()`. A list type reads its points: `polygon.area()`.
+- C++: linking `rant_math` defines `RANT_MATH`, which every file of the program needs.
+
 ## What a call gives back
 
 - A call that can fail throws `MathError` (`MathException` in C#), or in Rust returns `Result`. In C it returns
@@ -34,15 +46,15 @@ C `rant_pose_inverse` is:
 
 ```python
 import rant_math as m
-pose = m.Pose(m.Double3(1, 2, 3), m.quaternion_from_axis_angle(m.Double3(0, 0, 1), 0.5))
-m.pose_apply(m.pose_inverse(pose), m.Double3())
+pose = m.Pose(m.Double3(1, 2, 3), m.Quaternion.from_axis_angle(m.Double3(0, 0, 1), 0.5))
+pose.inverse() * m.Double3()
 ```
 
 ```cpp
 #include "rant_math.hpp"
 using namespace rant::math;
-Pose pose{ { 1, 2, 3 }, quaternion_from_axis_angle({ 0, 0, 1 }, 0.5) };
-Double3 back = pose_inverse(pose) * Double3{ 1, 2, 3 };
+Pose pose{ { 1, 2, 3 }, Quaternion::from_axis_angle({ 0, 0, 1 }, 0.5) };
+Double3 back = pose.inverse() * Double3{ 1, 2, 3 };
 ```
 
 ## Find the right call

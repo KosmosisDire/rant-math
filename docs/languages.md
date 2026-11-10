@@ -32,6 +32,25 @@ this page says how a name reads in each.
 | `rant_pose_inverse` | `rant::math::pose_inverse` | `rant_math.pose_inverse` | `RantMath.PoseInverse` | `poseInverse` |
 | `rant_pose2d_apply` | `rant::math::pose2d_apply` | `rant_math.pose2d_apply` | `RantMath.Pose2DApply` | `pose2dApply` |
 
+## Methods
+
+Each call on a type is also a method of it: `rant_pose_inverse(p)` is `p.inverse()`.
+
+| | C++ | Python | C# | Rust | TypeScript |
+|---|---|---|---|---|---|
+| A method | `p.inverse()` | `p.inverse()` | `p.Inverse()` | `p.inverse()` | `Pose.inverse(p)` |
+| A maker | `Quaternion::from_axis_angle(a, t)` | `Quaternion.from_axis_angle(a, t)` | `RantMath.QuaternionFromAxisAngle(a, t)` | `Quaternion::from_axis_angle(a, t)` | `Quaternion.fromAxisAngle(a, t)` |
+| Operators | yes | yes | none | none | none |
+| Brought in by | linking `rant_math` | `import rant_math` | `using Rant.Math;` | `use rant_math::prelude::*;` | the import |
+
+- `<other>_from_<type>` is `to_<other>`: `q.to_matrix3x3()`, `sphere.to_shape()`.
+- A list type reads its points: `polygon.area()`.
+- Operators: `+` and `-` on vectors, `* k` and `/ k` to scale, `*` to compose quaternions, poses and
+  matrices and to apply one to a vector, and their `+=` forms. `a * b` is a's frame then b's.
+- In Python a value from a node has them too once `rant_math` is installed, and an editor sees them.
+- In C++ the methods are declared in the types' structs, so every file of a program sees them:
+  linking `rant_math` defines `RANT_MATH` for all. Define it yourself in a build without CMake.
+
 ## Answers
 
 | C | C++ | Python | C# | Rust | TypeScript |
@@ -99,8 +118,6 @@ auto plane = rant::math::points_fit_plane(points, options);
 | Rust | nalgebra, the feature `nalgebra` | `v.to_nalgebra()`, `m.to_rant()` |
 
 C++ finds each with no setting. `RANT_MATH_NO_EIGEN`, `RANT_MATH_NO_OPENCV` and `RANT_MATH_NO_PCL` leave one out.
-
-C++ also has `+ - * /` on `Double2`, `Double3` and `Double4`, and `*` on `Quaternion`, `Pose` and `Pose2D`.
 
 ## Testing a binding
 
