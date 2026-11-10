@@ -163,6 +163,31 @@ def test_return_after_the_outs():
     assert [o.name for o in f.outputs] == ["out", "dist"]
 
 
+def test_one_count_serves_only_outputs_that_share_it():
+    # Two rooms of one tag share the count, two of different tags cannot.
+    f = Func("rant_x", "x", "x.h", "void", [P("a", "double", 1, room="n"), P("b", "double", 1, room="n"),
+                                            P("n", "uint32_t", 1)])
+    model.auto(f, None)
+    assert kinds(f.args) == ["out", "out", "count_ptr"]
+    f = Func("rant_x", "x", "x.h", "void", [P("a", "double", 1, room="n"), P("b", "double", 1, room="m"),
+                                            P("n", "uint32_t", 1)])
+    try:
+        model.auto(f, None)
+    except ValueError as e:
+        assert "b needs a count of its own" in str(e)
+        return
+    raise AssertionError("no error")
+
+
+def test_a_tag_naming_no_parameter_says_so():
+    try:
+        model.auto(Func("rant_x", "x", "x.h", "void", [P("out", "double", 1, same="poinst")]), None)
+    except ValueError as e:
+        assert "rant_x: a tag names poinst" in str(e)
+        return
+    raise AssertionError("no error")
+
+
 def test_nothing_to_return_is_an_error():
     try:
         model.auto(Func("rant_x", "x", "x.h", "void", [P("a", "double")]), None)

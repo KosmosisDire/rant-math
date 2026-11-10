@@ -484,6 +484,12 @@ class Walk:
     def counted(self):
         return is_count(self.nxt)
 
+    def named(self, word):
+        """The input or output of the parameter a tag names, which must come before the tagged one."""
+        if word not in self.by_c:
+            raise ValueError(f"{self.f.c}: a tag names {word}, which is no parameter before it")
+        return self.by_c[word]
+
 
 def is_count(p):
     return p is not None and p.type == "uint32_t" and not p.pointer
@@ -708,7 +714,7 @@ def cloud_select(w):
     p, f = w.p, w.f
     if not (p.pointer and tag(p, "select") is not None):
         return None
-    out = Output(p.name, "cloud_select", "RantPointCloudView", w.by_c[tag(p, "select")])
+    out = Output(p.name, "cloud_select", "RantPointCloudView", w.named(tag(p, "select")))
     f.outputs.append(out)
     f.args.append(Arg("out", out))
     w.pending.append(out)
@@ -732,7 +738,7 @@ def query_out(w):
     if not (p.pointer and tag(p, "query") is not None):
         return None
     shares = tag(p, "query")
-    out = w.by_c[p.name] = Output(p.name, "query", p.type, w.by_c[shares] if shares else None)
+    out = w.by_c[p.name] = Output(p.name, "query", p.type, w.named(shares) if shares else None)
     f.outputs.append(out)
     f.args.append(Arg("out", out))
     w.pending.append(out)
@@ -743,9 +749,14 @@ def count_out(w):
     p, f = w.p, w.f
     if not (p.pointer and p.type == "uint32_t" and w.pending):
         return None
+    first = w.pending[0]
+    for o in w.pending[1:]:
+        # rooms with one room tag, or a query sized by the first, all hold the one count
+        if not (o.kind == first.kind == "room" and o.size is first.size or o.kind == "query" and o.size is first):
+            raise ValueError(f"{f.c}: {p.name} counts {first.name}, but {o.name} needs a count of its own")
     if p.name in w.rooms:
         f.inputs.append(w.rooms[p.name])
-    f.args.append(Arg("count_ptr", w.pending[0]))
+    f.args.append(Arg("count_ptr", first))
     w.pending = []
     return 1
 
@@ -764,7 +775,7 @@ def same_out(w):
     p, f = w.p, w.f
     if not (p.pointer and tag(p, "same") is not None):
         return None
-    out = Output(p.name, "same", p.type, w.by_c[tag(p, "same")])
+    out = Output(p.name, "same", p.type, w.named(tag(p, "same")))
     f.outputs.append(out)
     f.args.append(Arg("out", out))
     return 1
