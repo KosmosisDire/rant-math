@@ -280,13 +280,16 @@ jobs:
       - name: Unity package
         run: cmake -D DIST=build/dist -P tools/unity.cmake
 
+      - name: Arduino library
+        run: cmake -D DIST=build/dist -P tools/arduino.cmake
+
       - name: Stage the assets
         run: |
           VERSION="$(tr -d '\r\n' < VERSION)"
           mkdir -p release
           cp build/dist/rant_math.h build/dist/rant_math.c build/dist/rant_math.hpp build/dist/rant_math.cpp release/
           cp licenses/*.txt release/
-          cp dist/Rant.Math.*.nupkg dist/rant-math-*.tgz artifacts/wheels-*/*.whl release/
+          cp dist/Rant.Math.*.nupkg dist/rant-math-*.tgz dist/math-*-arduino.zip artifacts/wheels-*/*.whl release/
           # the skill rant add offers, its files at the zip's top
           (cd skill && zip -r "../release/math-$VERSION-skill.zip" .)
           ls -la release

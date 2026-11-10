@@ -8,7 +8,8 @@ description: Writing code with Rant Math in C, C++, Python, C#, Unity, Rust, Typ
 Math on Rant's standard types, in every language Rant has. Reach for it before writing vector, pose or shape
 math by hand. Full docs: https://github.com/KosmosisDire/rant-math/tree/main/docs (`languages.md` first).
 
-- Add it with `rant add math`, never by hand.
+- Add it with `rant add math`, never by hand. That works in Arduino sketches and PlatformIO
+  projects too.
 - Bodies are x forward, y left, z up. Meters, radians, seconds.
 - It needs no Rant, and goes beside it in one program.
 

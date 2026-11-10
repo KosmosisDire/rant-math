@@ -5,7 +5,7 @@ Math on Rant's standard types, in C99, with a binding for every language Rant ha
 
 ## Add it
 
-In a RANT workspace:
+In a RANT workspace, an Arduino sketch or a PlatformIO project:
 
 ```sh
 rant add math
