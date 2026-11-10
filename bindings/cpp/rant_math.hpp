@@ -107,14 +107,15 @@ public:
         !std::is_same_v<std::decay_t<C>, Span> &&
         std::is_convertible_v<std::remove_pointer_t<decltype(std::declval<C &>().data())> (*)[], T (*)[]>>>
     constexpr Span(C &&c) noexcept : data_(c.data()), size_(c.size()) {}
-    /* { ... } in a call lives through that call, which is all a Span is for. */
-#if defined(__GNUC__) && !defined(__clang__)
+    /* { ... } in a call lives through that call, which is all a Span is for. GCC before 9 has
+     * no such warning and warns on its name. */
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 9
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winit-list-lifetime"
 #endif
     template <class U = T, class = std::enable_if_t<std::is_const_v<U>>>
     constexpr Span(std::initializer_list<std::remove_const_t<U>> list) noexcept : data_(list.begin()), size_(list.size()) {}
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 9
 #pragma GCC diagnostic pop
 #endif
     constexpr T *data() const noexcept { return data_; }
