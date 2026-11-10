@@ -632,6 +632,8 @@ _lib.rant_double2_length_squared.argtypes = [_RantDouble2]
 _lib.rant_double2_length_squared.restype = c_double
 _lib.rant_double2_distance.argtypes = [_RantDouble2, _RantDouble2]
 _lib.rant_double2_distance.restype = c_double
+_lib.rant_double2_is_near.argtypes = [_RantDouble2, _RantDouble2, c_double]
+_lib.rant_double2_is_near.restype = c_int
 _lib.rant_double2_normalize.argtypes = [_RantDouble2]
 _lib.rant_double2_normalize.restype = _RantDouble2
 _lib.rant_double2_lerp.argtypes = [_RantDouble2, _RantDouble2, c_double]
@@ -672,6 +674,8 @@ _lib.rant_double3_length_squared.argtypes = [_RantDouble3]
 _lib.rant_double3_length_squared.restype = c_double
 _lib.rant_double3_distance.argtypes = [_RantDouble3, _RantDouble3]
 _lib.rant_double3_distance.restype = c_double
+_lib.rant_double3_is_near.argtypes = [_RantDouble3, _RantDouble3, c_double]
+_lib.rant_double3_is_near.restype = c_int
 _lib.rant_double3_normalize.argtypes = [_RantDouble3]
 _lib.rant_double3_normalize.restype = _RantDouble3
 _lib.rant_double3_lerp.argtypes = [_RantDouble3, _RantDouble3, c_double]
@@ -754,6 +758,8 @@ _lib.rant_quaternion_slerp.argtypes = [_RantQuaternion, _RantQuaternion, c_doubl
 _lib.rant_quaternion_slerp.restype = _RantQuaternion
 _lib.rant_quaternion_angle.argtypes = [_RantQuaternion, _RantQuaternion]
 _lib.rant_quaternion_angle.restype = c_double
+_lib.rant_quaternion_is_near.argtypes = [_RantQuaternion, _RantQuaternion, c_double]
+_lib.rant_quaternion_is_near.restype = c_int
 _lib.rant_quaternion_integrate.argtypes = [_RantQuaternion, _RantDouble3, c_double]
 _lib.rant_quaternion_integrate.restype = _RantQuaternion
 _lib.rant_quaternion_yaw.argtypes = [_RantQuaternion]
@@ -1982,6 +1988,10 @@ def double2_distance(a: Double2, b: Double2) -> float:
     r = _lib.rant_double2_distance(_c_Double2(a), _c_Double2(b))
     return r
 
+def double2_is_near(a: Double2, b: Double2, tolerance: float) -> bool:
+    """no farther apart"""
+    return bool(_lib.rant_double2_is_near(_c_Double2(a), _c_Double2(b), tolerance))
+
 def double2_normalize(a: Double2) -> Double2:
     """zero stays zero"""
     r = _lib.rant_double2_normalize(_c_Double2(a))
@@ -2066,6 +2076,10 @@ def double3_length_squared(a: Double3) -> float:
 def double3_distance(a: Double3, b: Double3) -> float:
     r = _lib.rant_double3_distance(_c_Double3(a), _c_Double3(b))
     return r
+
+def double3_is_near(a: Double3, b: Double3, tolerance: float) -> bool:
+    """no farther apart"""
+    return bool(_lib.rant_double3_is_near(_c_Double3(a), _c_Double3(b), tolerance))
 
 def double3_normalize(a: Double3) -> Double3:
     """zero stays zero"""
@@ -2247,6 +2261,10 @@ def quaternion_angle(a: Quaternion, b: Quaternion) -> float:
     """The size of the turn from a to b, in [0, pi]."""
     r = _lib.rant_quaternion_angle(_c_Quaternion(a), _c_Quaternion(b))
     return r
+
+def quaternion_is_near(a: Quaternion, b: Quaternion, tolerance: float) -> bool:
+    """The turn from a to b is at most tolerance radians, so q and -q are near."""
+    return bool(_lib.rant_quaternion_is_near(_c_Quaternion(a), _c_Quaternion(b), tolerance))
 
 def quaternion_integrate(q: Quaternion, angular_velocity: Double3, dt: float) -> Quaternion:
     """q after turning at angular_velocity, given in its own frame, for dt seconds."""
@@ -4687,6 +4705,7 @@ __all__ = [
     "double2_from_heading",
     "double2_from_int2",
     "double2_heading",
+    "double2_is_near",
     "double2_length",
     "double2_length_squared",
     "double2_lerp",
@@ -4707,6 +4726,7 @@ __all__ = [
     "double3_dot",
     "double3_from_float3",
     "double3_from_int3",
+    "double3_is_near",
     "double3_length",
     "double3_length_squared",
     "double3_lerp",
@@ -4968,6 +4988,7 @@ __all__ = [
     "quaternion_from_rotation_vector",
     "quaternion_integrate",
     "quaternion_inverse",
+    "quaternion_is_near",
     "quaternion_look",
     "quaternion_normalize",
     "quaternion_rotate",

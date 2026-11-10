@@ -202,6 +202,7 @@ unsafe extern "C" {
     pub fn rant_double2_length(a: Double2) -> f64;
     pub fn rant_double2_length_squared(a: Double2) -> f64;
     pub fn rant_double2_distance(a: Double2, b: Double2) -> f64;
+    pub fn rant_double2_is_near(a: Double2, b: Double2, tolerance: f64) -> i32;
     pub fn rant_double2_normalize(a: Double2) -> Double2;
     pub fn rant_double2_lerp(a: Double2, b: Double2, t: f64) -> Double2;
     pub fn rant_double2_min(a: Double2, b: Double2) -> Double2;
@@ -222,6 +223,7 @@ unsafe extern "C" {
     pub fn rant_double3_length(a: Double3) -> f64;
     pub fn rant_double3_length_squared(a: Double3) -> f64;
     pub fn rant_double3_distance(a: Double3, b: Double3) -> f64;
+    pub fn rant_double3_is_near(a: Double3, b: Double3, tolerance: f64) -> i32;
     pub fn rant_double3_normalize(a: Double3) -> Double3;
     pub fn rant_double3_lerp(a: Double3, b: Double3, t: f64) -> Double3;
     pub fn rant_double3_min(a: Double3, b: Double3) -> Double3;
@@ -263,6 +265,7 @@ unsafe extern "C" {
     pub fn rant_quaternion_rotate(q: Quaternion, v: Double3) -> Double3;
     pub fn rant_quaternion_slerp(a: Quaternion, b: Quaternion, t: f64) -> Quaternion;
     pub fn rant_quaternion_angle(a: Quaternion, b: Quaternion) -> f64;
+    pub fn rant_quaternion_is_near(a: Quaternion, b: Quaternion, tolerance: f64) -> i32;
     pub fn rant_quaternion_integrate(q: Quaternion, angular_velocity: Double3, dt: f64) -> Quaternion;
     pub fn rant_quaternion_yaw(q: Quaternion) -> f64;
     pub fn rant_angle_wrap(angle: f64) -> f64;

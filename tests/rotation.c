@@ -152,6 +152,8 @@ static void slerp_and_motion(void){
     {   RantQuaternion a = rant_quaternion_identity(), b = rant_quaternion_from_axis_angle(rant_double3(0, 0, 1), 1e-9);
         RantQuaternion m = rant_quaternion_slerp(a, b, 0.5);
         CHECK(near(rant_quaternion_angle(a, m), 0.5e-9, 1e-18), "slerp of nearly equal turns");
+        CHECK(rant_quaternion_is_near(a, b, 2e-9) && !rant_quaternion_is_near(a, b, 0.5e-9), "is near by the turn between");
+        CHECK(rant_quaternion_is_near(b, rant_quaternion(-b.x, -b.y, -b.z, -b.w), 1e-12), "q is near -q");
         b = rant_quaternion_from_axis_angle(rant_double3(0, 0, 1), 3.0);
         CHECK(near(rant_quaternion_yaw(rant_quaternion_slerp(a, rant_quaternion(-b.x, -b.y, -b.z, -b.w), 0.5)), 1.5, 1e-12),
               "slerp takes the short way whatever sign b has");

@@ -82,7 +82,7 @@ file(WRITE "${OUT}/rant_math.c" [==[
 set(cpp "${CMAKE_CURRENT_LIST_DIR}/../bindings/cpp")
 file(READ "${cpp}/rant_math.hpp" hpp)
 string(REPLACE "\r" "" hpp "${hpp}")
-foreach(part "rant_math.h" "rant_types.hpp" "rant_math_api.inc")
+foreach(part "rant_math.h" "rant_types.hpp" "rant_math_api.inc" "rant_math_operators.inc")
   if(part STREQUAL "rant_math.h")
     file(READ "${header}" body)
   elseif(part STREQUAL "rant_types.hpp")

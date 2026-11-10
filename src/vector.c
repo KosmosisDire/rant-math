@@ -9,6 +9,7 @@ double rant_double2_cross(RantDouble2 a, RantDouble2 b){ return a.x * b.y - a.y 
 double rant_double2_length(RantDouble2 a){ return sqrt(a.x * a.x + a.y * a.y); }
 double rant_double2_length_squared(RantDouble2 a){ return a.x * a.x + a.y * a.y; }
 double rant_double2_distance(RantDouble2 a, RantDouble2 b){ return rant_double2_length(rant_double2_subtract(a, b)); }
+int rant_double2_is_near(RantDouble2 a, RantDouble2 b, double tolerance){ return rant_double2_distance(a, b) <= tolerance; }
 
 RantDouble2 rant_double2_normalize(RantDouble2 a){
     double n = rant_double2_length(a);
@@ -55,6 +56,7 @@ RantDouble3 rant_double3_cross(RantDouble3 a, RantDouble3 b){
 double rant_double3_length(RantDouble3 a){ return sqrt(a.x * a.x + a.y * a.y + a.z * a.z); }
 double rant_double3_length_squared(RantDouble3 a){ return a.x * a.x + a.y * a.y + a.z * a.z; }
 double rant_double3_distance(RantDouble3 a, RantDouble3 b){ return rant_double3_length(rant_double3_subtract(a, b)); }
+int rant_double3_is_near(RantDouble3 a, RantDouble3 b, double tolerance){ return rant_double3_distance(a, b) <= tolerance; }
 
 RantDouble3 rant_double3_normalize(RantDouble3 a){
     double n = rant_double3_length(a);

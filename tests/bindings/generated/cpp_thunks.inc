@@ -894,6 +894,14 @@ const std::map<std::string, Thunk> thunks = {
         J out = put(rant::math::double2_distance(x0, x1));
         return out;
     }},
+    {"double2_is_near", [](const std::vector<J> &a) {
+        (void)a;
+        Double2 x0 = get<Double2>(a[0]);
+        Double2 x1 = get<Double2>(a[1]);
+        double x2 = get<double>(a[2]);
+        J out = put(rant::math::double2_is_near(x0, x1, x2));
+        return out;
+    }},
     {"double2_normalize", [](const std::vector<J> &a) {
         (void)a;
         Double2 x0 = get<Double2>(a[0]);
@@ -1027,6 +1035,14 @@ const std::map<std::string, Thunk> thunks = {
         Double3 x0 = get<Double3>(a[0]);
         Double3 x1 = get<Double3>(a[1]);
         J out = put(rant::math::double3_distance(x0, x1));
+        return out;
+    }},
+    {"double3_is_near", [](const std::vector<J> &a) {
+        (void)a;
+        Double3 x0 = get<Double3>(a[0]);
+        Double3 x1 = get<Double3>(a[1]);
+        double x2 = get<double>(a[2]);
+        J out = put(rant::math::double3_is_near(x0, x1, x2));
         return out;
     }},
     {"double3_normalize", [](const std::vector<J> &a) {
@@ -1298,6 +1314,14 @@ const std::map<std::string, Thunk> thunks = {
         Quaternion x0 = get<Quaternion>(a[0]);
         Quaternion x1 = get<Quaternion>(a[1]);
         J out = put(rant::math::quaternion_angle(x0, x1));
+        return out;
+    }},
+    {"quaternion_is_near", [](const std::vector<J> &a) {
+        (void)a;
+        Quaternion x0 = get<Quaternion>(a[0]);
+        Quaternion x1 = get<Quaternion>(a[1]);
+        double x2 = get<double>(a[2]);
+        J out = put(rant::math::quaternion_is_near(x0, x1, x2));
         return out;
     }},
     {"quaternion_integrate", [](const std::vector<J> &a) {

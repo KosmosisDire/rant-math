@@ -13,6 +13,9 @@ void test_vector(void){
     CHECK(rant_double2_cross(rant_double2(1, 0), rant_double2(0, 1)) == 1.0, "double2 cross is +1 for x then y");
     CHECK(rant_double2_length(a2) == 5.0 && rant_double2_length_squared(a2) == 25.0, "double2 length");
     CHECK(near(rant_double2_distance(a2, b2), sqrt(20.0), 1e-15), "double2 distance");
+    CHECK(rant_double2_is_near(a2, rant_double2(3.0, 4.0 + 1e-10), 1e-9) && !rant_double2_is_near(a2, b2, 4.0),
+          "double2 is near within the tolerance only");
+    CHECK(!rant_double2_is_near(a2, rant_double2(NAN, 4.0), 1.0), "double2 NaN is near nothing");
     CHECK(near2(rant_double2_normalize(a2), rant_double2(0.6, 0.8), 1e-15), "double2 normalize");
     CHECK(near2(rant_double2_normalize(rant_double2(0, 0)), rant_double2(0, 0), 0.0), "double2 zero stays zero");
     CHECK(near2(rant_double2_lerp(a2, b2, 0.25), rant_double2(2.0, 3.5), 1e-15), "double2 lerp");
@@ -37,6 +40,8 @@ void test_vector(void){
     CHECK(near3(rant_double3_cross(rant_double3(1, 0, 0), rant_double3(0, 1, 0)), rant_double3(0, 0, 1), 0.0),
           "double3 cross is right handed");
     CHECK(near(rant_double3_length(rant_double3(2, 3, 6)), 7.0, 1e-15), "double3 length");
+    CHECK(rant_double3_is_near(a3, rant_double3(1.0, 2.0, 3.0 - 1e-10), 1e-9) && rant_double3_is_near(a3, a3, 0.0) &&
+          !rant_double3_is_near(a3, b3, 5.0), "double3 is near within the tolerance only");
     CHECK(near3(rant_double3_normalize(rant_double3(0, 0, 0)), rant_double3(0, 0, 0), 0.0), "double3 zero stays zero");
     CHECK(near(rant_double3_angle(rant_double3(1, 0, 0), rant_double3(0, 0, 3)), PI / 2, 1e-15), "double3 angle");
     CHECK(near(rant_double3_angle(rant_double3(1, 0, 0), rant_double3(1, 1e-9, 0)), 1e-9, 1e-20),

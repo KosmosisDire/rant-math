@@ -849,48 +849,14 @@ template <class P> inline pcl::PointCloud<P> to_pcl(const PointCloud &cloud) {
 /* Operators live beside the types so a call finds them with no using. */
 namespace rant { namespace types {
 
-inline Double2 operator+(Double2 a, Double2 b) { return math::double2_add(a, b); }
-inline Double2 operator-(Double2 a, Double2 b) { return math::double2_subtract(a, b); }
-inline Double2 operator-(Double2 a) { return math::double2_scale(a, -1.0); }
-inline Double2 operator*(Double2 a, double k) { return math::double2_scale(a, k); }
-inline Double2 operator*(double k, Double2 a) { return math::double2_scale(a, k); }
-inline Double2 operator/(Double2 a, double k) { return math::double2_scale(a, 1.0 / k); }
-inline Double2 &operator+=(Double2 &a, Double2 b) { return a = a + b; }
-inline Double2 &operator-=(Double2 &a, Double2 b) { return a = a - b; }
-inline Double2 &operator*=(Double2 &a, double k) { return a = a * k; }
-inline Double2 &operator/=(Double2 &a, double k) { return a = a / k; }
+#include "rant_math_operators.inc"   /* @RANT_EMBED@ */
+
 inline bool operator==(Double2 a, Double2 b) { return a.x == b.x && a.y == b.y; }
 inline bool operator!=(Double2 a, Double2 b) { return !(a == b); }
-
-inline Double3 operator+(Double3 a, Double3 b) { return math::double3_add(a, b); }
-inline Double3 operator-(Double3 a, Double3 b) { return math::double3_subtract(a, b); }
-inline Double3 operator-(Double3 a) { return math::double3_scale(a, -1.0); }
-inline Double3 operator*(Double3 a, double k) { return math::double3_scale(a, k); }
-inline Double3 operator*(double k, Double3 a) { return math::double3_scale(a, k); }
-inline Double3 operator/(Double3 a, double k) { return math::double3_scale(a, 1.0 / k); }
-inline Double3 &operator+=(Double3 &a, Double3 b) { return a = a + b; }
-inline Double3 &operator-=(Double3 &a, Double3 b) { return a = a - b; }
-inline Double3 &operator*=(Double3 &a, double k) { return a = a * k; }
-inline Double3 &operator/=(Double3 &a, double k) { return a = a / k; }
 inline bool operator==(Double3 a, Double3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
 inline bool operator!=(Double3 a, Double3 b) { return !(a == b); }
-
-inline Double4 operator+(Double4 a, Double4 b) { return math::double4_add(a, b); }
-inline Double4 operator-(Double4 a, Double4 b) { return math::double4_subtract(a, b); }
-inline Double4 operator-(Double4 a) { return math::double4_scale(a, -1.0); }
-inline Double4 operator*(Double4 a, double k) { return math::double4_scale(a, k); }
-inline Double4 operator*(double k, Double4 a) { return math::double4_scale(a, k); }
-inline Double4 operator/(Double4 a, double k) { return math::double4_scale(a, 1.0 / k); }
 inline bool operator==(Double4 a, Double4 b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
 inline bool operator!=(Double4 a, Double4 b) { return !(a == b); }
-
-/* a * b is a's frame then b's, as quaternion_compose and pose_compose read: a parent to child chain. */
-inline Quaternion operator*(Quaternion a, Quaternion b) { return math::quaternion_compose(a, b); }
-inline Double3 operator*(Quaternion q, Double3 v) { return math::quaternion_rotate(q, v); }
-inline Pose operator*(Pose a, Pose b) { return math::pose_compose(a, b); }
-inline Double3 operator*(Pose p, Double3 point) { return math::pose_apply(p, point); }
-inline Pose2D operator*(Pose2D a, Pose2D b) { return math::pose2d_compose(a, b); }
-inline Double2 operator*(Pose2D p, Double2 point) { return math::pose2d_apply(p, point); }
 
 } }   /* namespace rant::types */
 

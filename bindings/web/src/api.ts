@@ -1388,6 +1388,16 @@ export function double2Distance(a: Double2, b: Double2): number {
     return r;
 }
 
+/** no farther apart */
+export function double2IsNear(a: Double2, b: Double2, tolerance: number): boolean {
+    begin();
+    const c_a = alloc(16); w_RantDouble2(c_a, a);
+    const c_b = alloc(16); w_RantDouble2(c_b, b);
+    const r = wasm._rm_double2_is_near(c_a, c_b, tolerance) !== 0;
+    refresh();
+    return r;
+}
+
 /** zero stays zero */
 export function double2Normalize(a: Double2): Double2 {
     begin();
@@ -1574,6 +1584,16 @@ export function double3Distance(a: Double3, b: Double3): number {
     const c_a = alloc(24); w_RantDouble3(c_a, a);
     const c_b = alloc(24); w_RantDouble3(c_b, b);
     const r = wasm._rm_double3_distance(c_a, c_b);
+    refresh();
+    return r;
+}
+
+/** no farther apart */
+export function double3IsNear(a: Double3, b: Double3, tolerance: number): boolean {
+    begin();
+    const c_a = alloc(24); w_RantDouble3(c_a, a);
+    const c_b = alloc(24); w_RantDouble3(c_b, b);
+    const r = wasm._rm_double3_is_near(c_a, c_b, tolerance) !== 0;
     refresh();
     return r;
 }
@@ -1969,6 +1989,16 @@ export function quaternionAngle(a: Quaternion, b: Quaternion): number {
     const c_a = alloc(32); w_RantQuaternion(c_a, a);
     const c_b = alloc(32); w_RantQuaternion(c_b, b);
     const r = wasm._rm_quaternion_angle(c_a, c_b);
+    refresh();
+    return r;
+}
+
+/** The turn from a to b is at most tolerance radians, so q and -q are near. */
+export function quaternionIsNear(a: Quaternion, b: Quaternion, tolerance: number): boolean {
+    begin();
+    const c_a = alloc(32); w_RantQuaternion(c_a, a);
+    const c_b = alloc(32); w_RantQuaternion(c_b, b);
+    const r = wasm._rm_quaternion_is_near(c_a, c_b, tolerance) !== 0;
     refresh();
     return r;
 }

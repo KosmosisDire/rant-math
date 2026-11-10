@@ -557,8 +557,25 @@ def thunks(m):
     return "\n".join(rows) + "\n"
 
 
+def operators(m):
+    """Each operator of the model beside the types, so a call finds it with no using, and its compound form."""
+    lines = [GEN, "/* a * b on quaternions and poses is a's frame then b's, as compose reads: a parent to child chain. */"]
+    for o in m.operators:
+        fn, left, right = "math::" + o.func.name, o.left, o.right
+        result = short(o.func.outputs[0].type)
+        if o.how == "negate":
+            lines.append(f"inline {result} operator-({left} a) {{ return {fn}(a, -1.0); }}")
+            continue
+        body = {"call": f"{fn}(a, b)", "scale": f"{fn}(a, b)", "scale_left": f"{fn}(b, a)", "divide": f"{fn}(a, 1.0 / b)"}[o.how]
+        lines.append(f"inline {result} operator{o.op}({left} a, {right} b) {{ return {body}; }}")
+        if result == left and left != "double":
+            lines.append(f"inline {left} &operator{o.op}=({left} &a, {right} b) {{ return a = a {o.op} b; }}")
+    return "\n".join(lines) + "\n"
+
+
 def generate(m):
     return [
         ("bindings/cpp/rant_math_api.inc", api(m)),
+        ("bindings/cpp/rant_math_operators.inc", operators(m)),
         ("tests/bindings/generated/cpp_thunks.inc", thunks(m)),
     ]

@@ -194,6 +194,10 @@ double rant_quaternion_angle(RantQuaternion a, RantQuaternion b){
     return 2.0 * atan2(s, fabs(d.w));
 }
 
+int rant_quaternion_is_near(RantQuaternion a, RantQuaternion b, double tolerance){
+    return rant_quaternion_angle(a, b) <= tolerance;
+}
+
 RantQuaternion rant_quaternion_integrate(RantQuaternion q, RantDouble3 angular_velocity, double dt){
     return rant_quaternion_normalize(rant_quaternion_compose(
         q, rant_quaternion_from_rotation_vector(rant_double3_scale(angular_velocity, dt))));

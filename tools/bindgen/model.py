@@ -149,11 +149,32 @@ class Func:
 
 
 @dataclass
+class Method:
+    type: str               # what it hangs on: a standard type's name, or math's own such as Shape, Axes, KdTree
+    name: str
+    func: Func
+    static: bool = False    # made from other values, as Quaternion.from_axis_angle
+    field: str = ""         # the field the first input reads, points for a Polygon whose C call takes the list
+    self_index: int = 0     # the input that is the value itself, 1 for rant_twist_transform(pose, twist)
+
+
+@dataclass
+class Operator:
+    op: str                 # + - * / or neg
+    left: str
+    right: str              # "" for neg, double for a scale
+    func: Func
+    how: str                # call, scale (a k), scale_left (k a), divide (a by 1 / k), negate (a by -1)
+
+
+@dataclass
 class Model:
     structs: dict
     enums: dict
     functions: list
     version: str
+    methods: list = field(default_factory=list)
+    operators: list = field(default_factory=list)
 
     def func(self, c):
         for f in self.functions:
@@ -614,6 +635,100 @@ def normal_type(t):
     return t.replace("const ", "").replace("*", "").strip()
 
 
+# What a first input of these kinds is in every binding.
+RECEIVER_KINDS = {
+    "shape": "Shape", "shape2d": "Shape2D", "image": "Image", "image_mut": "Image", "cloud": "PointCloud",
+    "cloud_mut": "PointCloud", "grid": "Grid", "grid_mut": "Grid", "scan": "LaserScan", "tree": "KdTree",
+    "mesh": "Mesh", "prism": "Prism",
+}
+
+# Types whose functions start with another word than their name.
+PREFIXES = {"CameraIntrinsics": "camera", "KdTree": "kdtree"}
+
+# A method spelled as an operator by its name, with a value of a struct on the right.
+OPERATOR_VERBS = {"add": "+", "subtract": "-", "compose": "*", "rotate": "*", "apply": "*"}
+
+
+def prefix(t):
+    return PREFIXES.get(t) or re.sub(r"(?<=[a-z])(?=[A-Z])", "_", t).lower()
+
+
+def is_vector(t):
+    # Float, Double and Int vectors move between each other by casts in Rant's types, not by methods.
+    return re.fullmatch(r"(Float|Double|Int)\d", t) is not None
+
+
+def receiver(f, m):
+    """The type a function's first input is in the bindings, and the field of it the call reads."""
+    if not f.inputs:
+        return None, ""
+    first = f.inputs[0]
+    if first.kind in ("value", "ref") and first.type in m.structs and first.type not in HIDDEN_STRUCTS:
+        return first.type[4:], ""
+    if first.kind in RECEIVER_KINDS:
+        return RECEIVER_KINDS[first.kind], ""
+    view = next((a.b for a in f.args if a.kind == "view" and a.a is first), None)
+    if view:                                                        # RantPolygonView is a Polygon's points
+        return view[4:-4], LIST_VIEWS[view][1]
+    return None, ""
+
+
+def result_type(f):
+    if len(f.outputs) == 1 and f.outputs[0].kind in ("return", "out", "shape_new") and f.outputs[0].type.startswith("Rant"):
+        return f.outputs[0].type[4:]
+    return None
+
+
+def find_methods(m):
+    """rant_<type>_<verb> on a first input of that type is <type>.<verb>, and <other>_from_<type> is
+    <type>.to_<other>. A call that makes a type from other values is a static of it."""
+    methods = []
+    for f in m.functions:
+        if f.hand:
+            continue
+        t, field_name = receiver(f, m)
+        made = result_type(f)
+        if t is not None and f.name.startswith(prefix(t) + "_"):
+            methods.append(Method(t, f.name[len(prefix(t)) + 1:], f, field=field_name))
+        elif t is not None and made and f.name == prefix(made) + "_from_" + prefix(t):
+            if not (is_vector(t) and is_vector(made)):
+                methods.append(Method(t, "to_" + prefix(made), f, field=field_name))
+        elif made and made != t and f.name.startswith(prefix(made) + "_"):
+            later = [k for k, i in enumerate(f.inputs) if k and i.kind in ("value", "ref") and i.type == "Rant" + made]
+            if later:                                                # rant_twist_transform(pose, twist): twist.transform(pose)
+                methods.append(Method(made, f.name[len(prefix(made)) + 1:], f, self_index=later[0]))
+            else:
+                methods.append(Method(made, f.name[len(prefix(made)) + 1:], f, static=True))
+    seen = set()
+    for me in methods:
+        if (me.type, me.name) in seen:
+            raise ValueError(f"two methods {me.type}.{me.name}")
+        seen.add((me.type, me.name))
+    return methods
+
+
+def find_operators(m):
+    ops = []
+    for me in m.methods:
+        f = me.func
+        if me.static or f.errors != "none" or len(f.inputs) != 2 or len(f.outputs) != 1 or f.inputs[1].kind != "value":
+            continue
+        right = f.inputs[1].type
+        if me.name == "scale" and right == "double" and f.outputs[0].type == f.inputs[0].type:
+            ops += [Operator("*", me.type, "double", f, "scale"), Operator("*", "double", me.type, f, "scale_left"),
+                    Operator("/", me.type, "double", f, "divide"), Operator("neg", me.type, "", f, "negate")]
+            continue
+        op = OPERATOR_VERBS.get(me.name) or ("*" if me.name == "multiply" and me.type.startswith("Matrix") else None)
+        if op and right in m.structs:
+            ops.append(Operator(op, me.type, right[4:], f, "call"))
+    seen = set()
+    for o in ops:
+        if (o.op, o.left, o.right) in seen:
+            raise ValueError(f"two operators {o.left} {o.op} {o.right}")
+        seen.add((o.op, o.left, o.right))
+    return ops
+
+
 def read_model(root, types_path, clang=None):
     src = os.path.join(root, "src")
     order = re.findall(r'#include "(\w+\.h)"', open(os.path.join(src, "rant_math.h"), encoding="utf-8").read())
@@ -622,6 +737,8 @@ def read_model(root, types_path, clang=None):
     model = Model(structs, enums, functions, version)
     for f in functions:
         classify(f, model)
+    model.methods = find_methods(model)
+    model.operators = find_operators(model)
     return model
 
 

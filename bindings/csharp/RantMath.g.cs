@@ -431,6 +431,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double2_length(Double2 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double2_length_squared(Double2 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double2_distance(Double2 a, Double2 b);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_double2_is_near(Double2 a, Double2 b, double tolerance);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_normalize(Double2 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_lerp(Double2 a, Double2 b, double t);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double2 rant_double2_min(Double2 a, Double2 b);
@@ -451,6 +452,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double3_length(Double3 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double3_length_squared(Double3 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_double3_distance(Double3 a, Double3 b);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_double3_is_near(Double3 a, Double3 b, double tolerance);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_normalize(Double3 a);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_lerp(Double3 a, Double3 b, double t);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_double3_min(Double3 a, Double3 b);
@@ -492,6 +494,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern Double3 rant_quaternion_rotate(Quaternion q, Double3 v);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Quaternion rant_quaternion_slerp(Quaternion a, Quaternion b, double t);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_quaternion_angle(Quaternion a, Quaternion b);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_quaternion_is_near(Quaternion a, Quaternion b, double tolerance);
         [DllImport(LIB, CallingConvention = CC)] internal static extern Quaternion rant_quaternion_integrate(Quaternion q, Double3 angular_velocity, double dt);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_quaternion_yaw(Quaternion q);
         [DllImport(LIB, CallingConvention = CC)] internal static extern double rant_angle_wrap(double angle);
@@ -976,6 +979,12 @@ namespace Rant.Math
             return r;
         }
 
+        /// <summary>no farther apart</summary>
+        public static unsafe bool Double2IsNear(Double2 a, Double2 b, double tolerance)
+        {
+            return Native.rant_double2_is_near(a, b, tolerance) != 0;
+        }
+
         /// <summary>zero stays zero</summary>
         public static unsafe Double2 Double2Normalize(Double2 a)
         {
@@ -1099,6 +1108,12 @@ namespace Rant.Math
         {
             var r = Native.rant_double3_distance(a, b);
             return r;
+        }
+
+        /// <summary>no farther apart</summary>
+        public static unsafe bool Double3IsNear(Double3 a, Double3 b, double tolerance)
+        {
+            return Native.rant_double3_is_near(a, b, tolerance) != 0;
         }
 
         /// <summary>zero stays zero</summary>
@@ -1365,6 +1380,12 @@ namespace Rant.Math
         {
             var r = Native.rant_quaternion_angle(a, b);
             return r;
+        }
+
+        /// <summary>The turn from a to b is at most tolerance radians, so q and -q are near.</summary>
+        public static unsafe bool QuaternionIsNear(Quaternion a, Quaternion b, double tolerance)
+        {
+            return Native.rant_quaternion_is_near(a, b, tolerance) != 0;
         }
 
         /// <summary>q after turning at angular_velocity, given in its own frame, for dt seconds.</summary>

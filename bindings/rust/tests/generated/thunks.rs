@@ -544,6 +544,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "double2_length" => { let x0: Double2 = Json::get(&a[0]); let mut out = rant_math::double2_length(x0).put();  let _ = &mut out; Ok(out) }
         "double2_length_squared" => { let x0: Double2 = Json::get(&a[0]); let mut out = rant_math::double2_length_squared(x0).put();  let _ = &mut out; Ok(out) }
         "double2_distance" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_distance(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double2_is_near" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::double2_is_near(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "double2_normalize" => { let x0: Double2 = Json::get(&a[0]); let mut out = rant_math::double2_normalize(x0).put();  let _ = &mut out; Ok(out) }
         "double2_lerp" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::double2_lerp(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "double2_min" => { let x0: Double2 = Json::get(&a[0]); let x1: Double2 = Json::get(&a[1]); let mut out = rant_math::double2_min(x0, x1).put();  let _ = &mut out; Ok(out) }
@@ -564,6 +565,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "double3_length" => { let x0: Double3 = Json::get(&a[0]); let mut out = rant_math::double3_length(x0).put();  let _ = &mut out; Ok(out) }
         "double3_length_squared" => { let x0: Double3 = Json::get(&a[0]); let mut out = rant_math::double3_length_squared(x0).put();  let _ = &mut out; Ok(out) }
         "double3_distance" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_distance(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "double3_is_near" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::double3_is_near(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "double3_normalize" => { let x0: Double3 = Json::get(&a[0]); let mut out = rant_math::double3_normalize(x0).put();  let _ = &mut out; Ok(out) }
         "double3_lerp" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::double3_lerp(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "double3_min" => { let x0: Double3 = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::double3_min(x0, x1).put();  let _ = &mut out; Ok(out) }
@@ -605,6 +607,7 @@ pub fn call(name: &str, a: &[Value], extra: &mut Map<std::string::String, Value>
         "quaternion_rotate" => { let x0: Quaternion = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let mut out = rant_math::quaternion_rotate(x0, x1).put();  let _ = &mut out; Ok(out) }
         "quaternion_slerp" => { let x0: Quaternion = Json::get(&a[0]); let x1: Quaternion = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::quaternion_slerp(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "quaternion_angle" => { let x0: Quaternion = Json::get(&a[0]); let x1: Quaternion = Json::get(&a[1]); let mut out = rant_math::quaternion_angle(x0, x1).put();  let _ = &mut out; Ok(out) }
+        "quaternion_is_near" => { let x0: Quaternion = Json::get(&a[0]); let x1: Quaternion = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::quaternion_is_near(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "quaternion_integrate" => { let x0: Quaternion = Json::get(&a[0]); let x1: Double3 = Json::get(&a[1]); let x2: f64 = Json::get(&a[2]); let mut out = rant_math::quaternion_integrate(x0, x1, x2).put();  let _ = &mut out; Ok(out) }
         "quaternion_yaw" => { let x0: Quaternion = Json::get(&a[0]); let mut out = rant_math::quaternion_yaw(x0).put();  let _ = &mut out; Ok(out) }
         "angle_wrap" => { let x0: f64 = Json::get(&a[0]); let mut out = rant_math::angle_wrap(x0).put();  let _ = &mut out; Ok(out) }

@@ -86,6 +86,11 @@ pub fn double2_distance(a: Double2, b: Double2) -> f64 {
     r
 }
 
+/// no farther apart
+pub fn double2_is_near(a: Double2, b: Double2, tolerance: f64) -> bool {
+    (unsafe { ffi::rant_double2_is_near(a, b, tolerance) }) != 0
+}
+
 /// zero stays zero
 pub fn double2_normalize(a: Double2) -> Double2 {
     let r = unsafe { ffi::rant_double2_normalize(a) };
@@ -189,6 +194,11 @@ pub fn double3_length_squared(a: Double3) -> f64 {
 pub fn double3_distance(a: Double3, b: Double3) -> f64 {
     let r = unsafe { ffi::rant_double3_distance(a, b) };
     r
+}
+
+/// no farther apart
+pub fn double3_is_near(a: Double3, b: Double3, tolerance: f64) -> bool {
+    (unsafe { ffi::rant_double3_is_near(a, b, tolerance) }) != 0
 }
 
 /// zero stays zero
@@ -411,6 +421,11 @@ pub fn quaternion_slerp(a: Quaternion, b: Quaternion, t: f64) -> Quaternion {
 pub fn quaternion_angle(a: Quaternion, b: Quaternion) -> f64 {
     let r = unsafe { ffi::rant_quaternion_angle(a, b) };
     r
+}
+
+/// The turn from a to b is at most tolerance radians, so q and -q are near.
+pub fn quaternion_is_near(a: Quaternion, b: Quaternion, tolerance: f64) -> bool {
+    (unsafe { ffi::rant_quaternion_is_near(a, b, tolerance) }) != 0
 }
 
 /// q after turning at angular_velocity, given in its own frame, for dt seconds.

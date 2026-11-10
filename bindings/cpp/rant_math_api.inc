@@ -158,6 +158,11 @@ inline double double2_distance(Double2 a, Double2 b) {
     return r;
 }
 
+/* no farther apart */
+inline bool double2_is_near(Double2 a, Double2 b, double tolerance) {
+    return detail::rant_double2_is_near(impl::bits<detail::RantDouble2>(a), impl::bits<detail::RantDouble2>(b), tolerance) != 0;
+}
+
 /* zero stays zero */
 inline Double2 double2_normalize(Double2 a) {
     auto r = detail::rant_double2_normalize(impl::bits<detail::RantDouble2>(a));
@@ -261,6 +266,11 @@ inline double double3_length_squared(Double3 a) {
 inline double double3_distance(Double3 a, Double3 b) {
     auto r = detail::rant_double3_distance(impl::bits<detail::RantDouble3>(a), impl::bits<detail::RantDouble3>(b));
     return r;
+}
+
+/* no farther apart */
+inline bool double3_is_near(Double3 a, Double3 b, double tolerance) {
+    return detail::rant_double3_is_near(impl::bits<detail::RantDouble3>(a), impl::bits<detail::RantDouble3>(b), tolerance) != 0;
 }
 
 /* zero stays zero */
@@ -483,6 +493,11 @@ inline Quaternion quaternion_slerp(Quaternion a, Quaternion b, double t) {
 inline double quaternion_angle(Quaternion a, Quaternion b) {
     auto r = detail::rant_quaternion_angle(impl::bits<detail::RantQuaternion>(a), impl::bits<detail::RantQuaternion>(b));
     return r;
+}
+
+/* The turn from a to b is at most tolerance radians, so q and -q are near. */
+inline bool quaternion_is_near(Quaternion a, Quaternion b, double tolerance) {
+    return detail::rant_quaternion_is_near(impl::bits<detail::RantQuaternion>(a), impl::bits<detail::RantQuaternion>(b), tolerance) != 0;
 }
 
 /* q after turning at angular_velocity, given in its own frame, for dt seconds. */

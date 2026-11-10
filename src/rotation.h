@@ -53,6 +53,8 @@ RANT_MATH_API RantDouble3    rant_quaternion_rotate(RantQuaternion q, RantDouble
 RANT_MATH_API RantQuaternion rant_quaternion_slerp(RantQuaternion a, RantQuaternion b, double t);
 /* The size of the turn from a to b, in [0, pi]. */
 RANT_MATH_API double         rant_quaternion_angle(RantQuaternion a, RantQuaternion b);
+/* The turn from a to b is at most tolerance radians, so q and -q are near. */
+RANT_MATH_API int            rant_quaternion_is_near(RantQuaternion a, RantQuaternion b, double tolerance);
 /* q after turning at angular_velocity, given in its own frame, for dt seconds. */
 RANT_MATH_API RantQuaternion rant_quaternion_integrate(RantQuaternion q, RantDouble3 angular_velocity, double dt);
 /* The heading of the turned +x seen from above, from +x toward +y. */

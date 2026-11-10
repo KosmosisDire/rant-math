@@ -18,6 +18,7 @@ RANT_MATH_API double      rant_double2_cross(RantDouble2 a, RantDouble2 b);     
 RANT_MATH_API double      rant_double2_length(RantDouble2 a);
 RANT_MATH_API double      rant_double2_length_squared(RantDouble2 a);
 RANT_MATH_API double      rant_double2_distance(RantDouble2 a, RantDouble2 b);
+RANT_MATH_API int         rant_double2_is_near(RantDouble2 a, RantDouble2 b, double tolerance);  /* no farther apart */
 RANT_MATH_API RantDouble2 rant_double2_normalize(RantDouble2 a);                  /* zero stays zero */
 RANT_MATH_API RantDouble2 rant_double2_lerp(RantDouble2 a, RantDouble2 b, double t);
 RANT_MATH_API RantDouble2 rant_double2_min(RantDouble2 a, RantDouble2 b);
@@ -41,6 +42,7 @@ RANT_MATH_API RantDouble3 rant_double3_cross(RantDouble3 a, RantDouble3 b);
 RANT_MATH_API double      rant_double3_length(RantDouble3 a);
 RANT_MATH_API double      rant_double3_length_squared(RantDouble3 a);
 RANT_MATH_API double      rant_double3_distance(RantDouble3 a, RantDouble3 b);
+RANT_MATH_API int         rant_double3_is_near(RantDouble3 a, RantDouble3 b, double tolerance);  /* no farther apart */
 RANT_MATH_API RantDouble3 rant_double3_normalize(RantDouble3 a);                  /* zero stays zero */
 RANT_MATH_API RantDouble3 rant_double3_lerp(RantDouble3 a, RantDouble3 b, double t);
 RANT_MATH_API RantDouble3 rant_double3_min(RantDouble3 a, RantDouble3 b);

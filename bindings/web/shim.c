@@ -277,6 +277,7 @@ EMSCRIPTEN_KEEPALIVE double rm_double2_cross(const RantDouble2 *a, const RantDou
 EMSCRIPTEN_KEEPALIVE double rm_double2_length(const RantDouble2 *a) { return rant_double2_length(*a); }
 EMSCRIPTEN_KEEPALIVE double rm_double2_length_squared(const RantDouble2 *a) { return rant_double2_length_squared(*a); }
 EMSCRIPTEN_KEEPALIVE double rm_double2_distance(const RantDouble2 *a, const RantDouble2 *b) { return rant_double2_distance(*a, *b); }
+EMSCRIPTEN_KEEPALIVE int rm_double2_is_near(const RantDouble2 *a, const RantDouble2 *b, double tolerance) { return rant_double2_is_near(*a, *b, tolerance); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_normalize(RantDouble2 *ret, const RantDouble2 *a) { *ret = rant_double2_normalize(*a); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_lerp(RantDouble2 *ret, const RantDouble2 *a, const RantDouble2 *b, double t) { *ret = rant_double2_lerp(*a, *b, t); }
 EMSCRIPTEN_KEEPALIVE void rm_double2_min(RantDouble2 *ret, const RantDouble2 *a, const RantDouble2 *b) { *ret = rant_double2_min(*a, *b); }
@@ -297,6 +298,7 @@ EMSCRIPTEN_KEEPALIVE void rm_double3_cross(RantDouble3 *ret, const RantDouble3 *
 EMSCRIPTEN_KEEPALIVE double rm_double3_length(const RantDouble3 *a) { return rant_double3_length(*a); }
 EMSCRIPTEN_KEEPALIVE double rm_double3_length_squared(const RantDouble3 *a) { return rant_double3_length_squared(*a); }
 EMSCRIPTEN_KEEPALIVE double rm_double3_distance(const RantDouble3 *a, const RantDouble3 *b) { return rant_double3_distance(*a, *b); }
+EMSCRIPTEN_KEEPALIVE int rm_double3_is_near(const RantDouble3 *a, const RantDouble3 *b, double tolerance) { return rant_double3_is_near(*a, *b, tolerance); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_normalize(RantDouble3 *ret, const RantDouble3 *a) { *ret = rant_double3_normalize(*a); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_lerp(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b, double t) { *ret = rant_double3_lerp(*a, *b, t); }
 EMSCRIPTEN_KEEPALIVE void rm_double3_min(RantDouble3 *ret, const RantDouble3 *a, const RantDouble3 *b) { *ret = rant_double3_min(*a, *b); }
@@ -338,6 +340,7 @@ EMSCRIPTEN_KEEPALIVE void rm_quaternion_normalize(RantQuaternion *ret, const Ran
 EMSCRIPTEN_KEEPALIVE void rm_quaternion_rotate(RantDouble3 *ret, const RantQuaternion *q, const RantDouble3 *v) { *ret = rant_quaternion_rotate(*q, *v); }
 EMSCRIPTEN_KEEPALIVE void rm_quaternion_slerp(RantQuaternion *ret, const RantQuaternion *a, const RantQuaternion *b, double t) { *ret = rant_quaternion_slerp(*a, *b, t); }
 EMSCRIPTEN_KEEPALIVE double rm_quaternion_angle(const RantQuaternion *a, const RantQuaternion *b) { return rant_quaternion_angle(*a, *b); }
+EMSCRIPTEN_KEEPALIVE int rm_quaternion_is_near(const RantQuaternion *a, const RantQuaternion *b, double tolerance) { return rant_quaternion_is_near(*a, *b, tolerance); }
 EMSCRIPTEN_KEEPALIVE void rm_quaternion_integrate(RantQuaternion *ret, const RantQuaternion *q, const RantDouble3 *angular_velocity, double dt) { *ret = rant_quaternion_integrate(*q, *angular_velocity, dt); }
 EMSCRIPTEN_KEEPALIVE double rm_quaternion_yaw(const RantQuaternion *q) { return rant_quaternion_yaw(*q); }
 EMSCRIPTEN_KEEPALIVE double rm_angle_wrap(double angle) { return rant_angle_wrap(angle); }

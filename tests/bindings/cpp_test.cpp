@@ -766,6 +766,19 @@ static void operators() {
     CHECK(near(chain.position.x, 0.0) && near(chain.orientation.w, 1.0));
     Pose2D p2{ { 1, 0 }, 0 };
     CHECK(near((p2 * p2).position.x, 2.0) && near((p2 * Double2{ 1, 1 }).x, 2.0));
+    Quaternion r = q;
+    r *= q;
+    CHECK(near(quaternion_angle(r, twice), 0.0));
+    Pose moved = p;
+    moved *= p;
+    CHECK(near(moved.position.y, 1.0));
+    Matrix3x3 turn = matrix3x3_from_quaternion(q);
+    CHECK(near((turn * Double3{ 1, 0, 0 }).y, 1.0) && near(((turn * turn) * Double3{ 1, 0, 0 }).x, -1.0));
+    Matrix4x4 frame = matrix4x4_from_pose(p);
+    CHECK(near((frame * Double3{ 1, 0, 0 }).y, 1.0) && near((frame * frame * Double3{ 0, 0, 0 }).y, 1.0));
+    Inertia one{};
+    one.mass = 2.0;
+    CHECK(near((one + one).mass, 4.0));
 }
 
 static void axes() {
