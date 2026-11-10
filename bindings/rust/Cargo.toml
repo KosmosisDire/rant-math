@@ -1,7 +1,7 @@
 [package]
 name = "rant-math"
 description = "Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2024"
 rust-version = "1.85"
 repository = "https://github.com/KosmosisDire/rant-math"
