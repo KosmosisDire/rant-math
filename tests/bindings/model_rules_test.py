@@ -188,6 +188,15 @@ def test_a_tag_naming_no_parameter_says_so():
     raise AssertionError("no error")
 
 
+def test_a_typedef_owns_its_struct_in_every_clang():
+    # Clang 22 marks the type, older ones wrap it in an ElaboratedType, and a typedef of a struct
+    # declared elsewhere owns none.
+    clang22 = {"inner": [{"kind": "RecordType", "isTagOwned": True, "decl": {"id": "0x1"}}]}
+    clang18 = {"inner": [{"kind": "ElaboratedType", "ownedTagDecl": {"id": "0x2"}, "inner": []}]}
+    alias = {"inner": [{"kind": "ElaboratedType", "inner": [{"kind": "RecordType", "decl": {"id": "0x3"}}]}]}
+    assert model.owned_tag(clang22) == "0x1" and model.owned_tag(clang18) == "0x2" and model.owned_tag(alias) is None
+
+
 def test_nothing_to_return_is_an_error():
     try:
         model.auto(Func("rant_x", "x", "x.h", "void", [P("a", "double")]), None)

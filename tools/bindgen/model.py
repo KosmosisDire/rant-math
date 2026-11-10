@@ -257,6 +257,17 @@ def clang_ast(clang, root, types_path):
     return tree
 
 
+def owned_tag(typedef):
+    """The id of the struct or enum a typedef declares, None when it names one declared elsewhere.
+    Clang 22 marks the type isTagOwned, older ones wrap it in an ElaboratedType with ownedTagDecl."""
+    for n in typedef.get("inner", []):
+        if n.get("isTagOwned"):
+            return n["decl"]["id"]
+        if "ownedTagDecl" in n:
+            return n["ownedTagDecl"]["id"]
+    return None
+
+
 def where(loc):
     # A location inside a macro holds the place it was written out as its expansion.
     return loc.get("expansionLoc", loc)
@@ -360,8 +371,7 @@ def read_headers(clang, root, types_path, order):
         if node["kind"] in ("RecordDecl", "EnumDecl"):
             records[node["id"]] = node
         elif node["kind"] == "TypedefDecl":
-            owned = next((n for n in node.get("inner", []) if n.get("isTagOwned")), None)
-            tag = records.get(owned["decl"]["id"]) if owned else None
+            tag = records.get(owned_tag(node))
             if tag is None or not tag.get("completeDefinition", tag["kind"] == "EnumDecl"):
                 continue
             if tag["kind"] == "RecordDecl":
