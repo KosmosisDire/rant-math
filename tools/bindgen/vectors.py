@@ -962,16 +962,16 @@ class CCase:
 
     def inputs(self):
         for i, (inp, value) in enumerate(zip(self.f.inputs, self.row)):
-            self.names[id(inp)] = self.emit_input(inp, value, f"a{i}")
+            try:
+                self.names[id(inp)] = self.emit_input(inp, value, f"a{i}")
+            except (TypeError, ValueError, KeyError) as e:
+                raise ValueError(f"{self.f.name}: input {i} {inp.name} ({inp.kind} {inp.type}) cannot take {value!r}") from e
 
     def emit_input(self, inp, v, name):
         k = inp.kind
         w = self.w
         if k == "value":
-            if inp.type in w.m.structs:
-                self.decl(f"{inp.type} {name} = {w.literal(inp.type, v)};")
-            else:
-                self.decl(f"{inp.type} {name} = {w.literal(inp.type, v)};")
+            self.decl(f"{inp.type} {name} = {w.literal(inp.type, v)};")
             return {"value": name}
         if k == "ref":
             self.decl(f"{inp.type} {name} = {w.literal(inp.type, v)};")
