@@ -1,7 +1,11 @@
 # What every backend reads: math's C headers parsed into types and functions, and each function
 # sorted by the kinds of its parameters into what a binding takes and gives back.
+import json
 import os
 import re
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 
 SCALARS = {
@@ -190,55 +194,156 @@ class Model:
         return out
 
 
-def strip_comments(text):
-    return re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
+def clang_ast(clang, root, types_path):
+    """The headers as clang's JSON tree, with the file and line clang leaves out when unchanged filled in."""
+    with tempfile.TemporaryDirectory() as shim:
+        # base.h includes rant_types.h, which is Rant's stdtypes.h under its released name.
+        with open(os.path.join(shim, "rant_types.h"), "w", encoding="utf-8") as f:
+            f.write('#include "%s"\n' % os.path.abspath(types_path).replace("\\", "/"))
+        run = subprocess.run([clang, "-x", "c", "-std=c99", "-fsyntax-only", "-Xclang", "-ast-dump=json",
+                              "-I", shim, os.path.join(root, "src", "rant_math.h")],
+                             capture_output=True, text=True, encoding="utf-8")
+    if run.returncode != 0:
+        raise RuntimeError("clang could not read the headers:\n" + run.stderr)
+    tree = json.loads(run.stdout)
+    last = {"file": "", "line": 0}
+
+    def fill(node):
+        if isinstance(node, list):
+            for n in node:
+                fill(n)
+        elif isinstance(node, dict):
+            if "offset" in node:
+                for k in ("file", "line"):
+                    if k in node:
+                        last[k] = node[k]
+                    else:
+                        node[k] = last[k]
+            for k, v in node.items():
+                if k != "includedFrom":
+                    fill(v)
+    fill(tree)
+    return tree
 
 
-def parse_decl(text):
-    """A declaration without its name split off: returns (type, const, pointers, name, dims)."""
-    t = " ".join(text.split())
-    dims = tuple(int(d) for d in re.findall(r"\[(\d+)\]", t))
-    t = re.sub(r"\[\d*\]", "", t).strip()
-    m = re.match(r"(const\s+)?([A-Za-z_]\w*)\s*(\*+)?\s*(?:const\s+)?([A-Za-z_]\w*)?$", t)
+def where(loc):
+    # A location inside a macro holds the place it was written out as its expansion.
+    return loc.get("expansionLoc", loc)
+
+
+def read_type(qual):
+    """A clang type spelling as (name, const, pointers, dims)."""
+    dims = tuple(int(d) for d in re.findall(r"\[(\d+)\]", qual))
+    t = re.sub(r"\[\d*\]", "", qual).strip()
+    m = re.match(r"(const\s+)?(?:struct\s+|enum\s+)?([A-Za-z_]\w*)\s*(\*+)?\s*(?:const)?$", t)
     if not m:
-        raise ValueError("cannot read declaration: " + text)
-    return m.group(2), bool(m.group(1)), len(m.group(3) or ""), m.group(4) or "", dims
+        raise ValueError("cannot read type: " + qual)
+    return m.group(2), bool(m.group(1)), len(m.group(3) or ""), dims
 
 
-def parse_structs(text, std, structs, enums):
-    clean = strip_comments(text)
-    clean = re.sub(r"^\s*#.*$", " ", clean, flags=re.M)
-    for m in re.finditer(r"typedef\s+struct\s*\w*\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}\s*(\w+)\s*;", clean, flags=re.S):
-        body, name = m.group(1), m.group(2)
-        fields = []
-        if "union" not in body:
-            for decl in body.split(";"):
-                decl = decl.strip()
-                if not decl:
-                    continue
-                parts = [p.strip() for p in decl.split(",")]
-                t, _, ptrs, n, dims = parse_decl(parts[0])
-                fields.append(CField(n, t, bool(ptrs), dims))
-                for p in parts[1:]:
-                    extra_ptrs = p.count("*")
-                    extra_dims = tuple(int(d) for d in re.findall(r"\[(\d+)\]", p))
-                    n2 = re.sub(r"\[\d*\]", "", p).replace("*", "").strip()
-                    fields.append(CField(n2, t, bool(extra_ptrs or ptrs), extra_dims))
-        structs[name] = Struct(name, fields, std)
-    for m in re.finditer(r"typedef\s+enum\s*\w*\s*\{(.*?)\}\s*(\w+)\s*;", clean, flags=re.S):
-        options, value = [], 0
-        for item in m.group(1).split(","):
-            item = item.strip()
-            if not item:
+def read_record(node):
+    # A struct holding a union is a tagged view each binding writes by hand, so it lists no fields.
+    if any(n.get("kind") == "RecordDecl" and n.get("tagUsed") == "union" for n in node.get("inner", [])):
+        return []
+    fields = []
+    for n in node.get("inner", []):
+        if n.get("kind") == "FieldDecl":
+            t, _, ptrs, dims = read_type(n["type"]["qualType"])
+            fields.append(CField(n["name"], t, bool(ptrs), dims))
+    return fields
+
+
+def read_enum(node):
+    options, value = [], 0
+    for n in node.get("inner", []):
+        if n.get("kind") != "EnumConstantDecl":
+            continue
+        for e in n.get("inner", []):
+            if e.get("kind") == "ConstantExpr":
+                value = int(e["value"])
+        options.append((n["name"], value))
+        value += 1
+    return options
+
+
+def doc_of(text, begin, end):
+    """The comment on a declaration: after its ; on the same line, else just before RANT_MATH_API."""
+    m = re.match(r"\s*;[ \t]*(/\*.*?\*/)", text[end:], re.S)
+    if m:
+        return m.group(1)
+    head = text[:begin].rstrip()
+    if head.endswith("RANT_MATH_API"):
+        head = head[: -len("RANT_MATH_API")].rstrip()
+    if head.endswith("*/"):
+        start = head.rfind("/*")
+        # One that ends the line of the declaration before belongs to that one.
+        if not head[head.rfind("\n", 0, start) + 1: start].strip():
+            return head[start:]
+    return ""
+
+
+def read_function(node, text, header):
+    begin = where(node["range"]["begin"])["offset"]
+    close = where(node["range"]["end"])
+    ret = node["type"]["qualType"].split("(", 1)[0].strip()
+    params = []
+    for p in node.get("inner", []):
+        if p.get("kind") != "ParmVarDecl":
+            continue
+        t, const, ptrs, _ = read_type(p["type"]["qualType"])
+        # An array parameter's type is already a pointer, so its size comes from the text it spans.
+        name_end = where(p["loc"])["offset"] + where(p["loc"])["tokLen"]
+        span = text[name_end: where(p["range"]["end"])["offset"] + where(p["range"]["end"])["tokLen"]]
+        dim = re.search(r"\[(\d+)\]", span)
+        params.append(CParam(p["name"], t, const, 0 if dim else ptrs, int(dim.group(1)) if dim else 0))
+    comment = re.sub(r"/\*|\*/", " ", doc_of(text, begin, close["offset"] + close["tokLen"]))
+    return Func(node["name"], node["name"][5:], header, ret, params, clean_doc(comment))
+
+
+def read_headers(clang, root, types_path, order):
+    """Each header's structs, enums and functions, the types file first and then math's in build order."""
+    tree = clang_ast(clang, root, types_path)
+    key = lambda p: os.path.normcase(os.path.abspath(p))
+    files = {key(types_path): ""}
+    files.update({key(os.path.join(root, "src", n)): n for n in order})
+    found = {name: ([], [], []) for name in files.values()}
+    texts = {}
+    records = {}
+    for node in tree["inner"]:
+        loc = where(node.get("loc", {}))
+        if "file" not in loc or key(loc["file"]) not in files:
+            continue
+        header = files[key(loc["file"])]
+        if node["kind"] in ("RecordDecl", "EnumDecl"):
+            records[node["id"]] = node
+        elif node["kind"] == "TypedefDecl":
+            owned = next((n for n in node.get("inner", []) if n.get("isTagOwned")), None)
+            tag = records.get(owned["decl"]["id"]) if owned else None
+            if tag is None or not tag.get("completeDefinition", tag["kind"] == "EnumDecl"):
                 continue
-            if "=" in item:
-                c, v = item.split("=")
-                c, value = c.strip(), int(v.strip())
+            if tag["kind"] == "RecordDecl":
+                found[header][0].append(Struct(node["name"], read_record(tag), header == ""))
             else:
-                c = item
-            options.append((c, value))
-            value += 1
-        enums[m.group(2)] = Enum(m.group(2), options, std)
+                found[header][1].append(Enum(node["name"], read_enum(tag), header == ""))
+        elif node["kind"] == "FunctionDecl" and header:
+            if header not in texts:
+                texts[header] = open(loc["file"], encoding="utf-8", newline="").read()
+            found[header][2].append(read_function(node, texts[header], header))
+    structs, enums, functions = {}, {}, []
+    for name in [""] + list(order):
+        s, e, f = found[name]
+        structs.update((x.name, x) for x in s)
+        enums.update((x.name, x) for x in e)
+        functions += f
+    return structs, enums, functions
+
+
+def find_clang():
+    for c in (os.environ.get("RANT_MATH_CLANG"), shutil.which("clang"),
+              os.path.join(os.environ.get("ProgramFiles", ""), "LLVM", "bin", "clang.exe")):
+        if c and os.path.isfile(c):
+            return c
+    raise RuntimeError("bindgen reads the headers through clang: put it on PATH or name it in RANT_MATH_CLANG")
 
 
 def clean_doc(comment):
@@ -248,26 +353,6 @@ def clean_doc(comment):
     keep = [s for s in sentences if not re.search(
         r"\bNULL\b|\bcount\b|\bcounts\b|rant_|RANT_|ERR_|\bOK\b|\bout\b|out_count|\bpointer\b|holds the room|\bdst\b|\bview\b", s)]
     return " ".join(keep)
-
-
-def parse_functions(path, name):
-    text = open(path, encoding="utf-8").read()
-    pattern = re.compile(r"(/\*(?:(?!\*/).)*?\*/\s*)?RANT_MATH_API\s+([^;{(]+?)\s*\b(rant_\w+)\s*\(([^;]*?)\)\s*;([ \t]*/\*.*?\*/)?", re.S)
-    out = []
-    no_cpp = re.sub(r"^\s*#.*$", " ", text, flags=re.M)
-    for m in pattern.finditer(no_cpp):
-        comment = (m.group(5) or "") or (m.group(1) or "")
-        comment = re.sub(r"/\*|\*/", " ", comment)
-        ret = " ".join(m.group(2).split())
-        fn = m.group(3)
-        params = []
-        arglist = strip_comments(m.group(4)).strip()
-        if arglist != "void":
-            for a in arglist.split(","):
-                t, const, ptrs, n, dims = parse_decl(a)
-                params.append(CParam(n, t, const, ptrs, dims[0] if dims else 0))
-        out.append(Func(fn, fn[5:], name, ret, params, clean_doc(comment)))
-    return out
 
 
 SPECIAL = {}
@@ -782,17 +867,10 @@ def _(f, m):
     f.args = [Arg("prism", prism), Arg("value", pose)]
 
 
-def read_model(root, types_path):
+def read_model(root, types_path, clang=None):
     src = os.path.join(root, "src")
     order = re.findall(r'#include "(\w+\.h)"', open(os.path.join(src, "rant_math.h"), encoding="utf-8").read())
-    structs, enums = {}, {}
-    parse_structs(open(types_path, encoding="utf-8").read(), True, structs, enums)
-    functions = []
-    for name in order:
-        path = os.path.join(src, name)
-        parse_structs(open(path, encoding="utf-8").read(), False, structs, enums)
-        functions += parse_functions(path, name)
-    # Prism's C view holds the standard type's three fields.
+    structs, enums, functions = read_headers(clang or find_clang(), root, types_path, order)
     version = open(os.path.join(root, "VERSION"), encoding="utf-8").read().strip()
     model = Model(structs, enums, functions, version)
     for f in functions:

@@ -4,17 +4,22 @@ if(NOT Python3_Interpreter_FOUND)
   message(STATUS "Rant Math: no Python, so the binding checks are left out")
   return()
 endif()
+find_program(RANT_MATH_CLANG clang HINTS "$ENV{ProgramFiles}/LLVM/bin")
+if(NOT RANT_MATH_CLANG)
+  message(STATUS "Rant Math: no clang to read the headers, so the binding checks are left out")
+  return()
+endif()
 
 set(GEN "${CMAKE_SOURCE_DIR}/tools/bindgen/gen.py")
 set(VECTORS "${CMAKE_CURRENT_SOURCE_DIR}/vectors.json")
 file(GLOB BINDGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tools/bindgen/*.py" "${CMAKE_SOURCE_DIR}/src/*.h")
 
-add_test(NAME bindings.current COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --check)
+add_test(NAME bindings.current COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --clang "${RANT_MATH_CLANG}" --check)
 
 # The C program that asks the library every case. Its answers must match the checked in vectors.
 set(RECORD_C "${CMAKE_CURRENT_BINARY_DIR}/record.c")
 add_custom_command(OUTPUT "${RECORD_C}"
-  COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --record-source "${RECORD_C}"
+  COMMAND "${Python3_EXECUTABLE}" "${GEN}" --types "${RANT_MATH_TYPES}" --clang "${RANT_MATH_CLANG}" --record-source "${RECORD_C}"
   DEPENDS ${BINDGEN_SOURCES}
   VERBATIM)
 add_executable(rant_math_record "${RECORD_C}")
@@ -25,7 +30,7 @@ else()
   target_compile_options(rant_math_record PRIVATE -w)
 endif()
 add_test(NAME bindings.vectors COMMAND "${CMAKE_COMMAND}"
-  "-DPYTHON=${Python3_EXECUTABLE}" "-DGEN=${GEN}" "-DTYPES=${RANT_MATH_TYPES}"
+  "-DPYTHON=${Python3_EXECUTABLE}" "-DGEN=${GEN}" "-DTYPES=${RANT_MATH_TYPES}" "-DCLANG=${RANT_MATH_CLANG}"
   "-DRECORD=$<TARGET_FILE:rant_math_record>" "-DANSWERS=${CMAKE_CURRENT_BINARY_DIR}/answers.txt"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/check_vectors.cmake")
 

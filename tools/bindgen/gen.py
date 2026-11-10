@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Writes every language's binding of Rant Math from its C headers.
+"""Writes every language's binding of Rant Math from its C headers, read through clang.
 
     gen.py --types <Rant's src/common/stdtypes.h>           writes each generated file
     gen.py --types <...> --check                            fails when a checked in file is stale
@@ -83,6 +83,7 @@ def coverage(cases, answers):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--types", required=True, help="Rant's src/common/stdtypes.h")
+    ap.add_argument("--clang", help="the clang that reads the headers, else RANT_MATH_CLANG or the one on PATH")
     ap.add_argument("--check", action="store_true", help="fail when a checked in file is stale")
     ap.add_argument("--record-source", help="write the C program that records the vectors here")
     ap.add_argument("--record-answers", help="the file that program wrote")
@@ -90,7 +91,7 @@ def main():
     ap.add_argument("--check-vectors", action="store_true")
     ap.add_argument("--coverage", action="store_true")
     a = ap.parse_args()
-    model = model_module.read_model(ROOT, a.types)
+    model = model_module.read_model(ROOT, a.types, a.clang)
 
     if a.record_source:
         text = vectors.write_record_program(model, vectors.build_cases(model))
