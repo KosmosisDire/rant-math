@@ -81,10 +81,10 @@ static uint32_t i_build(RantKdTree *t, uint32_t lo, uint32_t hi){
     return me;
 }
 
-RantMathResult rant_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **out){
+RantMathResult rant_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **tree){
     RantKdTree *t;
     uint32_t i, n = 0;
-    if (!out || (count && !points)) return RANT_MATH_ERR_ARGUMENT;
+    if (!tree || (count && !points)) return RANT_MATH_ERR_ARGUMENT;
     for (i = 0; i < count; i++) n += i_math_finite3(points[i]);
     t = (RantKdTree *)calloc(1, sizeof *t);
     if (!t) return RANT_MATH_ERR_MEMORY;
@@ -96,7 +96,7 @@ RantMathResult rant_kdtree_create(const RantDouble3 *points, uint32_t count, Ran
     for (i = 0; i < count; i++)
         if (i_math_finite3(points[i])){ t->points[t->count] = points[i]; t->index[t->count++] = i; }
     i_build(t, 0, t->count);
-    *out = t;
+    *tree = t;
     return RANT_MATH_OK;
 }
 

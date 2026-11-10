@@ -740,7 +740,7 @@ EMSCRIPTEN_KEEPALIVE RantMathResult rm_point_cloud_transform(RantPointCloudView 
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_point_cloud_select(const RantPointCloudView *cloud, const uint8_t *keep, uint8_t *data, uint32_t *count) { return rant_point_cloud_select(cloud, keep, data, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_laser_scan_points(const RantLaserScanView *scan, RantDouble2 *out, uint32_t *count) { return rant_laser_scan_points(scan, out, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_image_depth_points(const RantImageView *depth, const RantCameraIntrinsics *camera, RantDouble3 *out, uint32_t *count) { return rant_image_depth_points(depth, camera, out, count); }
-EMSCRIPTEN_KEEPALIVE RantMathResult rm_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **out) { return rant_kdtree_create(points, count, out); }
+EMSCRIPTEN_KEEPALIVE RantMathResult rm_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **tree) { return rant_kdtree_create(points, count, tree); }
 EMSCRIPTEN_KEEPALIVE void rm_kdtree_destroy(RantKdTree *tree) { rant_kdtree_destroy(tree); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_kdtree_nearest(const RantKdTree *tree, const RantDouble3 *point, uint32_t *indices, double *distances, uint32_t *count) { return rant_kdtree_nearest(tree, *point, indices, distances, count); }
 EMSCRIPTEN_KEEPALIVE RantMathResult rm_kdtree_within(const RantKdTree *tree, const RantDouble3 *point, double radius, uint32_t *indices, double *distances, uint32_t *count) { return rant_kdtree_within(tree, *point, radius, indices, distances, count); }

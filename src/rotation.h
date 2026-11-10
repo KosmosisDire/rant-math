@@ -31,7 +31,7 @@ RANT_MATH_API void rant_quaternion_to_euler(RantQuaternion q, RantEulerOrder ord
 /* The axis need not be unit length. A zero axis gives the identity. */
 RANT_MATH_API RantQuaternion rant_quaternion_from_axis_angle(RantDouble3 axis, double angle);
 /* The angle in [0, pi] and its unit axis, +x when there is no turn. */
-RANT_MATH_API double rant_quaternion_to_axis_angle(RantQuaternion q, RantDouble3 *axis);
+RANT_MATH_API double rant_quaternion_to_axis_angle(RantQuaternion q, RantDouble3 *axis) /* (last angle) */;
 /* A rotation vector is the axis times the angle, as robot controllers and gyros give it. */
 RANT_MATH_API RantQuaternion rant_quaternion_from_rotation_vector(RantDouble3 v);
 RANT_MATH_API RantDouble3    rant_quaternion_to_rotation_vector(RantQuaternion q);

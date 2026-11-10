@@ -43,8 +43,8 @@ RANT_MATH_API RantMathResult rant_points2d_fit_pose(const RantDouble2 *from, con
 /* y = c[0] + c[1] x + ... + c[degree] x^degree nearest the points by their error in y, into
  * degree + 1 coefficients. Needs degree + 1 points with different x. */
 RANT_MATH_API RantMathResult rant_polynomial_fit(const double *x, const double *y, uint32_t count, uint32_t degree,
-                                                 const RantFitOptions *options, double *coefficients);
-RANT_MATH_API double         rant_polynomial_at(const double *coefficients, uint32_t degree, double x);
+                                                 const RantFitOptions *options, double *coefficients /* (size degree + 1) */);
+RANT_MATH_API double         rant_polynomial_at(const double *coefficients, uint32_t degree /* (degree) */, double x);
 
 #ifdef __cplusplus
 }

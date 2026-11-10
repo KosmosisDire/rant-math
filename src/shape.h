@@ -58,7 +58,8 @@ RANT_MATH_API RantMathResult   rant_shape_sample_inside(const RantShape *s, uint
 RANT_MATH_API RantMathResult   rant_shape_sample_surface(const RantShape *s, uint64_t seed, RantDouble3 *out, uint32_t count);
 /* Triangles counterclockwise from outside, a round part in segments, 0 for 32, split where faces meet at over crease
  * radians or colors differ. Corners fill x, y and z, normal_x, y and z, and rgba or rgb, as docs/shapes.md says. */
-RANT_MATH_API RantMathResult   rant_shape_mesh(const RantShape *s, uint32_t segments, double crease, RantPointCloudView *vertices,
+RANT_MATH_API RantMathResult   rant_shape_mesh(const RantShape *s, uint32_t segments, double crease,
+                                               RantPointCloudView *vertices /* (mesh) */,
                                                uint32_t *vertex_count, uint32_t *triangles, uint32_t *triangle_count);
 
 typedef enum {

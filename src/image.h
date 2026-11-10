@@ -37,27 +37,32 @@ RANT_MATH_API RantMathResult rant_image_value_at(const RantImageView *image, uin
 
 /* Into dst's format at the same size, between Mono8, Rgb8, Rgba8, Bgr8, Yuyv and Nv12, or a
  * copy in any raw format. Mono8 from colour is BT.601 luma, and alpha is dropped or opaque. */
-RANT_MATH_API RantMathResult rant_image_convert(const RantImageView *src, RantImageView *dst);
+RANT_MATH_API RantMathResult rant_image_convert(const RantImageView *src,
+                                              RantImageView *dst /* (image format=format) (takes RantImageFormat format) */);
 /* Mono8, Mono16 or Monof32 values from low to high through a ramp, such as rant_colormap_ramp gives, into a
  * format convert writes. NaN, and 0 in Mono16 as depth cameras send it, is no reading and comes out transparent. */
 RANT_MATH_API RantMathResult rant_image_colorize(const RantImageView *src, double low, double high, const RantColor *ramp,
-                                                 uint32_t ramp_count, RantImageView *dst);
+                                                 uint32_t ramp_count,
+                                                 RantImageView *dst /* (image format=format) (takes RantImageFormat format) */);
 /* A view of the part from x, y on, sharing image's data. Not Nv12, and Yuyv keeps whole pairs. */
 RANT_MATH_API RantMathResult rant_image_crop(const RantImageView *image, uint32_t x, uint32_t y, uint32_t width,
-                                             uint32_t height, RantImageView *out);
+                                             uint32_t height, RantImageView *out /* (copy) */);
 
 /* These take Mono8, Mono16, Monof32, Rgb8, Rgba8 and Bgr8, with dst in src's format and apart from it. */
-RANT_MATH_API RantMathResult rant_image_flip_horizontal(const RantImageView *src, RantImageView *dst);
-RANT_MATH_API RantMathResult rant_image_flip_vertical(const RantImageView *src, RantImageView *dst);
+RANT_MATH_API RantMathResult rant_image_flip_horizontal(const RantImageView *src, RantImageView *dst /* (image) */);
+RANT_MATH_API RantMathResult rant_image_flip_vertical(const RantImageView *src, RantImageView *dst /* (image) */);
 /* Clockwise as seen on screen, any number of quarter turns. */
-RANT_MATH_API RantMathResult rant_image_rotate(const RantImageView *src, int quarter_turns, RantImageView *dst);
+RANT_MATH_API RantMathResult rant_image_rotate(const RantImageView *src, int quarter_turns,
+                                             RantImageView *dst /* (image width=turned_width height=turned_height) */);
 /* To dst's size, the image's edges matched. */
-RANT_MATH_API RantMathResult rant_image_resize(const RantImageView *src, RantImageFilter filter, RantImageView *dst);
+RANT_MATH_API RantMathResult rant_image_resize(const RantImageView *src, RantImageFilter filter,
+                                             RantImageView *dst /* (image width=width height=height) (takes uint32_t width)
+                                                                   (takes uint32_t height) */);
 /* src from camera as ideal would see it, NULL for camera without distortion. A pixel no source
  * reaches is 0, NaN in Monof32. Depth wants RANT_FILTER_NEAREST, which mixes no edges. */
 RANT_MATH_API RantMathResult rant_image_undistort(const RantImageView *src, const RantCameraIntrinsics *camera,
-                                                  const RantCameraIntrinsics *ideal, RantImageFilter filter,
-                                                  RantImageView *dst);
+                                                  const RantCameraIntrinsics *ideal /* (optional) */, RantImageFilter filter,
+                                                  RantImageView *dst /* (image width=ideal_width height=ideal_height) */);
 
 /* A shape in pixels blended over Mono8, Rgb8, Rgba8 or Bgr8 with a smooth edge. width 0 fills,
  * above 0 draws the outline that wide, and a curve with no inside is drawn 1 wide for 0. */

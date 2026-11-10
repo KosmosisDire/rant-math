@@ -83,7 +83,8 @@ RANT_MATH_API RantMathResult     rant_polygon2d_edges(RantPolygon2DView p, RantS
 RANT_MATH_API RantMathResult     rant_polygon2d_planes(RantPolygon2DView p, RantPlane2D *out, uint32_t *count);
 /* Triangles over the polygon as three indices into its points each, counterclockwise, the
  * Mesh layout. *count counts triangles: a polygon of n corners makes n - 2. */
-RANT_MATH_API RantMathResult     rant_polygon2d_triangulate(RantPolygon2DView p, uint32_t *triangles, uint32_t *count);
+RANT_MATH_API RantMathResult     rant_polygon2d_triangulate(RantPolygon2DView p, uint32_t *triangles /* (per 3) */,
+                                                                 uint32_t *count);
 
 #ifdef __cplusplus
 }

@@ -665,7 +665,7 @@ unsafe extern "C" {
     pub fn rant_point_cloud_select(cloud: *const RawPointCloudView, keep: *const u8, data: *mut u8, count: *mut u32) -> c_int;
     pub fn rant_laser_scan_points(scan: *const RawLaserScanView, out: *mut Double2, count: *mut u32) -> c_int;
     pub fn rant_image_depth_points(depth: *const RawImageView, camera: *const CameraIntrinsics, out: *mut Double3, count: *mut u32) -> c_int;
-    pub fn rant_kdtree_create(points: *const Double3, count: u32, out: *mut *mut RawKdTree) -> c_int;
+    pub fn rant_kdtree_create(points: *const Double3, count: u32, tree: *mut *mut RawKdTree) -> c_int;
     pub fn rant_kdtree_destroy(tree: *mut RawKdTree);
     pub fn rant_kdtree_nearest(tree: *const RawKdTree, point: Double3, indices: *mut u32, distances: *mut f64, count: *mut u32) -> c_int;
     pub fn rant_kdtree_within(tree: *const RawKdTree, point: Double3, radius: f64, indices: *mut u32, distances: *mut f64, count: *mut u32) -> c_int;

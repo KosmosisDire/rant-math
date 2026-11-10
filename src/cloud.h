@@ -43,8 +43,8 @@ RANT_MATH_API RantMathResult rant_point_cloud_write_colors(RantPointCloudView *c
 RANT_MATH_API RantMathResult rant_point_cloud_transform(RantPointCloudView *cloud, RantPose pose);
 /* The points keep marks with 1, whole and in order, into data at point_step bytes each. count holds
  * the points data has room for and gets how many keep marks. */
-RANT_MATH_API RantMathResult rant_point_cloud_select(const RantPointCloudView *cloud, const uint8_t *keep, uint8_t *data,
-                                                     uint32_t *count);
+RANT_MATH_API RantMathResult rant_point_cloud_select(const RantPointCloudView *cloud, const uint8_t *keep /* (same cloud) */,
+                                                     uint8_t *data /* (select cloud) */, uint32_t *count);
 
 /* A LaserScan's beams turning from +x toward +y, each beam's echoes together, echoes 0 read as 1. */
 typedef struct {

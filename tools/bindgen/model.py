@@ -98,6 +98,7 @@ class CParam:
     const: bool = False
     pointer: int = 0
     dim: int = 0
+    tags: list = field(default_factory=list)  # (name, words) from the comment beside it
 
 
 @dataclass
@@ -144,6 +145,7 @@ class Func:
     errors: str = "none"        # none throw optional bool
     hand: bool = False          # each backend writes this one's body itself
     vector: bool = True         # takes part in the shared vectors
+    tags: list = field(default_factory=list)  # (name, words) from a comment between its ) and ;
 
 
 @dataclass
@@ -287,17 +289,29 @@ def read_function(node, text, header):
     close = where(node["range"]["end"])
     ret = node["type"]["qualType"].split("(", 1)[0].strip()
     params = []
-    for p in node.get("inner", []):
-        if p.get("kind") != "ParmVarDecl":
-            continue
+    nodes = [p for p in node.get("inner", []) if p.get("kind") == "ParmVarDecl"]
+    for k, p in enumerate(nodes):
         t, const, ptrs, _ = read_type(p["type"]["qualType"])
         # An array parameter's type is already a pointer, so its size comes from the text it spans.
         name_end = where(p["loc"])["offset"] + where(p["loc"])["tokLen"]
-        span = text[name_end: where(p["range"]["end"])["offset"] + where(p["range"]["end"])["tokLen"]]
-        dim = re.search(r"\[(\d+)\]", span)
-        params.append(CParam(p["name"], t, const, 0 if dim else ptrs, int(dim.group(1)) if dim else 0))
-    comment = re.sub(r"/\*|\*/", " ", doc_of(text, begin, close["offset"] + close["tokLen"]))
-    return Func(node["name"], node["name"][5:], header, ret, params, clean_doc(comment))
+        end = where(p["range"]["end"])["offset"] + where(p["range"]["end"])["tokLen"]
+        dim = re.search(r"\[(\d+)\]", text[name_end:end])
+        upto = where(nodes[k + 1]["range"]["begin"])["offset"] if k + 1 < len(nodes) else close["offset"]
+        params.append(CParam(p["name"], t, const, 0 if dim else ptrs, int(dim.group(1)) if dim else 0,
+                             read_tags(text[end:upto])))
+    after = close["offset"] + close["tokLen"]
+    comment = re.sub(r"/\*|\*/", " ", doc_of(text, begin, after))
+    f = Func(node["name"], node["name"][5:], header, ret, params, clean_doc(comment))
+    f.tags = read_tags(text[after: text.index(";", after)])
+    return f
+
+
+def read_tags(text):
+    """The tags of a comment beside a declaration, (name words) each, for what its C type cannot say."""
+    tags = []
+    for comment in re.findall(r"/\*(.*?)\*/", text, re.S):
+        tags += [(n, w.strip()) for n, w in re.findall(r"\((\w+)([^()]*)\)", comment)]
+    return tags
 
 
 def read_headers(clang, root, types_path, order):
@@ -355,20 +369,33 @@ def clean_doc(comment):
     return " ".join(keep)
 
 
-SPECIAL = {}
+# Each backend writes these itself: the text its errors carry and the free of its own tree.
+HAND = {"rant_math_result_text", "rant_kdtree_destroy"}
+
+# Lists of a type a binding holds as its own kind.
+LIST_KINDS = {"RantDetection2DView": "det2d", "RantDetection3DView": "det3d"}
+
+# Views a call writes through: changed in place, unless a tag makes the view a new value.
+WRITTEN_KINDS = {"RantImageView": "image", "RantPointCloudView": "cloud", "RantGridView": "grid"}
 
 
-def special(c):
-    def wrap(fn):
-        SPECIAL[c] = fn
-        return fn
-    return wrap
+def tag(p, name):
+    """The words of tag name on a parameter or function, None when it has none."""
+    for n, words in p.tags:
+        if n == name:
+            return words
+    return None
+
+
+def tags(p, name):
+    return [words for n, words in p.tags if n == name]
 
 
 def classify(f, m):
-    if f.c in SPECIAL:
-        SPECIAL[f.c](f, m)
-    else:
+    if f.c in HAND:
+        f.hand = True
+        f.vector = False
+    if f.ret != "void" or f.c not in HAND:
         auto(f, m)
     if f.ret == "RantMathResult":
         f.errors = "throw"
@@ -377,47 +404,77 @@ def classify(f, m):
 
 
 def auto(f, m):
-    """The rule for every regular function: read the C parameters left to right."""
+    """Read the C parameters left to right, by their types and the tags beside them."""
     ps = f.params
     i = 0
-    list_inputs = {}
+    by_c = {}       # each C parameter's input or output, for the tags that name one
+    rooms = {}      # a count parameter that a room output names, to the input it becomes
+    pending = []    # lists whose count parameter is still to come
     last_list = None
     while i < len(ps):
         p = ps[i]
         name = RENAMES.get(p.name, p.name)
         nxt = ps[i + 1] if i + 1 < len(ps) else None
+        counted = nxt is not None and nxt.type == "uint32_t" and not nxt.pointer
         if p.dim:                                                    # T out[N]
             out = Output(p.name, "fixed", p.type, p.dim)
             f.outputs.append(out)
             f.args.append(Arg("out", out))
+        elif p.type == "RantMatrixView" and not p.pointer:
+            shape = tag(p, "out")
+            if shape is None:
+                inp = by_c[p.name] = Input(name, "matrix")
+                f.inputs.append(inp)
+                f.args.append(Arg("matrix", inp))
+            else:                                                    # (out rows cols)
+                rows, cols = shape.split()
+                out = Output(p.name, "matrix", rows=rows, cols=cols)
+                f.outputs.append(out)
+                f.args.append(Arg("matrix_out", out))
         elif p.type in LIST_VIEWS and not p.pointer:                 # a view of a list
             elem, word = LIST_VIEWS[p.type]
-            inp = Input(word, "list", elem)
+            inp = by_c[p.name] = Input(word, "list", elem)
             f.inputs.append(inp)
             f.args.append(Arg("view", inp, p.type))
             last_list = inp
         elif p.type == "RantMeshView" and not p.pointer:            # a binding's Mesh, its corners read in C
-            inp = Input("mesh", "mesh", "RantMesh")
+            inp = by_c[p.name] = Input("mesh", "mesh", "RantMesh")
             f.inputs.append(inp)
             f.args.append(Arg("mesh", inp))
             last_list = inp
         elif p.type == "RantPrismView" and not p.pointer:
-            inp = Input("prism", "prism", "RantPrism")
+            inp = by_c[p.name] = Input("prism", "prism", "RantPrism")
             f.inputs.append(inp)
             f.args.append(Arg("prism", inp))
         elif p.pointer and p.const and p.type in OBJECT_KINDS:
-            inp = Input(name, OBJECT_KINDS[p.type], p.type)
+            inp = by_c[p.name] = Input(name, OBJECT_KINDS[p.type], p.type)
             f.inputs.append(inp)
             f.args.append(Arg(OBJECT_KINDS[p.type], inp))
-        elif p.pointer and p.const and nxt is not None and nxt.type == "uint32_t" and not nxt.pointer and "count" in nxt.name:
-            inp = Input(name, "list", p.type)                        # const T *a, uint32_t count
+        elif p.pointer and p.const and p.type in LIST_KINDS and counted:
+            inp = by_c[p.name] = Input(name, LIST_KINDS[p.type], p.type)
+            f.inputs.append(inp)
+            f.args += [Arg("det_ptr", inp), Arg("det_count", inp)]
+            last_list = inp
+            i += 1
+        elif p.pointer and p.const and tag(p, "same") is not None:  # a list as long as another input
+            inp = by_c[p.name] = Input(name, "list", p.type)
+            f.inputs.append(inp)
+            f.args.append(Arg("list_ptr", inp))
+        elif p.pointer and p.const and counted and tag(nxt, "degree") is not None:
+            inp = by_c[p.name] = Input(name, "list", p.type)        # const T *a, uint32_t degree
+            f.inputs.append(inp)
+            f.args += [Arg("list_ptr", inp), Arg("degree", inp)]
+            last_list = inp
+            i += 1
+        elif p.pointer and p.const and counted and "count" in nxt.name:
+            inp = by_c[p.name] = Input(name, "list", p.type)        # const T *a, uint32_t count
             f.inputs.append(inp)
             f.args.append(Arg("list_ptr", inp))
             f.args.append(Arg("list_count", inp))
             last_list = inp
             i += 1
         elif p.pointer and p.const and p.type == "char":
-            inp = Input(name, "string", "char")
+            inp = by_c[p.name] = Input(name, "string", "char")
             f.inputs.append(inp)
             f.args.append(Arg("string", inp))
         elif p.pointer and p.const:
@@ -438,17 +495,79 @@ def auto(f, m):
                 last_list = a
                 i += 3
                 continue
-            inp = Input(name, "ref", p.type)                         # const T *one
+            kind = "ref" if tag(p, "optional") is None else "opt_ref"  # const T *one, NULL too with (optional)
+            inp = by_c[p.name] = Input(name, kind, p.type)
             f.inputs.append(inp)
-            f.args.append(Arg("ref", inp))
-        elif p.pointer:
-            if nxt is not None and nxt.type == "uint32_t" and nxt.pointer:
-                out = Output(p.name, "query", p.type)                # T *out, uint32_t *count
+            f.args.append(Arg(kind, inp))
+        elif p.pointer == 2:                                         # T **out: a handle the binding frees
+            out = Output(p.name, "handle", p.type)
+            f.outputs.append(out)
+            f.args.append(Arg("out", out))
+            f.vector = False
+        elif p.pointer and p.type in WRITTEN_KINDS:
+            if tag(p, "image") is not None:                          # (image format= width= height=)
+                size = dict(w.split("=") for w in tag(p, "image").split())
+                out = Output(p.name, "image", p.type, rows=size.get("height", "src.height"),
+                             cols=size.get("width", "src.width"), size=size.get("format", "src.format"))
                 f.outputs.append(out)
+                f.args.append(Arg("image_out", out))
+                for words in tags(p, "takes"):                       # what C reads from the new view
+                    t, n = words.split()
+                    f.inputs.append(Input(n, "value", t))
+            elif tag(p, "copy") is not None:
+                out = Output(p.name, "image_copy", p.type)
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+            elif tag(p, "mesh") is not None:                         # its corners, their count, triangles, their count
+                out = Output("mesh", "mesh_new", "RantMesh")
+                f.outputs.append(out)
+                f.args.append(Arg("mesh_out", out))
+                i += 4
+                continue
+            else:
+                kind = WRITTEN_KINDS[p.type] + "_mut"
+                inp = by_c[p.name] = Input(name, kind, p.type)
+                f.inputs.append(inp)
+                f.outputs.append(Output(p.name, "mutated", p.type, inp))
+                f.args.append(Arg(kind, inp))
+        elif p.pointer:
+            if tag(p, "select") is not None:                         # the points of a cloud a mask keeps
+                out = Output(p.name, "cloud_select", "RantPointCloudView", by_c[tag(p, "select")])
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+                pending.append(out)
+            elif tag(p, "room") is not None:                         # as many as the count asks for
+                count = rooms.setdefault(tag(p, "room"), Input(tag(p, "room"), "value", "uint32_t"))
+                out = by_c[p.name] = Output(p.name, "room", p.type, count)
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+                pending.append(out)
+            elif tag(p, "query") is not None:                        # as many as the call finds
+                shares = tag(p, "query")
+                out = by_c[p.name] = Output(p.name, "query", p.type, by_c[shares] if shares else None)
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+                pending.append(out)
+            elif p.type == "uint32_t" and pending:                   # the count of the lists before it
+                if p.name in rooms:
+                    f.inputs.append(rooms[p.name])
+                f.args.append(Arg("count_ptr", pending[0]))
+                pending = []
+            elif tag(p, "size") is not None:                         # (size words a backend reads)
+                out = Output(p.name, "expr", p.type, tag(p, "size"))
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+            elif tag(p, "same") is not None:                         # one for each item of an input
+                out = Output(p.name, "same", p.type, by_c[tag(p, "same")])
+                f.outputs.append(out)
+                f.args.append(Arg("out", out))
+            elif nxt is not None and nxt.type == "uint32_t" and nxt.pointer:
+                out = Output(p.name, "query", p.type, per=int(tag(p, "per") or 1))
+                f.outputs.append(out)                                # T *out, uint32_t *count
                 f.args += [Arg("out", out), Arg("count_ptr", out)]
                 i += 2
                 continue
-            if nxt is not None and nxt.type == "uint32_t" and not nxt.pointer:
+            elif counted:
                 count = Input(RENAMES.get(nxt.name, nxt.name), "value", "uint32_t")
                 out = Output(p.name, "sized", p.type, count)         # T *out, uint32_t count
                 f.inputs.append(count)
@@ -456,7 +575,7 @@ def auto(f, m):
                 f.args += [Arg("out", out), Arg("value", count)]
                 i += 2
                 continue
-            if p.type == "uint8_t" or p.name in ("normals", "labels"):
+            elif p.type == "uint8_t" or p.name in ("normals", "labels"):
                 out = Output(p.name, "same", p.type, last_list)      # one for each of the points before
                 f.outputs.append(out)
                 f.args.append(Arg("out", out))
@@ -465,406 +584,34 @@ def auto(f, m):
                 f.outputs.append(out)
                 f.args.append(Arg("out", out))
         else:
-            inp = Input(name, "value", p.type)
+            inp = by_c[p.name] = Input(name, "value", p.type)
             f.inputs.append(inp)
             f.args.append(Arg("value", inp))
         i += 1
-    if f.ret in ("RantShape", "RantShape2D"):
-        f.outputs.insert(0, Output("return", "shape_new", f.ret))     # a binding's own Shape holds the data
+    ret = normal_type(f.ret)
+    if ret in ("RantShape", "RantShape2D"):
+        f.outputs.insert(0, Output("return", "shape_new", ret))     # a binding's own Shape holds the data
         f.vector = False
-    elif f.ret not in ("void", "int", "RantMathResult"):
-        f.outputs.insert(0, Output("return", "return", normal_type(f.ret)))
+    elif ret == "RantPrismView":
+        f.outputs.insert(0, Output("return", "prism", "RantPrism"))
+    elif ret == "RantPointCloudView":
+        f.outputs.insert(0, Output("return", "cloud_layout", ret))
+    elif ret == "RantPointFieldView":
+        f.outputs.insert(0, Output("return", "field", ret))
+    elif f.ret == "const char *":
+        f.outputs.insert(0, Output("return", "return", "string"))
+    elif ret not in ("void", "int", "RantMathResult"):
+        last = tag(f, "last")                                        # (last name): the return comes after the outs
+        if last is None:
+            f.outputs.insert(0, Output("return", "return", ret))
+        else:
+            f.outputs.append(Output(last, "return", ret))
     if not f.outputs and f.ret == "void":
         raise ValueError("no answer from " + f.c)
 
 
 def normal_type(t):
     return t.replace("const ", "").replace("*", "").strip()
-
-
-# The functions no rule can read from their C types alone.
-
-@special("rant_math_result_text")
-def _(f, m):
-    f.vector = False
-    f.hand = True
-    f.outputs = [Output("return", "return", "string")]
-    f.inputs = [Input("r", "value", "RantMathResult")]
-    f.args = [Arg("value", f.inputs[0])]
-
-
-@special("rant_quaternion_to_axis_angle")
-def _(f, m):
-    q = Input("q", "value", "RantQuaternion")
-    axis = Output("axis", "out", "RantDouble3")
-    angle = Output("angle", "return", "double")
-    f.inputs = [q]
-    f.outputs = [axis, angle]
-    f.args = [Arg("value", q), Arg("out", axis)]
-
-
-def matrix_inputs(f, names):
-    inputs = [Input(n, "matrix") for n in names]
-    f.inputs = inputs
-    return inputs
-
-
-def matrix_fn(rows, cols, inputs=("a",)):
-    def apply(f, m):
-        ins = matrix_inputs(f, inputs)
-        out = Output("out", "matrix", rows=rows, cols=cols)
-        f.outputs = [out]
-        f.args = [Arg("matrix", i) for i in ins] + [Arg("matrix_out", out)]
-    return apply
-
-
-SPECIAL["rant_matrix_multiply"] = matrix_fn("a.rows", "b.cols", ("a", "b"))
-SPECIAL["rant_matrix_transpose"] = matrix_fn("a.cols", "a.rows")
-SPECIAL["rant_matrix_inverse"] = matrix_fn("a.rows", "a.cols")
-SPECIAL["rant_matrix_solve"] = matrix_fn("a.cols", "b.cols", ("a", "b"))
-SPECIAL["rant_matrix_cholesky"] = matrix_fn("a.rows", "a.cols")
-
-
-@special("rant_matrix_determinant")
-def _(f, m):
-    a, = matrix_inputs(f, ["a"])
-    out = Output("out", "out", "double")
-    f.outputs = [out]
-    f.args = [Arg("matrix", a), Arg("out", out)]
-
-
-@special("rant_matrix_svd")
-def _(f, m):
-    a, = matrix_inputs(f, ["a"])
-    u = Output("u", "matrix", rows="a.rows", cols="min")
-    s = Output("s", "expr", "double", "min")
-    v = Output("v", "matrix", rows="a.cols", cols="min")
-    f.outputs = [u, s, v]
-    f.args = [Arg("matrix", a), Arg("matrix_out", u), Arg("out", s), Arg("matrix_out", v)]
-
-
-@special("rant_matrix_eigen")
-def _(f, m):
-    a, = matrix_inputs(f, ["a"])
-    values = Output("values", "expr", "double", "a.rows")
-    vectors = Output("vectors", "matrix", rows="a.rows", cols="a.rows")
-    f.outputs = [values, vectors]
-    f.args = [Arg("matrix", a), Arg("out", values), Arg("matrix_out", vectors)]
-
-
-@special("rant_polygon_flatten")
-def _(f, m):
-    pts = Input("points", "list", "RantDouble3")
-    frame = Output("frame", "out", "RantPose")
-    out = Output("out", "same", "RantDouble2", pts)
-    f.inputs = [pts]
-    f.outputs = [frame, out]
-    f.args = [Arg("view", pts, "RantPolygonView"), Arg("out", frame), Arg("out", out)]
-
-
-@special("rant_mesh_normals")
-def _(f, m):
-    mesh = Input("mesh", "mesh", "RantMesh")
-    out = Output("normals", "same", "RantDouble3", mesh)   # one for each of its corners
-    f.inputs = [mesh]
-    f.outputs = [out]
-    f.args = [Arg("mesh", mesh), Arg("out", out)]
-
-
-@special("rant_polygon2d_triangulate")
-def _(f, m):
-    pts = Input("points", "list", "RantDouble2")
-    out = Output("triangles", "query", "uint32_t", per=3)
-    f.inputs = [pts]
-    f.outputs = [out]
-    f.args = [Arg("view", pts, "RantPolygon2DView"), Arg("out", out), Arg("count_ptr", out)]
-
-
-def shape_gap(kind, seg):
-    def apply(f, m):
-        a, b = Input("a", kind, f.params[0].type), Input("b", kind, f.params[0].type)
-        gap = Output("gap", "out", "double")
-        between = Output("between", "out", seg)
-        f.inputs = [a, b]
-        f.outputs = [gap, between]
-        f.args = [Arg(kind, a), Arg(kind, b), Arg("out", gap), Arg("out", between)]
-    return apply
-
-
-SPECIAL["rant_shape_gap"] = shape_gap("shape", "RantSegment")
-SPECIAL["rant_shape2d_gap"] = shape_gap("shape2d", "RantSegment2D")
-
-
-@special("rant_shape_mesh")
-def _(f, m):
-    s = Input("s", "shape", "RantShape")
-    seg = Input("segments", "value", "uint32_t")
-    crease = Input("crease", "value", "double")
-    out = Output("mesh", "mesh_new", "RantMesh")   # a binding's Mesh, corners and normals as f32
-    f.inputs = [s, seg, crease]
-    f.outputs = [out]
-    f.args = [Arg("shape", s), Arg("value", seg), Arg("value", crease), Arg("mesh_out", out)]
-
-
-@special("rant_polynomial_fit")
-def _(f, m):
-    x = Input("x", "list", "double")
-    y = Input("y", "list", "double")
-    degree = Input("degree", "value", "uint32_t")
-    options = Input("options", "fit_options", "RantFitOptions")
-    out = Output("coefficients", "expr", "double", "degree + 1")
-    f.inputs = [x, y, degree, options]
-    f.outputs = [out]
-    f.args = [Arg("list_ptr", x), Arg("list_ptr", y), Arg("list_count", x, y), Arg("value", degree),
-              Arg("fit_options", options), Arg("out", out)]
-
-
-@special("rant_polynomial_at")
-def _(f, m):
-    c = Input("coefficients", "list", "double")
-    x = Input("x", "value", "double")
-    f.inputs = [c, x]
-    f.outputs = [Output("return", "return", "double")]
-    f.args = [Arg("list_ptr", c), Arg("degree", c), Arg("value", x)]
-
-
-@special("rant_points_clusters")
-def _(f, m):
-    pts = Input("points", "list", "RantDouble3")
-    d = Input("distance", "value", "double")
-    mp = Input("min_points", "value", "uint32_t")
-    labels = Output("labels", "same", "uint32_t", pts)
-    clusters = Output("clusters", "out", "uint32_t")
-    f.inputs = [pts, d, mp]
-    f.outputs = [labels, clusters]
-    f.args = [Arg("list_ptr", pts), Arg("list_count", pts), Arg("value", d), Arg("value", mp), Arg("out", labels), Arg("out", clusters)]
-
-
-@special("rant_points_align")
-def _(f, m):
-    s = Input("source", "list", "RantDouble3")
-    t = Input("target", "list", "RantDouble3")
-    g = Input("guess", "value", "RantPose")
-    o = Input("options", "align_options", "RantAlignOptions")
-    out = Output("out", "out", "RantPose")
-    f.inputs = [s, t, g, o]
-    f.outputs = [out]
-    f.args = [Arg("list_ptr", s), Arg("list_count", s), Arg("list_ptr", t), Arg("list_count", t),
-              Arg("value", g), Arg("align_options", o), Arg("out", out)]
-
-
-@special("rant_kdtree_create")
-def _(f, m):
-    pts = Input("points", "list", "RantDouble3")
-    out = Output("tree", "handle", "RantKdTree")
-    f.inputs = [pts]
-    f.outputs = [out]
-    f.args = [Arg("list_ptr", pts), Arg("list_count", pts), Arg("out", out)]
-    f.vector = False
-
-
-@special("rant_kdtree_destroy")
-def _(f, m):
-    f.vector = False
-    f.hand = True
-
-
-@special("rant_kdtree_nearest")
-def _(f, m):
-    tree = Input("tree", "tree", "RantKdTree")
-    p = Input("point", "value", "RantDouble3")
-    k = Input("count", "value", "uint32_t")
-    i = Output("indices", "room", "uint32_t", k)
-    d = Output("distances", "room", "double", k)
-    f.inputs = [tree, p, k]
-    f.outputs = [i, d]
-    f.args = [Arg("tree", tree), Arg("value", p), Arg("out", i), Arg("out", d), Arg("count_ptr", i)]
-
-
-@special("rant_kdtree_within")
-def _(f, m):
-    tree = Input("tree", "tree", "RantKdTree")
-    p = Input("point", "value", "RantDouble3")
-    r = Input("radius", "value", "double")
-    i = Output("indices", "query", "uint32_t")
-    d = Output("distances", "query", "double", i)   # shares the count of indices
-    f.inputs = [tree, p, r]
-    f.outputs = [i, d]
-    f.args = [Arg("tree", tree), Arg("value", p), Arg("value", r), Arg("out", i), Arg("out", d), Arg("count_ptr", i)]
-
-
-def image_out(name="dst", format="src.format", width="src.width", height="src.height"):
-    return Output(name, "image", "RantImageView", rows=height, cols=width, size=format)
-
-
-def image_fn(extra, dst=None):
-    # (const RantImageView *src, extras..., RantImageView *dst)
-    def apply(f, m):
-        src = Input("src", "image", "RantImageView")
-        f.inputs = [src]
-        f.args = [Arg("image", src)]
-        ps = f.params[1:-1]
-        k = 0
-        while k < len(ps):
-            p = ps[k]
-            if p.pointer:                                            # const T *list, uint32_t count
-                if not p.const or k + 1 >= len(ps) or ps[k + 1].type != "uint32_t":
-                    raise ValueError(f.c)
-                inp = Input(p.name, "list", p.type)
-                f.inputs.append(inp)
-                f.args += [Arg("list_ptr", inp), Arg("list_count", inp)]
-                k += 2
-                continue
-            inp = Input(p.name, "value", p.type)
-            f.inputs.append(inp)
-            f.args.append(Arg("value", inp))
-            k += 1
-        out = dst() if dst else image_out()
-        for e in extra:
-            f.inputs.append(e)
-        f.outputs = [out]
-        f.args.append(Arg("image_out", out))
-    return apply
-
-
-def named_format():
-    return Input("format", "value", "RantImageFormat")
-
-
-SPECIAL["rant_image_convert"] = image_fn([named_format()], lambda: image_out(format="format"))
-SPECIAL["rant_image_colorize"] = image_fn([named_format()], lambda: image_out(format="format"))
-SPECIAL["rant_image_flip_horizontal"] = image_fn([])
-SPECIAL["rant_image_flip_vertical"] = image_fn([])
-SPECIAL["rant_image_rotate"] = image_fn([], lambda: image_out(width="turned_width", height="turned_height"))
-SPECIAL["rant_image_resize"] = image_fn([Input("width", "value", "uint32_t"), Input("height", "value", "uint32_t")],
-                                        lambda: image_out(width="width", height="height"))
-
-
-@special("rant_image_undistort")
-def _(f, m):
-    src = Input("src", "image", "RantImageView")
-    cam = Input("camera", "ref", "RantCameraIntrinsics")
-    ideal = Input("ideal", "opt_ref", "RantCameraIntrinsics")
-    filt = Input("filter", "value", "RantImageFilter")
-    out = image_out(width="ideal_width", height="ideal_height")
-    f.inputs = [src, cam, ideal, filt]
-    f.outputs = [out]
-    f.args = [Arg("image", src), Arg("ref", cam), Arg("opt_ref", ideal), Arg("value", filt), Arg("image_out", out)]
-
-
-@special("rant_image_crop")
-def _(f, m):
-    # Crop shares data in C, where the caller holds the lifetime. A binding hands back its own copy.
-    image = Input("image", "image", "RantImageView")
-    ins = [Input(n, "value", "uint32_t") for n in ("x", "y", "width", "height")]
-    out = Output("out", "image_copy", "RantImageView")
-    f.inputs = [image] + ins
-    f.outputs = [out]
-    f.args = [Arg("image", image)] + [Arg("value", i) for i in ins] + [Arg("out", out)]
-
-
-@special("rant_image_draw")
-def _(f, m):
-    image = Input("image", "image_mut", "RantImageView")
-    shape = Input("shape", "shape2d", "RantShape2D")
-    color = Input("color", "value", "RantColor")
-    width = Input("width", "value", "double")
-    f.inputs = [image, shape, color, width]
-    f.outputs = [Output("image", "mutated", "RantImageView", image)]
-    f.args = [Arg("image_mut", image), Arg("shape2d", shape), Arg("value", color), Arg("value", width)]
-
-
-@special("rant_point_cloud_layout")
-def _(f, m):
-    layout = Input("layout", "value", "RantPointCloudLayout")
-    f.inputs = [layout]
-    f.outputs = [Output("return", "cloud_layout", "RantPointCloudView")]
-    f.args = [Arg("value", layout)]
-
-
-@special("rant_point_cloud_field")
-def _(f, m):
-    cloud = Input("cloud", "cloud", "RantPointCloudView")
-    name = Input("name", "string", "char")
-    f.inputs = [cloud, name]
-    f.outputs = [Output("return", "field", "RantPointFieldView")]
-    f.args = [Arg("cloud", cloud), Arg("string", name)]
-    f.errors = "none"
-
-
-def cloud_write(element, words=None):
-    def apply(f, m):
-        cloud = Input("cloud", "cloud_mut", "RantPointCloudView")
-        f.inputs = [cloud]
-        f.args = [Arg("cloud_mut", cloud)]
-        if len(f.params) == 4:
-            field_in = Input(f.params[1].name, "string", "char")
-            f.inputs.append(field_in)
-            f.args.append(Arg("string", field_in))
-        values = Input(words or f.params[-2].name, "list", element)
-        f.inputs.append(values)
-        f.args += [Arg("list_ptr", values), Arg("list_count", values)]
-        f.outputs = [Output("cloud", "mutated", "RantPointCloudView", cloud)]
-    return apply
-
-
-SPECIAL["rant_point_cloud_write_points"] = cloud_write("RantDouble3")
-SPECIAL["rant_point_cloud_write_values"] = cloud_write("double")
-SPECIAL["rant_point_cloud_write_colors"] = cloud_write("RantColor")
-
-
-@special("rant_point_cloud_transform")
-def _(f, m):
-    cloud = Input("cloud", "cloud_mut", "RantPointCloudView")
-    pose = Input("pose", "value", "RantPose")
-    f.inputs = [cloud, pose]
-    f.outputs = [Output("cloud", "mutated", "RantPointCloudView", cloud)]
-    f.args = [Arg("cloud_mut", cloud), Arg("value", pose)]
-
-
-@special("rant_point_cloud_select")
-def _(f, m):
-    cloud = Input("cloud", "cloud", "RantPointCloudView")
-    keep = Input("keep", "list", "uint8_t")
-    out = Output("out", "cloud_select", "RantPointCloudView", cloud)
-    f.inputs = [cloud, keep]
-    f.outputs = [out]
-    f.args = [Arg("cloud", cloud), Arg("list_ptr", keep), Arg("out", out), Arg("count_ptr", out)]
-
-
-@special("rant_grid_write_value")
-def _(f, m):
-    grid = Input("grid", "grid_mut", "RantGridView")
-    name = Input("field", "string", "char")
-    cell = Input("cell", "value", "RantInt3")
-    value = Input("value", "value", "double")
-    f.inputs = [grid, name, cell, value]
-    f.outputs = [Output("grid", "mutated", "RantGridView", grid)]
-    f.args = [Arg("grid_mut", grid), Arg("string", name), Arg("value", cell), Arg("value", value)]
-
-
-def detections(kind, element):
-    def apply(f, m):
-        d = Input("detections", kind, element)
-        iou = Input("iou", "value", "double")
-        keep = Output("keep", "same", "uint8_t", d)
-        f.inputs = [d, iou]
-        f.outputs = [keep]
-        f.args = [Arg("det_ptr", d), Arg("det_count", d), Arg("value", iou), Arg("out", keep)]
-    return apply
-
-
-SPECIAL["rant_detections2d_suppress"] = detections("det2d", "RantDetection2DView")
-SPECIAL["rant_detections3d_suppress"] = detections("det3d", "RantDetection3DView")
-
-
-@special("rant_prism_transform")
-def _(f, m):
-    prism = Input("prism", "prism", "RantPrism")
-    pose = Input("pose", "value", "RantPose")
-    f.inputs = [prism, pose]
-    f.outputs = [Output("return", "prism", "RantPrism")]
-    f.args = [Arg("prism", prism), Arg("value", pose)]
 
 
 def read_model(root, types_path, clang=None):

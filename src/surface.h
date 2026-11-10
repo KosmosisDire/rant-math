@@ -13,7 +13,7 @@ extern "C" {
 RANT_MATH_API RantMathResult   rant_polygon_plane(RantPolygonView p, RantPlane *out);
 /* The polygon in its own plane, for the Polygon2D calls: frame's xy plane holds it, at its first
  * corner with +x toward the next, and out gets its p.count corners in that frame. */
-RANT_MATH_API RantMathResult   rant_polygon_flatten(RantPolygonView p, RantPose *frame, RantDouble2 *out);
+RANT_MATH_API RantMathResult   rant_polygon_flatten(RantPolygonView p, RantPose *frame, RantDouble2 *out /* (same p) */);
 RANT_MATH_API double           rant_polygon_distance(RantPolygonView p, RantDouble3 point);
 RANT_MATH_API RantSurfacePoint rant_polygon_closest(RantPolygonView p, RantDouble3 point);
 /* Either side of the polygon counts. */

@@ -30,20 +30,22 @@ RANT_MATH_API RantDouble3    rant_matrix4x4_apply_direction(RantMatrix4x4 m, Ran
  * An output never shares memory with an input, and a call refuses one that does. */
 typedef struct { double *data; uint32_t rows, cols; } RantMatrixView;
 
-RANT_MATH_API RantMathResult rant_matrix_multiply(RantMatrixView a, RantMatrixView b, RantMatrixView out);
-RANT_MATH_API RantMathResult rant_matrix_transpose(RantMatrixView a, RantMatrixView out);
+RANT_MATH_API RantMathResult rant_matrix_multiply(RantMatrixView a, RantMatrixView b, RantMatrixView out /* (out a.rows b.cols) */);
+RANT_MATH_API RantMathResult rant_matrix_transpose(RantMatrixView a, RantMatrixView out /* (out a.cols a.rows) */);
 RANT_MATH_API RantMathResult rant_matrix_determinant(RantMatrixView a, double *out);
-RANT_MATH_API RantMathResult rant_matrix_inverse(RantMatrixView a, RantMatrixView out);
+RANT_MATH_API RantMathResult rant_matrix_inverse(RantMatrixView a, RantMatrixView out /* (out a.rows a.cols) */);
 /* x such that a x = b, each column of b solved alone. With more rows than columns, the x
  * with the least squared error. Fails when the columns of a are dependent. */
-RANT_MATH_API RantMathResult rant_matrix_solve(RantMatrixView a, RantMatrixView b, RantMatrixView x);
+RANT_MATH_API RantMathResult rant_matrix_solve(RantMatrixView a, RantMatrixView b, RantMatrixView x /* (out a.cols b.cols) */);
 /* a = u diag(s) v^T for an m by n matrix and k = min(m, n): u is m by k, s holds k values
  * from the largest down, v is n by k. */
-RANT_MATH_API RantMathResult rant_matrix_svd(RantMatrixView a, RantMatrixView u, double *s, RantMatrixView v);
+RANT_MATH_API RantMathResult rant_matrix_svd(RantMatrixView a, RantMatrixView u /* (out a.rows min) */, double *s /* (size min) */,
+                                             RantMatrixView v /* (out a.cols min) */);
 /* A symmetric matrix's eigenvalues from the smallest up, each eigenvector a column. */
-RANT_MATH_API RantMathResult rant_matrix_eigen(RantMatrixView a, double *values, RantMatrixView vectors);
+RANT_MATH_API RantMathResult rant_matrix_eigen(RantMatrixView a, double *values /* (size a.rows) */,
+                                               RantMatrixView vectors /* (out a.rows a.rows) */);
 /* The lower l with a = l l^T. Fails when a is not symmetric positive definite. */
-RANT_MATH_API RantMathResult rant_matrix_cholesky(RantMatrixView a, RantMatrixView l);
+RANT_MATH_API RantMathResult rant_matrix_cholesky(RantMatrixView a, RantMatrixView l /* (out a.rows a.cols) */);
 
 #ifdef __cplusplus
 }

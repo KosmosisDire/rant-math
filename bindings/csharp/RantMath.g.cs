@@ -894,7 +894,7 @@ namespace Rant.Math
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_point_cloud_select(RawPointCloudView* cloud, byte* keep, byte* data, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_laser_scan_points(RawLaserScanView* scan, Double2* @out, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_image_depth_points(RawImageView* depth, RawCameraIntrinsics* camera, Double3* @out, uint* count);
-        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_kdtree_create(Double3* points, uint count, IntPtr* @out);
+        [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_kdtree_create(Double3* points, uint count, IntPtr* tree);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_kdtree_nearest(IntPtr tree, Double3 point, uint* indices, double* distances, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_kdtree_within(IntPtr tree, Double3 point, double radius, uint* indices, double* distances, uint* count);
         [DllImport(LIB, CallingConvention = CC)] internal static extern int rant_points_downsample(Double3* points, uint count, double voxel, byte* keep);

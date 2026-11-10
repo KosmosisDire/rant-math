@@ -13,15 +13,17 @@ extern "C" {
 typedef struct RantKdTree RantKdTree;
 
 /* A tree over a copy of the points, which need not outlive it. Each point keeps its index. */
-RANT_MATH_API RantMathResult rant_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **out);
+RANT_MATH_API RantMathResult rant_kdtree_create(const RantDouble3 *points, uint32_t count, RantKdTree **tree);
 RANT_MATH_API void           rant_kdtree_destroy(RantKdTree *tree);
 /* The count points nearest point, nearest first and ties by index, their distances when distances
  * is not NULL. count gets how many it found, fewer when the tree holds fewer. */
-RANT_MATH_API RantMathResult rant_kdtree_nearest(const RantKdTree *tree, RantDouble3 point, uint32_t *indices,
-                                                 double *distances, uint32_t *count);
+RANT_MATH_API RantMathResult rant_kdtree_nearest(const RantKdTree *tree, RantDouble3 point,
+                                                 uint32_t *indices /* (room count) */,
+                                                 double *distances /* (room count) */, uint32_t *count);
 /* Every point no farther than radius, nearest first. count holds the room and gets how many there are. */
 RANT_MATH_API RantMathResult rant_kdtree_within(const RantKdTree *tree, RantDouble3 point, double radius,
-                                                uint32_t *indices, double *distances, uint32_t *count);
+                                                uint32_t *indices /* (query) */, double *distances /* (query indices) */,
+                                                uint32_t *count);
 
 /* keep gets 1 for one point of each cube of edge voxel, from the frame origin, that points fall
  * in: the one nearest the mean of that cube's points. */
@@ -40,7 +42,8 @@ RANT_MATH_API RantMathResult rant_points_normals(const RantDouble3 *points, uint
 /* A point within distance of a cluster's point joins it. labels gets each point's cluster from 1,
  * largest first, or 0 for one under min_points. clusters gets how many have a label. */
 RANT_MATH_API RantMathResult rant_points_clusters(const RantDouble3 *points, uint32_t count, double distance,
-                                                  uint32_t min_points, uint32_t *labels, uint32_t *clusters);
+                                                  uint32_t min_points, uint32_t *labels /* (same points) */,
+                                                  uint32_t *clusters);
 
 /* How rant_points_align pairs points. All zero, or a NULL pointer, pairs each with its nearest. */
 typedef struct {
