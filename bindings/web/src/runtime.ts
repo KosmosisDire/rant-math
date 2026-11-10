@@ -54,6 +54,9 @@ const KIND: Record<number, string> = {
 
 export type ErrorKind = "Argument" | "Degenerate" | "Space" | "Format" | "Memory" | "Outside";
 
+/** The key a value a call hands back holds its type's name under, as Pose. Object.keys and JSON skip it. */
+export const TYPE: unique symbol = Symbol.for("rant.type") as never;
+
 /** A call that could not answer. kind says why. */
 export class MathError extends Error {
     readonly kind: ErrorKind;

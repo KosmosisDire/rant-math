@@ -163,6 +163,9 @@ def structs_ts(m, lay):
         else:
             reads = [f"{f.name}: {read_value(m, lay, f.type, f.dims, f'p + {off}')}" for f, off in fields]
         ret = "CameraOut" if t == "RantCameraIntrinsics" else short(t)
+        # A value a call hands back carries its type, a view only passes through.
+        if not t.endswith("View"):
+            reads.insert(0, f'[TYPE]: "{short(t)}"')
         out.append(f"function r_{t}(p: number): {ret} {{\n    return {{ {', '.join(reads)} }};\n}}\n")
     for t in RAW_STRUCTS:
         size, _, fields = lay.of(t)
@@ -219,6 +222,8 @@ def types_ts(m):
             continue
         seen.add(s.name)
         fields = "\n".join(f"    {f.name}: {ts_field_type(m, f, s.name)};" for f in s.fields)
+        if not s.name.endswith("View"):
+            fields = TAGGED + fields
         out.append(f"export interface {s.short} {{\n{fields}\n}}\n")
     return "\n".join(out)
 
@@ -538,7 +543,7 @@ class Writer:
             self.emit('const layout = s.kind === "mesh" && s.value.colors ? "XyzNormalRgba" : "XyzNormal";')
             self.emit("const cloud = alloc(20); wasm._rm_point_cloud_layout(cloud, enumIn(PointCloudLayoutValues, layout));")
             self.emit("refresh();")
-            self.emit("const out: MeshOut = { vertices: cloudLike(cloud), triangles: new Uint32Array(0) };")
+            self.emit('const out: MeshOut = { [TYPE]: "Mesh", vertices: cloudLike(cloud), triangles: new Uint32Array(0) };')
             self.emit("const bytes = U32[n >> 2] * out.vertices.point_step, count = U32[t >> 2] * 3;")
             self.emit("const v = cloudIn({ ...out.vertices, data: new Uint8Array(bytes) });")
             self.emit("const o = alloc(4 * count);")
@@ -632,19 +637,19 @@ class Writer:
         n = self.names[id(i)]
         two = f.ret == "RantShape2D"
         if word in ("polyline", "polygon"):
-            self.emit(f'return {{ kind: "{word}", value: flatCopy({n}, 3) }};')
+            self.emit(f'return {{ [TYPE]: "Shape", kind: "{word}", value: flatCopy({n}, 3) }};')
         elif word in ("polyline2d", "polygon2d"):
-            self.emit(f'return {{ kind: "{word}", value: flatCopy({n}, 2) }};')
+            self.emit(f'return {{ [TYPE]: "Shape2D", kind: "{word}", value: flatCopy({n}, 2) }};')
         elif word == "mesh":
             self.emit('if (lengthOf(mesh.triangles) % 3) throw new MathError(-1);')
             self.emit("begin();")
             self.emit("const [points, count, colors] = cornersIn(mesh);")
             self.emit("const vertices = numbersOut(points, 3 * count, Float64Array), triangles = Uint32Array.from(mesh.triangles);")
-            self.emit('return { kind: "mesh", value: colors ? { vertices, triangles, colors: U8.slice(colors, colors + 4 * count) } : { vertices, triangles } };')
+            self.emit('return { [TYPE]: "Shape", kind: "mesh", value: colors ? { vertices, triangles, colors: U8.slice(colors, colors + 4 * count) } : { vertices, triangles } };')
         elif word == "prism":
-            self.emit(f'return {{ kind: "prism", value: {{ pose: {n}.pose, base: flatCopy({n}.base.points, 2), height: {n}.height }} }};')
+            self.emit(f'return {{ [TYPE]: "Shape", kind: "prism", value: {{ pose: {n}.pose, base: flatCopy({n}.base.points, 2), height: {n}.height }} }};')
         else:
-            self.emit(f'return {{ kind: "{word}", value: {n} }};')
+            self.emit(f'return {{ [TYPE]: "{"Shape2D" if two else "Shape"}", kind: "{word}", value: {n} }};')
 
 
 def input_decl(m, w, i):
@@ -719,7 +724,7 @@ def type_groups(m):
 
 
 def api_ts(m, lay):
-    head = GEN + 'import { wasm, begin, alloc, refresh, check, room, MathError, F32, F64, I8, I16, I32, U8, U16, U32, enumIn, lengthOf, countOf, sameCount, numbersIn, numbersOut, listIn, listOut, viewIn, stringIn, flatCopy } from "./runtime.js";\n'
+    head = GEN + 'import { wasm, begin, alloc, refresh, check, room, MathError, F32, F64, I8, I16, I32, U8, U16, U32, enumIn, lengthOf, countOf, sameCount, numbersIn, numbersOut, listIn, listOut, viewIn, stringIn, flatCopy, TYPE } from "./runtime.js";\n'
     parts = [head, types_ts(m), HAND_TYPES, structs_ts(m, lay), HAND_HELPERS]
     for f in m.functions:
         if f.hand:
@@ -730,31 +735,34 @@ def api_ts(m, lay):
     return "\n".join(parts)
 
 
+# The type's name a value a call hands back holds, optional so a plain literal fits.
+TAGGED = "    readonly [TYPE]?: string;\n"
+
 HAND_TYPES = """
-export interface Polygon2D { points: readonly Double2[] | Float64Array; }
-export interface Prism { pose: Pose; base: Polygon2D; height: number; }
+export interface Polygon2D { readonly [TYPE]?: string; points: readonly Double2[] | Float64Array; }
+export interface Prism { readonly [TYPE]?: string; pose: Pose; base: Polygon2D; height: number; }
 /** A camera a call hands back, its coefficients always a Float64Array. */
 export type CameraOut = CameraIntrinsics & { coeffs: Float64Array };
 /** A prism a call hands back, its base always a list. */
-export interface PrismOut { pose: Pose; base: { points: Double2[] }; height: number; }
-export interface Image { width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
+export interface PrismOut { readonly [TYPE]?: string; pose: Pose; base: { points: Double2[] }; height: number; }
+export interface Image { readonly [TYPE]?: string; width: number; height: number; stride: number; format: ImageFormat; data: Uint8Array; }
 export interface PointField { name: string; offset: number; kind: ScalarKind; count: number; }
-export interface PointCloud { origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
-export interface Mesh { vertices: PointCloud; triangles: ArrayLike<number>; }
+export interface PointCloud { readonly [TYPE]?: string; origin?: { pose: Pose; parent: string }; width?: number; fields: readonly PointField[]; point_step: number; dense?: boolean; data: Uint8Array; }
+export interface Mesh { readonly [TYPE]?: string; vertices: PointCloud; triangles: ArrayLike<number>; }
 /** A mesh a call hands back, its corners x, y, z and a normal as f32. */
-export interface MeshOut { vertices: ReturnType<typeof cloudLike>; triangles: Uint32Array; }
+export interface MeshOut { readonly [TYPE]?: string; vertices: ReturnType<typeof cloudLike>; triangles: Uint32Array; }
 export interface GridField { name: string; kind: ScalarKind; data: Uint8Array; }
-export interface Grid { origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
-export interface LaserScan { angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
-export interface Detection2D { bounds: OrientedBox2D; label: string; score: number; }
-export interface Detection3D { bounds: OrientedBox; label: string; score: number; }
+export interface Grid { readonly [TYPE]?: string; origin: { pose: Pose }; resolution: number; cells_x: number; cells_y: number; cells_z: number; fields: readonly GridField[]; }
+export interface LaserScan { readonly [TYPE]?: string; angle_min: number; angle_step: number; range_min: number; range_max: number; echoes: number; ranges: ArrayLike<number>; }
+export interface Detection2D { readonly [TYPE]?: string; bounds: OrientedBox2D; label: string; score: number; }
+export interface Detection3D { readonly [TYPE]?: string; bounds: OrientedBox; label: string; score: number; }
 
 /** A dense matrix of doubles, rows one after another. */
-export interface Matrix { rows: number; cols: number; data: ArrayLike<number>; }
+export interface Matrix { readonly [TYPE]?: string; rows: number; cols: number; data: ArrayLike<number>; }
 
 /** Any shape behind one type, made by a shapeFrom call. It keeps its own copy of any list. */
-export interface Shape { kind: string; value: any; }
-export interface Shape2D { kind: string; value: any; }
+export interface Shape { readonly [TYPE]?: string; kind: string; value: any; }
+export interface Shape2D { readonly [TYPE]?: string; kind: string; value: any; }
 
 /** How a fit treats its points. All default, every point counts alike. */
 export interface FitOptions {
@@ -805,7 +813,7 @@ function prismIn(prism: Prism): number {
 
 function prismOf(p: number): PrismOut {
     const v = r_RantPrismView(p);
-    return { pose: v.pose, base: { points: listOut(v.base.points, v.base.count, 16, r_RantDouble2, 2, false) as Double2[] }, height: v.height };
+    return { [TYPE]: "Prism", pose: v.pose, base: { points: listOut(v.base.points, v.base.count, 16, r_RantDouble2, 2, false) as Double2[] }, height: v.height };
 }
 
 function matrixIn(m: Matrix): number {
@@ -819,7 +827,7 @@ function matrixOut(rows: number, cols: number) {
     const data = alloc(8 * rows * cols);
     const view = alloc(12);
     w_RantMatrixView(view, { data, rows, cols });
-    return { view, matrix: (): Matrix => ({ rows, cols, data: numbersOut(data, rows * cols, Float64Array) }) };
+    return { view, matrix: (): Matrix => ({ [TYPE]: "Matrix", rows, cols, data: numbersOut(data, rows * cols, Float64Array) }) };
 }
 
 function imageIn(image: Image): number {
@@ -840,7 +848,7 @@ function imageOut(format: ImageFormat, width: number, height: number) {
     const data = alloc(size);
     const view = alloc(24);
     w_RantImageView(view, { width, height, stride: 0, format, data, size });
-    return { view, image: (): Image => ({ width, height, stride: 0, format, data: U8.slice(data, data + size) }) };
+    return { view, image: (): Image => ({ [TYPE]: "Image", width, height, stride: 0, format, data: U8.slice(data, data + size) }) };
 }
 
 function imageCopy(part: number): Image {
@@ -910,6 +918,7 @@ function fieldOf(p: number): PointField {
 function cloudLike(p: number): Required<PointCloud> & { fields: PointField[] } {
     const v = r_RantPointCloudView(p);
     return {
+        [TYPE]: "PointCloud",
         origin: { pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } }, parent: "" },
         width: 0,
         fields: Array.from({ length: v.field_count }, (_, i) => fieldOf(v.fields + 20 * i)),

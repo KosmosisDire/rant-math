@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use rquickjs::function::Rest;
-use rquickjs::{Array, Ctx, Exception, Function, Object, Result as JsResult, TypedArray, Value};
+use rquickjs::{Array, Ctx, Exception, Function, Object, Result as JsResult, Symbol, TypedArray, Value};
 
 use crate::*;
 
@@ -86,8 +86,62 @@ pub fn install<'js>(ctx: &Ctx<'js>) -> JsResult<Object<'js>> {
             other => other,
         })
     })?;
+    let table = Function::new(ctx.clone(), |ctx: Ctx<'js>| table_lists(&ctx))?;
     let make: Function = ctx.eval(PRELUDE)?;
-    make.call((call,))
+    make.call((call, table))
+}
+
+/// The table as plain objects named as the TypeScript binding's: functions, methods and operators.
+fn table_lists<'js>(ctx: &Ctx<'js>) -> JsResult<Array<'js>> {
+    let args = |list: &[crate::table::Arg]| -> JsResult<Array<'js>> {
+        let out = Array::new(ctx.clone())?;
+        for (i, a) in list.iter().enumerate() {
+            let o = Object::new(ctx.clone())?;
+            o.set("name", a.name)?;
+            o.set("kind", a.kind)?;
+            o.set("type", a.type_name)?;
+            out.set(i, o)?;
+        }
+        Ok(out)
+    };
+    let functions = Array::new(ctx.clone())?;
+    for (i, f) in crate::table::functions().iter().enumerate() {
+        let o = Object::new(ctx.clone())?;
+        o.set("name", f.name)?;
+        o.set("doc", f.doc)?;
+        o.set("inputs", args(&f.inputs)?)?;
+        o.set("outputs", args(&f.outputs)?)?;
+        o.set("errors", f.errors)?;
+        functions.set(i, o)?;
+    }
+    let methods = Array::new(ctx.clone())?;
+    for (i, m) in crate::table::methods().iter().enumerate() {
+        let o = Object::new(ctx.clone())?;
+        o.set("type", m.type_name)?;
+        o.set("name", m.name)?;
+        o.set("function", m.function as u32)?;
+        match m.self_index {
+            Some(s) => o.set("selfIndex", s as u32)?,
+            None => o.set("selfIndex", Value::new_null(ctx.clone()))?,
+        }
+        o.set("field", m.field)?;
+        methods.set(i, o)?;
+    }
+    let operators = Array::new(ctx.clone())?;
+    for (i, op) in crate::table::operators().iter().enumerate() {
+        let o = Object::new(ctx.clone())?;
+        o.set("op", op.op)?;
+        o.set("left", op.left)?;
+        o.set("right", op.right)?;
+        o.set("function", op.function as u32)?;
+        o.set("how", op.how)?;
+        operators.set(i, o)?;
+    }
+    let out = Array::new(ctx.clone())?;
+    out.set(0, functions)?;
+    out.set(1, methods)?;
+    out.set(2, operators)?;
+    Ok(out)
 }
 
 /// The number the prelude frees a tree by, one past every call.
@@ -274,6 +328,13 @@ impl<'js> Js<'js> for Value<'js> {
     }
 }
 
+/// A new object naming its type under Symbol.for("rant.type"), as every value a call hands back.
+fn tagged<'js>(ctx: &Ctx<'js>, name: &str) -> JsResult<Object<'js>> {
+    let o = Object::new(ctx.clone())?;
+    o.set(Symbol::new_global(ctx.clone(), "rant.type")?.as_atom(), name)?;
+    Ok(o)
+}
+
 fn math_argument<'js>(ctx: &Ctx<'js>) -> rquickjs::Error {
     Exception::throw_range(ctx, "a list of the wrong size")
 }
@@ -320,7 +381,7 @@ impl<'js> Js<'js> for Prism {
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
         let base = Object::new(ctx.clone())?;
         base.set("points", list_out(ctx, &self.base.points, false, 2)?)?;
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Prism")?;
         o.set("pose", self.pose.put(ctx)?)?;
         o.set("base", base)?;
         o.set("height", self.height)?;
@@ -348,7 +409,7 @@ impl<'js> Js<'js> for Image {
         image_in(ctx, v)
     }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Image")?;
         o.set("width", self.width)?;
         o.set("height", self.height)?;
         o.set("stride", self.stride)?;
@@ -409,7 +470,7 @@ impl<'js> Js<'js> for Mesh {
         mesh_in(ctx, v)
     }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Mesh")?;
         o.set("vertices", self.vertices.put(ctx)?)?;
         o.set("triangles", numbers_out(ctx, &self.triangles)?)?;
         Ok(o.into_value())
@@ -428,7 +489,7 @@ impl<'js> Js<'js> for PointCloud {
         let origin = Object::new(ctx.clone())?;
         origin.set("pose", self.origin.pose.put(ctx)?)?;
         origin.set("parent", "")?;
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "PointCloud")?;
         o.set("origin", origin)?;
         o.set("width", self.width)?;
         o.set("fields", list_fields(ctx, &self.fields)?)?;
@@ -538,7 +599,7 @@ impl<'js> Js<'js> for Matrix {
         matrix_in(ctx, v)
     }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Matrix")?;
         o.set("rows", self.rows)?;
         o.set("cols", self.cols)?;
         o.set("data", numbers_out(ctx, &self.data)?)?;

@@ -38,3 +38,24 @@ fn names_read_as_a_module() {
         }
     });
 }
+
+#[test]
+fn results_name_their_type_and_the_table_reads() {
+    let rt = Runtime::new().unwrap();
+    let ctx = Context::full(&rt).unwrap();
+    ctx.with(|ctx| {
+        let math = rant_math::quickjs::install(&ctx).catch(&ctx).unwrap();
+        ctx.globals().set("math", math).unwrap();
+        let check = r#"
+            const T = Symbol.for("rant.type");
+            const p = math.poseInverse({ position: { x: 1, y: 2, z: 3 }, orientation: { x: 0, y: 0, z: 0, w: 1 } });
+            const hull = math.points2dHull([{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }]);
+            const m = math.methods().find((m) => m.type === "Pose" && m.name === "inverse");
+            const f = math.functions()[m.function];
+            [p[T], p.position[T], p.orientation[T], Object.keys(p).join(), math.shapeFromSphere({ center: { x: 0, y: 0, z: 0 }, radius: 1 })[T],
+             f.name, m.selfIndex, math.methods().some((m) => m.selfIndex === null), math.operators().length > 0, Array.isArray(hull) ? "list" : typeof hull].join(" ")
+        "#;
+        let got: String = ctx.eval(check).catch(&ctx).unwrap();
+        assert_eq!(got, "Pose Double3 Quaternion position,orientation Shape pose_inverse 0 true true list");
+    });
+}

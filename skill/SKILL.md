@@ -30,6 +30,7 @@ Prefer a call as a method of its first value: `pose.inverse()`, `q.rotate(v)`, `
 - C# has extension methods (`p.Inverse()`, under `using Rant.Math;`) and no operators.
 - Rust needs `use rant_math::prelude::*;` and has no operators.
 - TypeScript groups each type's calls by its name: `Pose.inverse(p)`, `Quaternion.fromAxisAngle(a, t)`.
+  What a call hands back names its type under `TYPE`, which is `Symbol.for("rant.type")`.
 - A maker is a static: `Quaternion::from_axis_angle(a, t)` in C++ and Rust, `Quaternion.from_axis_angle` in Python.
 - `<other>_from_<type>` is `to_<other>`: `sphere.to_shape()`. A list type reads its points: `polygon.area()`.
 - C++: linking `rant_math` defines `RANT_MATH`, which every file of the program needs.

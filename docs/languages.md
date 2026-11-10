@@ -50,6 +50,8 @@ Each call on a type is also a method of it: `rant_pose_inverse(p)` is `p.inverse
 - In Python a value from a node has them too once `rant_math` is installed, and an editor sees them.
 - In C++ the methods are declared in the types' structs, so every file of a program sees them:
   linking `rant_math` defines `RANT_MATH` for all. Define it yourself in a build without CMake.
+- In TypeScript and QuickJS a value a call hands back names its type under `Symbol.for("rant.type")`,
+  exported as `TYPE`: `p[TYPE]` is `"Pose"`, and `p.position[TYPE]` is `"Double3"`.
 
 ## Answers
 
@@ -124,7 +126,7 @@ C++ finds each with no setting. `RANT_MATH_NO_EIGEN`, `RANT_MATH_NO_OPENCV` and 
 The library lists itself, for a tool that finds a call by its name: every call with what it takes and gives,
 and each type's methods and operators.
 
-| C | Rust | TypeScript |
+| C | Rust | TypeScript and QuickJS |
 |---|---|---|
 | `rant_math_function_at(i)`, `rant_math_method_at(i)`, `rant_math_operator_at(i)` | `rant_math::table::functions()` and its kin | `functions()`, `methods()`, `operators()` |
 

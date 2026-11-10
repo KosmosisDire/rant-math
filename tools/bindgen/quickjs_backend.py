@@ -76,8 +76,9 @@ def struct_impls(m):
             else:
                 reads.append(f'{n}: field(ctx, v, "{f.name}")?')
                 writes.append(f'o.set("{f.name}", self.{n}.put(ctx)?)?;')
+        make = "Object::new(ctx.clone())" if s.name.endswith("View") else f'tagged(ctx, "{t}")'
         out.append(f"impl<'js> Js<'js> for {t} {{\n    fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> {{ Ok({t} {{ {', '.join(reads)} }}) }}\n"
-                   f"    fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {{\n        let o = Object::new(ctx.clone())?;\n        " + "\n        ".join(writes) + "\n        Ok(o.into_value())\n    }\n}\n")
+                   f"    fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {{\n        let o = {make}?;\n        " +"\n        ".join(writes) + "\n        Ok(o.into_value())\n    }\n}\n")
     return "\n".join(out)
 
 
@@ -288,18 +289,18 @@ def prelude_js(m):
         word = f.c.split("_from_")[1]
         name = camel(f.name)
         if word in ("polyline", "polygon"):
-            shapes.append(f'        {name}: (points) => ({{ kind: "{word}", value: flatCopy(points, 3) }}),')
+            shapes.append(f'        {name}: (points) => ({{ [TYPE]: "Shape", kind: "{word}", value: flatCopy(points, 3) }}),')
         elif word in ("polyline2d", "polygon2d"):
-            shapes.append(f'        {name}: (points) => ({{ kind: "{word}", value: flatCopy(points, 2) }}),')
+            shapes.append(f'        {name}: (points) => ({{ [TYPE]: "Shape2D", kind: "{word}", value: flatCopy(points, 2) }}),')
         elif word == "mesh":
-            shapes.append(f'        {name}: (mesh) => {{ if (mesh.triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return {{ kind: "mesh", value: mesh }}; }},')
+            shapes.append(f'        {name}: (mesh) => {{ if (mesh.triangles.length % 3) throw new MathError(-1, "triangles come in threes"); return {{ [TYPE]: "Shape", kind: "mesh", value: mesh }}; }},')
         elif word == "prism":
-            shapes.append(f'        {name}: (prism) => ({{ kind: "prism", value: {{ pose: prism.pose, base: flatCopy(prism.base.points, 2), height: prism.height }} }}),')
+            shapes.append(f'        {name}: (prism) => ({{ [TYPE]: "Shape", kind: "prism", value: {{ pose: prism.pose, base: flatCopy(prism.base.points, 2), height: prism.height }} }}),')
         else:
-            shapes.append(f'        {name}: (value) => ({{ kind: "{word}", value }}),')
+            shapes.append(f'        {name}: (value) => ({{ [TYPE]: "{"Shape2D" if f.c.startswith("rant_shape2d_") else "Shape"}", kind: "{word}", value }}),')
     groups = "".join(f"    api.{t} = {{ " + ", ".join(f"{n}: api.{fn}" for n, fn in calls) + " };\n" for t, calls in type_groups(m).items())
     free = len(fs)
-    return GEN + """((call) => {
+    return GEN + """((call, table) => {
     const KINDS = { [-1]: "Argument", [-2]: "Degenerate", [-3]: "Space", [-4]: "Format", [-5]: "Memory", [-6]: "Outside" };
     class MathError extends Error {
         constructor(code, text) {
@@ -310,6 +311,7 @@ def prelude_js(m):
         }
     }
     const fail = (code, text) => new MathError(code, text);
+    const TYPE = Symbol.for("rant.type");
 """ + SHAPES_JS + f"""
     class KdTree {{
         constructor(id) {{ this.id = id; }}
@@ -322,7 +324,13 @@ def prelude_js(m):
         MathError,
 """ + "\n".join(entries + shapes) + """
     };
-""" + groups + """    return api;
+""" + groups + """    // The library's table, as the TypeScript binding's functions, methods and operators, read on first use.
+    let lists = null;
+    const read = () => lists ??= table();
+    api.functions = () => read()[0];
+    api.methods = () => read()[1];
+    api.operators = () => read()[2];
+    return api;
 })
 """
 

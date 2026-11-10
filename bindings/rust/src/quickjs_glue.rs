@@ -118,7 +118,7 @@ impl<'js> Js<'js> for ScalarKind {
 impl<'js> Js<'js> for Double2 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Double2 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Double2")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         Ok(o.into_value())
@@ -128,7 +128,7 @@ impl<'js> Js<'js> for Double2 {
 impl<'js> Js<'js> for Double3 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Double3 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Double3")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -139,7 +139,7 @@ impl<'js> Js<'js> for Double3 {
 impl<'js> Js<'js> for Double4 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Double4 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")?, w: field(ctx, v, "w")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Double4")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -151,7 +151,7 @@ impl<'js> Js<'js> for Double4 {
 impl<'js> Js<'js> for Float2 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Float2 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Float2")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         Ok(o.into_value())
@@ -161,7 +161,7 @@ impl<'js> Js<'js> for Float2 {
 impl<'js> Js<'js> for Float3 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Float3 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Float3")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -172,7 +172,7 @@ impl<'js> Js<'js> for Float3 {
 impl<'js> Js<'js> for Float4 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Float4 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")?, w: field(ctx, v, "w")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Float4")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -184,7 +184,7 @@ impl<'js> Js<'js> for Float4 {
 impl<'js> Js<'js> for Int2 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Int2 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Int2")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         Ok(o.into_value())
@@ -194,7 +194,7 @@ impl<'js> Js<'js> for Int2 {
 impl<'js> Js<'js> for Int3 {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Int3 { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Int3")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -205,7 +205,7 @@ impl<'js> Js<'js> for Int3 {
 impl<'js> Js<'js> for Quaternion {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Quaternion { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")?, w: field(ctx, v, "w")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Quaternion")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -227,7 +227,7 @@ impl<'js> Js<'js> for Matrix4x4 {
 impl<'js> Js<'js> for Pose {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Pose { position: field(ctx, v, "position")?, orientation: field(ctx, v, "orientation")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Pose")?;
         o.set("position", self.position.put(ctx)?)?;
         o.set("orientation", self.orientation.put(ctx)?)?;
         Ok(o.into_value())
@@ -237,7 +237,7 @@ impl<'js> Js<'js> for Pose {
 impl<'js> Js<'js> for Pose2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Pose2D { position: field(ctx, v, "position")?, angle: field(ctx, v, "angle")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Pose2D")?;
         o.set("position", self.position.put(ctx)?)?;
         o.set("angle", self.angle.put(ctx)?)?;
         Ok(o.into_value())
@@ -247,7 +247,7 @@ impl<'js> Js<'js> for Pose2D {
 impl<'js> Js<'js> for Twist {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Twist { linear: field(ctx, v, "linear")?, angular: field(ctx, v, "angular")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Twist")?;
         o.set("linear", self.linear.put(ctx)?)?;
         o.set("angular", self.angular.put(ctx)?)?;
         Ok(o.into_value())
@@ -257,7 +257,7 @@ impl<'js> Js<'js> for Twist {
 impl<'js> Js<'js> for Wrench {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Wrench { force: field(ctx, v, "force")?, torque: field(ctx, v, "torque")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Wrench")?;
         o.set("force", self.force.put(ctx)?)?;
         o.set("torque", self.torque.put(ctx)?)?;
         Ok(o.into_value())
@@ -267,7 +267,7 @@ impl<'js> Js<'js> for Wrench {
 impl<'js> Js<'js> for Twist2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Twist2D { linear: field(ctx, v, "linear")?, angular: field(ctx, v, "angular")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Twist2D")?;
         o.set("linear", self.linear.put(ctx)?)?;
         o.set("angular", self.angular.put(ctx)?)?;
         Ok(o.into_value())
@@ -277,7 +277,7 @@ impl<'js> Js<'js> for Twist2D {
 impl<'js> Js<'js> for Wrench2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Wrench2D { force: field(ctx, v, "force")?, torque: field(ctx, v, "torque")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Wrench2D")?;
         o.set("force", self.force.put(ctx)?)?;
         o.set("torque", self.torque.put(ctx)?)?;
         Ok(o.into_value())
@@ -297,7 +297,7 @@ impl<'js> Js<'js> for Covariance6 {
 impl<'js> Js<'js> for Inertia {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Inertia { mass: field(ctx, v, "mass")?, center: field(ctx, v, "center")?, ixx: field(ctx, v, "ixx")?, ixy: field(ctx, v, "ixy")?, ixz: field(ctx, v, "ixz")?, iyy: field(ctx, v, "iyy")?, iyz: field(ctx, v, "iyz")?, izz: field(ctx, v, "izz")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Inertia")?;
         o.set("mass", self.mass.put(ctx)?)?;
         o.set("center", self.center.put(ctx)?)?;
         o.set("ixx", self.ixx.put(ctx)?)?;
@@ -313,7 +313,7 @@ impl<'js> Js<'js> for Inertia {
 impl<'js> Js<'js> for OrientedBox {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(OrientedBox { pose: field(ctx, v, "pose")?, size: field(ctx, v, "size")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "OrientedBox")?;
         o.set("pose", self.pose.put(ctx)?)?;
         o.set("size", self.size.put(ctx)?)?;
         Ok(o.into_value())
@@ -323,7 +323,7 @@ impl<'js> Js<'js> for OrientedBox {
 impl<'js> Js<'js> for Axes {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Axes { x: field(ctx, v, "x")?, y: field(ctx, v, "y")?, z: field(ctx, v, "z")?, scale: field(ctx, v, "scale")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Axes")?;
         o.set("x", self.x.put(ctx)?)?;
         o.set("y", self.y.put(ctx)?)?;
         o.set("z", self.z.put(ctx)?)?;
@@ -335,7 +335,7 @@ impl<'js> Js<'js> for Axes {
 impl<'js> Js<'js> for Accel {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Accel { linear: field(ctx, v, "linear")?, angular: field(ctx, v, "angular")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Accel")?;
         o.set("linear", self.linear.put(ctx)?)?;
         o.set("angular", self.angular.put(ctx)?)?;
         Ok(o.into_value())
@@ -345,7 +345,7 @@ impl<'js> Js<'js> for Accel {
 impl<'js> Js<'js> for Plane {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Plane { position: field(ctx, v, "position")?, normal: field(ctx, v, "normal")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Plane")?;
         o.set("position", self.position.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         Ok(o.into_value())
@@ -355,7 +355,7 @@ impl<'js> Js<'js> for Plane {
 impl<'js> Js<'js> for Ray {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Ray { origin: field(ctx, v, "origin")?, direction: field(ctx, v, "direction")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Ray")?;
         o.set("origin", self.origin.put(ctx)?)?;
         o.set("direction", self.direction.put(ctx)?)?;
         Ok(o.into_value())
@@ -365,7 +365,7 @@ impl<'js> Js<'js> for Ray {
 impl<'js> Js<'js> for RayHit {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(RayHit { point: field(ctx, v, "point")?, normal: field(ctx, v, "normal")?, distance: field(ctx, v, "distance")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "RayHit")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         o.set("distance", self.distance.put(ctx)?)?;
@@ -376,7 +376,7 @@ impl<'js> Js<'js> for RayHit {
 impl<'js> Js<'js> for Segment {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Segment { a: field(ctx, v, "a")?, b: field(ctx, v, "b")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Segment")?;
         o.set("a", self.a.put(ctx)?)?;
         o.set("b", self.b.put(ctx)?)?;
         Ok(o.into_value())
@@ -386,7 +386,7 @@ impl<'js> Js<'js> for Segment {
 impl<'js> Js<'js> for AlignedBox {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(AlignedBox { min: field(ctx, v, "min")?, max: field(ctx, v, "max")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "AlignedBox")?;
         o.set("min", self.min.put(ctx)?)?;
         o.set("max", self.max.put(ctx)?)?;
         Ok(o.into_value())
@@ -396,7 +396,7 @@ impl<'js> Js<'js> for AlignedBox {
 impl<'js> Js<'js> for Plane2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Plane2D { position: field(ctx, v, "position")?, normal: field(ctx, v, "normal")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Plane2D")?;
         o.set("position", self.position.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         Ok(o.into_value())
@@ -406,7 +406,7 @@ impl<'js> Js<'js> for Plane2D {
 impl<'js> Js<'js> for Ray2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Ray2D { origin: field(ctx, v, "origin")?, direction: field(ctx, v, "direction")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Ray2D")?;
         o.set("origin", self.origin.put(ctx)?)?;
         o.set("direction", self.direction.put(ctx)?)?;
         Ok(o.into_value())
@@ -416,7 +416,7 @@ impl<'js> Js<'js> for Ray2D {
 impl<'js> Js<'js> for RayHit2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(RayHit2D { point: field(ctx, v, "point")?, normal: field(ctx, v, "normal")?, distance: field(ctx, v, "distance")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "RayHit2D")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         o.set("distance", self.distance.put(ctx)?)?;
@@ -427,7 +427,7 @@ impl<'js> Js<'js> for RayHit2D {
 impl<'js> Js<'js> for Segment2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Segment2D { a: field(ctx, v, "a")?, b: field(ctx, v, "b")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Segment2D")?;
         o.set("a", self.a.put(ctx)?)?;
         o.set("b", self.b.put(ctx)?)?;
         Ok(o.into_value())
@@ -437,7 +437,7 @@ impl<'js> Js<'js> for Segment2D {
 impl<'js> Js<'js> for AlignedBox2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(AlignedBox2D { min: field(ctx, v, "min")?, max: field(ctx, v, "max")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "AlignedBox2D")?;
         o.set("min", self.min.put(ctx)?)?;
         o.set("max", self.max.put(ctx)?)?;
         Ok(o.into_value())
@@ -447,7 +447,7 @@ impl<'js> Js<'js> for AlignedBox2D {
 impl<'js> Js<'js> for SurfacePoint2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(SurfacePoint2D { point: field(ctx, v, "point")?, normal: field(ctx, v, "normal")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "SurfacePoint2D")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         Ok(o.into_value())
@@ -457,7 +457,7 @@ impl<'js> Js<'js> for SurfacePoint2D {
 impl<'js> Js<'js> for OrientedBox2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(OrientedBox2D { pose: field(ctx, v, "pose")?, size: field(ctx, v, "size")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "OrientedBox2D")?;
         o.set("pose", self.pose.put(ctx)?)?;
         o.set("size", self.size.put(ctx)?)?;
         Ok(o.into_value())
@@ -467,7 +467,7 @@ impl<'js> Js<'js> for OrientedBox2D {
 impl<'js> Js<'js> for Circle {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Circle { center: field(ctx, v, "center")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Circle")?;
         o.set("center", self.center.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
         Ok(o.into_value())
@@ -477,7 +477,7 @@ impl<'js> Js<'js> for Circle {
 impl<'js> Js<'js> for Capsule2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Capsule2D { axis: field(ctx, v, "axis")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Capsule2D")?;
         o.set("axis", self.axis.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
         Ok(o.into_value())
@@ -487,7 +487,7 @@ impl<'js> Js<'js> for Capsule2D {
 impl<'js> Js<'js> for SurfacePoint {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(SurfacePoint { point: field(ctx, v, "point")?, normal: field(ctx, v, "normal")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "SurfacePoint")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("normal", self.normal.put(ctx)?)?;
         Ok(o.into_value())
@@ -497,7 +497,7 @@ impl<'js> Js<'js> for SurfacePoint {
 impl<'js> Js<'js> for Sphere {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Sphere { center: field(ctx, v, "center")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Sphere")?;
         o.set("center", self.center.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
         Ok(o.into_value())
@@ -507,7 +507,7 @@ impl<'js> Js<'js> for Sphere {
 impl<'js> Js<'js> for Capsule {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Capsule { axis: field(ctx, v, "axis")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Capsule")?;
         o.set("axis", self.axis.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
         Ok(o.into_value())
@@ -517,7 +517,7 @@ impl<'js> Js<'js> for Capsule {
 impl<'js> Js<'js> for Cylinder {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Cylinder { axis: field(ctx, v, "axis")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Cylinder")?;
         o.set("axis", self.axis.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
         Ok(o.into_value())
@@ -527,7 +527,7 @@ impl<'js> Js<'js> for Cylinder {
 impl<'js> Js<'js> for Cone {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Cone { base: field(ctx, v, "base")?, tip: field(ctx, v, "tip")?, radius: field(ctx, v, "radius")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Cone")?;
         o.set("base", self.base.put(ctx)?)?;
         o.set("tip", self.tip.put(ctx)?)?;
         o.set("radius", self.radius.put(ctx)?)?;
@@ -538,7 +538,7 @@ impl<'js> Js<'js> for Cone {
 impl<'js> Js<'js> for CurvePoint {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(CurvePoint { point: field(ctx, v, "point")?, tangent: field(ctx, v, "tangent")?, distance: field(ctx, v, "distance")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "CurvePoint")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("tangent", self.tangent.put(ctx)?)?;
         o.set("distance", self.distance.put(ctx)?)?;
@@ -549,7 +549,7 @@ impl<'js> Js<'js> for CurvePoint {
 impl<'js> Js<'js> for CurvePoint2D {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(CurvePoint2D { point: field(ctx, v, "point")?, tangent: field(ctx, v, "tangent")?, distance: field(ctx, v, "distance")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "CurvePoint2D")?;
         o.set("point", self.point.put(ctx)?)?;
         o.set("tangent", self.tangent.put(ctx)?)?;
         o.set("distance", self.distance.put(ctx)?)?;
@@ -560,7 +560,7 @@ impl<'js> Js<'js> for CurvePoint2D {
 impl<'js> Js<'js> for Color {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(Color { r: field(ctx, v, "r")?, g: field(ctx, v, "g")?, b: field(ctx, v, "b")?, a: field(ctx, v, "a")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "Color")?;
         o.set("r", self.r.put(ctx)?)?;
         o.set("g", self.g.put(ctx)?)?;
         o.set("b", self.b.put(ctx)?)?;
@@ -572,7 +572,7 @@ impl<'js> Js<'js> for Color {
 impl<'js> Js<'js> for CameraIntrinsics {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(CameraIntrinsics { width: field(ctx, v, "width")?, height: field(ctx, v, "height")?, fx: field(ctx, v, "fx")?, fy: field(ctx, v, "fy")?, cx: field(ctx, v, "cx")?, cy: field(ctx, v, "cy")?, coeffs: coeffs(ctx, v)?, model: field(ctx, v, "model")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "CameraIntrinsics")?;
         o.set("width", self.width.put(ctx)?)?;
         o.set("height", self.height.put(ctx)?)?;
         o.set("fx", self.fx.put(ctx)?)?;
@@ -588,7 +588,7 @@ impl<'js> Js<'js> for CameraIntrinsics {
 impl<'js> Js<'js> for GeoPoint {
     fn get(ctx: &Ctx<'js>, v: &Value<'js>) -> JsResult<Self> { Ok(GeoPoint { lat: field(ctx, v, "lat")?, lon: field(ctx, v, "lon")?, alt: field(ctx, v, "alt")? }) }
     fn put(&self, ctx: &Ctx<'js>) -> JsResult<Value<'js>> {
-        let o = Object::new(ctx.clone())?;
+        let o = tagged(ctx, "GeoPoint")?;
         o.set("lat", self.lat.put(ctx)?)?;
         o.set("lon", self.lon.put(ctx)?)?;
         o.set("alt", self.alt.put(ctx)?)?;
