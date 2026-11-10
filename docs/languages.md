@@ -20,7 +20,7 @@ C names, and this page says how a name reads in each.
 | HMI code | nothing | `math.poseInverse(p)` |
 
 - Each brings the standard types with it and goes beside Rant in one program. In C++ include both headers in
-  either order. In Python, C# and TypeScript nothing more is needed.
+  either order, with `rant_math_members.hpp` on the include path. In Python, C# and TypeScript nothing more is needed.
 - Unity allows one assembly of a name, so add the standard types too: Rant itself from
   `https://github.com/KosmosisDire/Rant.git#upm`, or with no Rant `https://github.com/KosmosisDire/Rant.git#upm-types`.
 - Rust takes `rant-types` from Rant at one tag. A program using both needs the Rant that tag names.
@@ -45,11 +45,13 @@ Each call on a type is also a method of it: `rant_pose_inverse(p)` is `p.inverse
 
 - `<other>_from_<type>` is `to_<other>`: `q.to_matrix3x3()`, `sphere.to_shape()`.
 - A list type reads its points: `polygon.area()`.
-- Operators: `+` and `-` on vectors, `* k` and `/ k` to scale, `*` to compose quaternions, poses and
-  matrices and to apply one to a vector, and their `+=` forms. `a * b` is a's frame then b's.
+- C# matrices and covariances are arrays of arrays, which two types share, so they have no methods: `RantMath.Matrix3x3Inverse(m)`.
+- Operators in C++ and Python: `+`, `-` and `-v` on vectors, `* k` and `/ k` to scale, `*` to compose quaternions,
+  poses and matrices and to apply one to a vector. `a * b` is a's frame then b's. C++ has the `+=` forms too.
+- `a.is_near(b, tolerance)` on Double2, Double3 and Quaternion is true when no farther apart.
 - In Python a value from a node has them too once `rant_math` is installed, and an editor sees them.
-- In C++ the methods are declared in the types' structs, so every file of a program sees them:
-  linking `rant_math` defines `RANT_MATH` for all. Define it yourself in a build without CMake.
+- In C++ the methods are declared in the types' structs, so every file of a program must see them. Rant's
+  types add them when `rant_math_members.hpp` is on the include path, or `RANT_MATH` is defined.
 - In TypeScript and QuickJS a value a call hands back names its type under `Symbol.for("rant.type")`,
   exported as `TYPE`: `p[TYPE]` is `"Pose"`, and `p.position[TYPE]` is `"Double3"`.
 

@@ -1,6 +1,6 @@
 ---
 name: math
-description: Writing code with Rant Math in C, C++, Python, C#, Unity, Rust, TypeScript or HMI code: poses, axes, shapes, fits, cameras, images and point clouds on Rant's standard types
+description: Writing code with Rant Math in C, C++, Python, C#, Unity, Rust, TypeScript, HMI code or PLCnext IEC: poses, axes, shapes, fits, cameras, images and point clouds on Rant's standard types
 ---
 
 # Rant Math
@@ -27,14 +27,18 @@ C `rant_pose_inverse` is:
 
 Prefer a call as a method of its first value: `pose.inverse()`, `q.rotate(v)`, `box.contains(p)`.
 
-- C++ and Python also have operators: `+ -` on vectors, `* k`, `/ k`, and `*` to compose and apply.
-- C# has extension methods (`p.Inverse()`, under `using Rant.Math;`) and no operators.
+- C++ and Python also have operators: `+ -` and `-v` on vectors, `* k`, `/ k`, and `*` to compose and apply.
+- Compare Double2, Double3 and Quaternion with `a.is_near(b, tolerance)`: true when no farther apart.
+- C# has extension methods (`p.Inverse()`, under `using Rant.Math;`) and no operators. Matrices and covariances are
+  arrays, so call `RantMath.Matrix3x3Inverse(m)`.
 - Rust needs `use rant_math::prelude::*;` and has no operators.
 - TypeScript groups each type's calls by its name: `Pose.inverse(p)`, `Quaternion.fromAxisAngle(a, t)`.
   What a call hands back names its type under `TYPE`, which is `Symbol.for("rant.type")`.
+- PLCnext: the library `Rant` has the calls on fixed size values as IEC functions named as in C#, `PoseInverse(p)`.
+  Lists, images and shapes have none.
 - A maker is a static: `Quaternion::from_axis_angle(a, t)` in C++ and Rust, `Quaternion.from_axis_angle` in Python.
 - `<other>_from_<type>` is `to_<other>`: `sphere.to_shape()`. A list type reads its points: `polygon.area()`.
-- C++: linking `rant_math` defines `RANT_MATH`, which every file of the program needs.
+- C++: Rant's types find `rant_math_members.hpp` on the include path, so either include order works.
 
 ## What a call gives back
 
