@@ -67,10 +67,25 @@ pack_emit(rant_math.h)
 file(GLOB parts RELATIVE "${SRC}" "${SRC}/*.c")
 list(SORT parts)
 file(APPEND "${header}" "\n#if defined(RANT_MATH_IMPLEMENTATION) && !defined(RANT_MATH_IMPLEMENTED)\n#define RANT_MATH_IMPLEMENTED\n")
+# GCC 15.2 and older 15 miscompile rant_oriented_box2d_iou when they fuse multiply and add, as C++ and GNU C do
+file(APPEND "${header}" [==[
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ == 15 && __GNUC_MINOR__ < 3
+#define RANT_MATH_NO_FUSE
+#pragma GCC push_options
+#pragma GCC optimize("fp-contract=off")
+#endif
+]==])
 foreach(part ${parts})
   pack_emit("${part}")
 endforeach()
-file(APPEND "${header}" "\n#endif /* RANT_MATH_IMPLEMENTATION */\n")
+file(APPEND "${header}" [==[
+
+#ifdef RANT_MATH_NO_FUSE
+#pragma GCC pop_options
+#undef RANT_MATH_NO_FUSE
+#endif
+#endif /* RANT_MATH_IMPLEMENTATION */
+]==])
 
 file(WRITE "${OUT}/rant_math.c" [==[
 /* GENERATED. The one file that holds the implementation. */
