@@ -116,7 +116,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: The libraries
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libeigen3-dev libopencv-dev libpcl-dev
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libeigen3-dev libopencv-dev libpcl-dev
 
       - name: Build
         run: |
