@@ -393,8 +393,9 @@ def read_headers(clang, root, types_path, order):
 
 def read_cpp_types(clang, path):
     """Rant's C++ types: each struct as "struct", each enum as its declaration, and each struct's fields."""
-    run = subprocess.run([clang, "-x", "c++", "-std=c++17", "-fsyntax-only", "-Xclang", "-ast-dump=json", path],
-                         capture_output=True, text=True, encoding="utf-8")
+    # clang only reads the declarations, so an MSVC library that asks for a newer clang still serves
+    run = subprocess.run([clang, "-x", "c++", "-std=c++17", "-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH", "-fsyntax-only",
+                          "-Xclang", "-ast-dump=json", path], capture_output=True, text=True, encoding="utf-8")
     if run.returncode != 0:
         raise RuntimeError("clang could not read " + path + ":\n" + run.stderr)
     found, fields = {}, {}
