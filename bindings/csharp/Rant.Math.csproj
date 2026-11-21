@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The NuGet package: the P/Invoke wrapper, the Rant.Types assembly, and the native library per
+       platform under runtimes/<rid>/native/. The CMake target rant_math_shared builds the library,
+       copied into native/<rid>/ here. RantDir names a Rant checkout: dotnet pack -p:RantDir=../rant -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Rant.Math</AssemblyName>
+    <RootNamespace>Rant.Math</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <PackageId>Rant.Math</PackageId>
+    <Authors>Nathan George</Authors>
+    <RepositoryUrl>https://github.com/KosmosisDire/rant-math</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/KosmosisDire/rant-math</PackageProjectUrl>
+    <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../VERSION').Trim())</Version>
+    <Description>Math on Rant's standard types: poses, shapes, fits, cameras, images and point clouds. Thin P/Invoke wrapper over a prebuilt native library (win-x64, linux-x64, linux-arm64, osx).</Description>
+    <PackageTags>robotics;geometry;poses;pointcloud;rant</PackageTags>
+    <IncludeSymbols>false</IncludeSymbols>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RantDir Condition="'$(RantDir)' == ''">$(MSBuildThisFileDirectory)../../../rant</RantDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="RantMath.cs" />
+    <Compile Include="RantMath.g.cs" />
+    <Compile Include="Conversions.cs" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <!-- The standard types go inside this package, so it needs no other. Rant's package carries the same
+       assembly, and .NET loads the newest one. -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RantMathPackTypes</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RantDir)/bindings/csharp/types/Rant.Types.csproj" PrivateAssets="all" />
+  </ItemGroup>
+  <Target Name="RantMathPackTypes" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <RantTypes Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(RantTypes);@(RantTypes->'%(RootDir)%(Directory)%(Filename).xml')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Globbed, so a platform that was not built is left out rather than failing the pack. -->
+  <ItemGroup>
+    <None Include="../../dist/native/**" Pack="true" PackagePath="runtimes/%(RecursiveDir)native/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>
